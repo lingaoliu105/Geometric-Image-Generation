@@ -40,3 +40,13 @@ class Color(Enum): # color from white to black, 9 levels
 class Rotation(Enum): # only 2 types. actual rotation will be random times the basic angle
     ANGLE30 = 30
     ANGLE45 = 45
+    
+class Pattern(Enum): # the pattern (dots, lines, etc) that fills up the shape
+    NIL=-1
+    DOT=0
+    NEL=1
+    NWL=2
+    VERTICAL=3
+    HORIZONTAL=4
+    CROSSHATCH=5
+    BRICK=6

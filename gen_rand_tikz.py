@@ -63,11 +63,26 @@ def generate_simple_image(pos_x, pos_y, rotation):
     size = size_item.value
     color = random.choice(list(img_params.Color))
     color_stm = f"white!{color.value}!black"
+    pattern = {
+        img_params.Pattern.NIL: "",
+        img_params.Pattern.DOT: "dots",
+        img_params.Pattern.NEL: "north east lines",
+        img_params.Pattern.NWL: "north west lines",
+        img_params.Pattern.VERTICAL: "vertical lines",
+        img_params.Pattern.HORIZONTAL: "horizontal lines",
+        img_params.Pattern.CROSSHATCH: "crosshatch",
+        img_params.Pattern.BRICK: "bricks",
+    }[random.choice(list(img_params.Pattern))]
+
     tikz_instruction = ""
     if shape == img_params.Shape.LINE:
         tikz_instruction = f"\draw ({pos_x}, {pos_y})--++({rotation}:{size});\n\draw ({pos_x},{pos_y})--++({rotation}:{-size});\n"
     elif shape == img_params.Shape.CIRCLE:
-        tikz_instruction = f"\draw ({pos_x},{pos_y}) circle ({size});\n"
+        tikz_instruction = (
+            f"\draw [fill={color_stm}] ({pos_x},{pos_y}) circle ({size});\n"
+        )
+        if pattern != "":
+            tikz_instruction += f"\draw [fill={color_stm},pattern={pattern}] ({pos_x},{pos_y}) circle ({size});\n"
     elif (
         shape == img_params.Shape.TRIANGLE_EQ
         or shape == img_params.Shape.SQUARE
@@ -75,16 +90,26 @@ def generate_simple_image(pos_x, pos_y, rotation):
         or shape == img_params.Shape.HEXAGON
     ):
         tikz_instruction = format_node_instruction(
-            pos_x, pos_y, size, color_stm, int(shape.value), rotation=rotation
+            pos_x,
+            pos_y,
+            size,
+            color_stm,
+            int(shape.value),
+            pattern=pattern,
+            rotation=rotation,
         )
 
     return tikz_instruction
 
 
 def format_node_instruction(
-    pos_x, pos_y, size, color_stm: str, sides: int, rotation: int = 0
+    pos_x, pos_y, size, color_stm: str, sides: int, pattern: str = "", rotation: int = 0
 ):  # \node is used to draw regular shapes
-    return f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, draw, fill={color_stm},rotate={rotation}] at ({pos_x},{pos_y}) {{}};"
+    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, draw, rotate={rotation},fill={color_stm}] at ({pos_x},{pos_y}) {{}};"
+    pattern_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, draw,rotate={rotation},pattern={pattern}] at ({pos_x},{pos_y}) {{}};"
+    if pattern != "":
+        base_instruction += pattern_instruction
+    return base_instruction
 
 
 def main(n):
