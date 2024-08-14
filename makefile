@@ -16,9 +16,14 @@ OBJS = $(SRCS:$(SRC_DIR)/%.tex=$(OBJ_DIR)/%.pdf)
 TARGETS = $(OBJS:$(OBJ_DIR)/%.pdf=$(TARGET_DIR)/%.png)
 
 # 默认目标
-all: tex pdf png
+all: dir tex pdf png
 
-tex: gen_rand_tikz.py
+dir:
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(SRC_DIR)
+	mkdir -p $(TARGET_DIR)
+
+tex: dir gen_rand_tikz.py
 	python gen_rand_tikz.py $(GEN_NUM)
 
 $(OBJ_DIR)/%.pdf : $(SRC_DIR)/%.tex
@@ -30,9 +35,6 @@ $(TARGET_DIR)/%.png : $(OBJ_DIR)/%.pdf
 	python convert_image.py $<
 
 png: $(TARGETS)
-
-print:
-	echo $(OBJS)
 
 # 清理生成的文件
 clean:
