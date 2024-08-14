@@ -1,0 +1,19 @@
+\documentclass{standalone}
+\usepackage{amsmath,mathrsfs,amsfonts}
+\usepackage{tikz}
+\usepackage{graphics}
+\usetikzlibrary{shapes.geometric}
+
+\begin{document}
+
+\begin{tikzpicture}[scale=0.5]
+\draw[->] (-10,0) -- (10,0) node[right] {$x$};
+
+% 画 y 轴
+\draw[->] (0,-10) -- (0,10) node[above] {$y$};
+\draw[help lines] (0,0) grid (10,10);
+{% for instruction in tikz_instructions %}
+{{instruction}}
+{% endfor %}
+\end{tikzpicture}
+\end{document}
