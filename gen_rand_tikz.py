@@ -63,7 +63,6 @@ def generate_simple_shape(pos_x, pos_y, rotation) -> SimpleShape:
     generated_shape.shape = random.choice(list(img_params.Shape))
     generated_shape.size = random.choice(list(img_params.Size))
     generate_num.color = random.choice(list(img_params.Color))
-    color_stm = f"white!{color.value}!black"
     generated_shape.pattern = random.choice(list(img_params.Pattern))
     {
         img_params.Pattern.NIL: "",
@@ -81,6 +80,8 @@ def generate_simple_shape(pos_x, pos_y, rotation) -> SimpleShape:
 
 def convert_tikz_instruction(input_shape:SimpleShape):
     tikz_instruction = ""
+    shape,pos_x,pos_y,rotation,size,color_stm,pattern = input_shape.shape,input_shape.position[0],input_shape.position[1],input_shape.rotation,input_shape.size,f"white!{input_shape.color.value}!black",input_shape.pattern
+
     if shape == img_params.Shape.LINE:
         tikz_instruction = f"\draw ({pos_x}, {pos_y})--++({rotation}:{size});\n\draw ({pos_x},{pos_y})--++({rotation}:{-size});\n"
     elif shape == img_params.Shape.CIRCLE:
@@ -107,6 +108,15 @@ def convert_tikz_instruction(input_shape:SimpleShape):
         )
 
     return tikz_instruction
+
+
+def convert_tikz_instructions(input_shapes:list):
+    instruction = ""
+    for shape in input_shapes:
+        instruction+=convert_tikz_instruction(shape)
+    return instruction
+    
+    
 def generate_composite_image_chaining(pos_x,pos_y,rotation,element_num = 4):
     """generate a composite geometry entity by chaining simple shapes
 
@@ -120,7 +130,12 @@ def generate_composite_image_chaining(pos_x,pos_y,rotation,element_num = 4):
 
     shapes = [0]*element_num
     for i in range(element_num):
-        new_element = generate_simple_shape
+        new_element = generate_simple_shape(pos_x,pos_y,rotation)
+        shapes[i] = new_element
+        attach_position = new_element.get_attach_point()
+        pos_x,pos_y = (attach_position[0]+attach_position[0]-new_element.position[0],attach_position[1]+attach_position[1]-new_element.position[1])
+    return shapes
+        
 def format_node_instruction(
     pos_x, pos_y, size, color_stm: str, sides: int, pattern: str = "", rotation: int = 0
 ):  # \node is used to draw regular shapes
