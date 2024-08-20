@@ -3,6 +3,7 @@ from jinja2 import Environment, FileSystemLoader
 
 import img_params
 import sys
+from SimpleShape import SimpleShape
 
 generate_num = 10
 
@@ -15,11 +16,11 @@ def combine_simple_images():
     for i in range(panel_num):
         pos = compute_panel_position(layout, i)
         rot = random.choice(list(img_params.Rotation)).value * random.randint(0, 23)
-        instructions.append(generate_simple_image(pos[0], pos[1], rot))
+        instructions.append(generate_simple_shape(pos[0], pos[1], rot))
     return instructions
 
 
-def compute_panel_position(layout, index):
+def compute_panel_position(layout, index):  
     """
     arguments:
     layout(Layout): the layout of the image
@@ -49,7 +50,7 @@ def compute_panel_position(layout, index):
     return lookup_table[layout][index]
 
 
-def generate_simple_image(pos_x, pos_y, rotation):
+def generate_simple_shape(pos_x, pos_y, rotation) -> SimpleShape:
     """
     arguments:
     pos_x and pos_y (int or float):  define the position of the center,
@@ -58,12 +59,13 @@ def generate_simple_image(pos_x, pos_y, rotation):
     returns
     str: the tikz instruction to draw a random simple geometry object.
     """
-    shape = random.choice(list(img_params.Shape))
-    size_item = random.choice(list(img_params.Size))
-    size = size_item.value
-    color = random.choice(list(img_params.Color))
+    generated_shape = SimpleShape()
+    generated_shape.shape = random.choice(list(img_params.Shape))
+    generated_shape.size = random.choice(list(img_params.Size))
+    generate_num.color = random.choice(list(img_params.Color))
     color_stm = f"white!{color.value}!black"
-    pattern = {
+    generated_shape.pattern = random.choice(list(img_params.Pattern))
+    {
         img_params.Pattern.NIL: "",
         img_params.Pattern.DOT: "dots",
         img_params.Pattern.NEL: "north east lines",
@@ -74,6 +76,10 @@ def generate_simple_image(pos_x, pos_y, rotation):
         img_params.Pattern.BRICK: "bricks",
     }[random.choice(list(img_params.Pattern))]
 
+
+
+
+def convert_tikz_instruction(input_shape:SimpleShape):
     tikz_instruction = ""
     if shape == img_params.Shape.LINE:
         tikz_instruction = f"\draw ({pos_x}, {pos_y})--++({rotation}:{size});\n\draw ({pos_x},{pos_y})--++({rotation}:{-size});\n"
@@ -84,6 +90,7 @@ def generate_simple_image(pos_x, pos_y, rotation):
         if pattern != "":
             tikz_instruction += f"\draw [fill={color_stm},pattern={pattern}] ({pos_x},{pos_y}) circle ({size});\n"
     elif (
+        
         shape == img_params.Shape.TRIANGLE_EQ
         or shape == img_params.Shape.SQUARE
         or shape == img_params.Shape.PENTAGON
@@ -100,8 +107,20 @@ def generate_simple_image(pos_x, pos_y, rotation):
         )
 
     return tikz_instruction
+def generate_composite_image_chaining(pos_x,pos_y,rotation,element_num = 4):
+    """generate a composite geometry entity by chaining simple shapes
 
+    Args:
+        pos_x (float): the center's x-coordinate of the shape
+        pos_y (float): y-coordinate
+        rotation (float): rotation in degree
+    """    
+    
+    # composite the image first, then shift to the center pos
 
+    shapes = [0]*element_num
+    for i in range(element_num):
+        new_element = generate_simple_shape
 def format_node_instruction(
     pos_x, pos_y, size, color_stm: str, sides: int, pattern: str = "", rotation: int = 0
 ):  # \node is used to draw regular shapes

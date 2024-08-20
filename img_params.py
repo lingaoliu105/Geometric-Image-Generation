@@ -23,6 +23,9 @@ class Size (Enum): # relative size of each component
     M = 1.5
     L = 2
     XL = 2.5
+    
+    def get_actual(self,shape):
+        return self.value
 
 class Color(Enum): # color from white to black, 9 levels
     value_difference = 100 / 8
@@ -50,3 +53,14 @@ class Pattern(Enum): # the pattern (dots, lines, etc) that fills up the shape
     HORIZONTAL=4
     CROSSHATCH=5
     BRICK=6
+
+class Composition(Enum):
+    CHAIN = 1
+    
+class TouchingPoint(Enum):
+    ENDPOINT = 0
+    MIDDLE = 0.5
+    THIRD = 0.33
+    QUARTER = 0.25
+    FIFTH = 0.2
+    
