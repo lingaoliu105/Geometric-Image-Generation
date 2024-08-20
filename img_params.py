@@ -55,6 +55,7 @@ class Pattern(Enum): # the pattern (dots, lines, etc) that fills up the shape
     BRICK=6
 
 class Composition(Enum):
+    SIMPLE = 0
     CHAIN = 1
     
 class TouchingPoint(Enum):
