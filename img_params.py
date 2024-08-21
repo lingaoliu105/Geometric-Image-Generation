@@ -19,6 +19,7 @@ class Layout (Enum):
     GRID = 9 # 3x3
 
 class Size (Enum): # relative size of each component
+    XS = 0.5
     S = 1
     M = 1.5
     L = 2

@@ -1,4 +1,5 @@
 import random
+from typing import Optional
 from jinja2 import Environment, FileSystemLoader
 
 from convert_tikz import *
@@ -6,7 +7,9 @@ import img_params
 import sys
 from SimpleShape import SimpleShape
 import numpy as np
-
+import shapely
+from util import *
+import math
 generate_num = 10
 
 
@@ -26,8 +29,7 @@ def combine_images(composition_type:img_params.Composition):
             img = generate_simple_shape(position=pos,rotation=rot)
             inst = convert_tikz_instruction(img)
         elif composition_type==img_params.Composition.CHAIN:
-            print("jioa")
-            img = generate_composite_image_chaining(position=pos,rotation=rot)
+            img = generate_composite_image_chaining(position=pos,rotation=rot,size=img_params.Size.XS)
             inst = convert_tikz_instructions(img)
         instructions.append(inst)
     return instructions
@@ -63,7 +65,14 @@ def compute_panel_position(layout, index):
     return np.array(lookup_table[layout][index])
 
 
-def generate_simple_shape(position:np.ndarray, rotation) -> SimpleShape:
+def generate_simple_shape(
+    position: np.ndarray,
+    rotation: float,
+    size: Optional[int] = None,
+    shape: Optional[img_params.Shape] = None,
+    color: Optional[img_params.Color] = None,
+    pattern: Optional[img_params.Pattern] = None,
+) -> SimpleShape:
     """
     arguments:
     position (numpy 2-d row vector): define the position of the center,
@@ -75,33 +84,47 @@ def generate_simple_shape(position:np.ndarray, rotation) -> SimpleShape:
     generated_shape = SimpleShape()
     generated_shape.position = position
     generated_shape.rotation = rotation
-    generated_shape.shape = random.choice(list(img_params.Shape))
-    generated_shape.size = random.choice(list(img_params.Size))
-    generated_shape.color = random.choice(list(img_params.Color))
-    generated_shape.pattern = random.choice(list(img_params.Pattern))
+    generated_shape.shape = shape if shape is not None else random.choice(list(img_params.Shape))
+    generated_shape.size = size if size is not None else random.choice(list(img_params.Size))
+    generated_shape.color = color if color is not None else random.choice(list(img_params.Color))
+    generated_shape.pattern = pattern if pattern is not None else random.choice(list(img_params.Pattern))
+
     return generated_shape
 
 
-
-def generate_composite_image_chaining(position,rotation,element_num = 4):
+def generate_composite_image_chaining(position,rotation,element_num = 4, chain_direction:Optional[np.ndarray] = None,size:Optional[img_params.Size] = None):
     """generate a composite geometry entity by chaining simple shapes
 
     Args:
         position (numpy 2-d array): coordinate of the center
         rotation (float): rotation in degree
     """    
-    
+
     # composite the image first, then shift to the center pos
 
     shapes = [0]*element_num
+    new_size = random.choice(list(img_params.Size)) if size is None else size
     for i in range(element_num):
-        new_element = generate_simple_shape(position,rotation)
+        new_element = generate_simple_shape(position,rotation,size=new_size)
         shapes[i] = new_element
         attach_position = new_element.get_attach_point()
-        position = attach_position+(attach_position-new_element.position)
-    print(shapes)
-    return shapes
+        # new_size = random.choice(list(img_params.Size))
+        new_size = random.choice(list(img_params.Size)) if size is None else size
+        if chain_direction is not None:
+            unit_direction = chain_direction / np.linalg.norm(chain_direction)
+            position = attach_position + unit_direction*new_size.value
+            continue
 
+        if new_element.shape==img_params.Shape.LINE:
+            rand_rad = random.random() * 2*math.pi
+            position = attach_position + new_size.value * np.array([math.cos(rand_rad),math.sin(rand_rad)])
+            continue
+        
+        unit_vec_center_to_touching = (attach_position - new_element.position)
+        unit_vec_center_to_touching /= np.linalg.norm(unit_vec_center_to_touching)
+        position = attach_position+unit_vec_center_to_touching * new_size.value
+    # print(shapes)
+    return shapes
 
 
 def main(n):

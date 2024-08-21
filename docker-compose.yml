@@ -1,0 +1,7 @@
+version: '3'
+services:
+  pdflatex:
+    image: texlive/texlive
+    volumes:
+      - ./:/workdir
+    command: make pdf
