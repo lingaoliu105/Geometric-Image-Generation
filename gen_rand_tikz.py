@@ -112,17 +112,17 @@ def generate_composite_image_chaining(position,rotation,element_num = 4, chain_d
         new_size = random.choice(list(img_params.Size)) if size is None else size
         if chain_direction is not None:
             unit_direction = chain_direction / np.linalg.norm(chain_direction)
-            position = attach_position + unit_direction*new_size.value
+            position = attach_position + unit_direction*new_size
             continue
 
         if new_element.shape==img_params.Shape.LINE:
             rand_rad = random.random() * 2*math.pi
-            position = attach_position + new_size.value * np.array([math.cos(rand_rad),math.sin(rand_rad)])
+            position = attach_position + new_size * np.array([math.cos(rand_rad),math.sin(rand_rad)])
             continue
         
         unit_vec_center_to_touching = (attach_position - new_element.position)
         unit_vec_center_to_touching /= np.linalg.norm(unit_vec_center_to_touching)
-        position = attach_position+unit_vec_center_to_touching * new_size.value
+        position = attach_position+unit_vec_center_to_touching * new_size
     # print(shapes)
     return shapes
 

@@ -22,7 +22,7 @@ def convert_tikz_instruction(input_shape: SimpleShape):
         input_shape.position[0],
         input_shape.position[1],
         input_shape.rotation,
-        input_shape.size.value,
+        input_shape.size,
         f"white!{input_shape.color.value}!black",
         get_pattern_tikz_string(input_shape.pattern),
     )

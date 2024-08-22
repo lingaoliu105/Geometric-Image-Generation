@@ -15,7 +15,7 @@ class SimpleShape():
         self,
         position: np.ndarray,
         rotation: float,
-        size: Optional[int] = None,
+        size: Optional[float] = None,
         shape: Optional[img_params.Shape] = None,
         color: Optional[img_params.Color] = None,
         pattern: Optional[img_params.Pattern] = None,
@@ -26,7 +26,7 @@ class SimpleShape():
             shape if shape is not None else random.choice(list(img_params.Shape))
         )
         self.size = (
-            size if size is not None else random.choice(list(img_params.Size))
+            size if size is not None else (random.random()+0.25)*2
         )
         self.color = (
             color if color is not None else random.choice(list(img_params.Color))
@@ -41,7 +41,7 @@ class SimpleShape():
         rot_sin = math.sin(rot_rad)
         rot_cos = math.cos(rot_rad)
         rot_polar = np.array((rot_cos, rot_sin))
-        rot_cart = self.size.value * rot_polar
+        rot_cart = self.size * rot_polar
         if self.shape == Shape.LINE:
             size = self.size.get_actual(self.shape)
             endpoints = [
@@ -79,7 +79,7 @@ class SimpleShape():
                 rot_sin = math.sin(rot_rad)
                 rot_cos = math.cos(rot_rad)
                 rot_polar = np.array((rot_cos, rot_sin))
-                rot_cart = self.size.value * rot_polar
+                rot_cart = self.size * rot_polar
                 vertices[index] = self.position + rot_cart
                 index += 1
             self.base_geometry = Polygon(vertices)
@@ -90,7 +90,7 @@ class SimpleShape():
     def get_attach_point(self)->np.ndarray:
         if self.shape==Shape.CIRCLE:
             rand_rad = random.random()*2*math.pi
-            return self.position + self.size.value * np.array([math.cos(rand_rad),math.sin(rand_rad)])
+            return self.position + self.size * np.array([math.cos(rand_rad),math.sin(rand_rad)])
         fraction = random.choice(list(TouchingPoint)).value*random.randint(1,5)%1
         vertices = self.get_vertices()
         edge_index = random.randint(0,len(vertices)-2) # the edge is vert[index] -- vert[index+1]

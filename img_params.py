@@ -18,15 +18,6 @@ class Layout (Enum):
     QUADRANT = 4.1 # 2x2
     GRID = 9 # 3x3
 
-class Size (Enum): # relative size of each component
-    XS = 0.5
-    S = 1
-    M = 1.5
-    L = 2
-    XL = 2.5
-    
-    def get_actual(self,shape):
-        return self.value
 
 class Color(Enum): # color from white to black, 9 levels
     value_difference = 100 / 8
