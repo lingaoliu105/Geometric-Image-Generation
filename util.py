@@ -1,4 +1,7 @@
+import random
 import numpy as np
+
+import img_params
 
 
 def compute_angle_between_vectors(
@@ -76,3 +79,40 @@ def compute_opposite_angle_range(
 
     return (opposite_start, opposite_end)
 
+
+def cubic_bezier(t, P0, P1, P2, P3):
+    """Calculate a point on a cubic Bezier curve."""
+    return (
+        (1 - t) ** 3 * P0
+        + 3 * (1 - t) ** 2 * t * P1
+        + 3 * (1 - t) * t**2 * P2
+        + t**3 * P3
+    )
+
+
+def generate_bezier_curve(P0, P1, P2, P3, num_points=100,scale = 1)->np.ndarray:
+    """Generate points on a cubic Bezier curve."""
+    t_values = np.linspace(0, 1, num_points)
+    curve = np.array([scale*cubic_bezier(t, P0, P1, P2, P3) for t in t_values])
+    return curve
+
+def generate_bezier_curve_single_param(curvature:float)->np.ndarray: 
+    """generate points on a cubic Bezier curve, which curvature is controled by the single input, 
+        and 2 endpoints at (-1,0) and (1,0). can be scaled up according to usage
+
+    Args:
+        curvature (float): the curvature that you expect the curve to be. the curve bends more when this number is larger
+    """    
+    
+    return generate_bezier_curve(np.array([-1,0]),np.array([-0.5,curvature]),np.array([0.5,-curvature]),np.array([1,0]),scale=8)
+
+def get_random_rotation()->int:
+    return random.choice(list(img_params.Rotation)).value * random.randint(0, 23)
+def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
+    # Calculate the difference between the points
+    diff = point1 - point2
+    
+    # Compute the Euclidean distance
+    distance = np.linalg.norm(diff)
+    
+    return distance

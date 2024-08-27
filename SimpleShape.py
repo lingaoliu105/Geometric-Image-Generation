@@ -11,6 +11,8 @@ from shapely.geometry import Point, LineString, Polygon
 class SimpleShape():
 
     __slots__=["shape","size","position","pattern","rotation","color","base_geometry"]
+    
+    touching_tolerance = 1e-11
     def __init__(
         self,
         position: np.ndarray,
@@ -19,11 +21,12 @@ class SimpleShape():
         shape: Optional[img_params.Shape] = None,
         color: Optional[img_params.Color] = None,
         pattern: Optional[img_params.Pattern] = None,
+        excluded_shapes_set: Optional[set] = None,
     ) -> None:
         self.position = position
         self.rotation = rotation
         self.shape = (
-            shape if shape is not None else random.choice(list(img_params.Shape))
+            shape if shape is not None else random.choice([x for x in list(img_params.Shape) if x not in excluded_shapes_set])
         )
         self.size = (
             size if size is not None else (random.random()+0.25)*2
@@ -43,17 +46,16 @@ class SimpleShape():
         rot_polar = np.array((rot_cos, rot_sin))
         rot_cart = self.size * rot_polar
         if self.shape == Shape.LINE:
-            size = self.size.get_actual(self.shape)
             endpoints = [
                 np.array(x)
                 for x in [
                     (
-                        self.position[0] + size // 2 * rot_cos,
-                        self.position[1] + size // 2 * rot_sin,
+                        self.position[0] + self.size / 2 * rot_cos,
+                        self.position[1] + self.size / 2 * rot_sin,
                     ),
                     (
-                        self.position[0] - size // 2 * rot_cos,
-                        self.position[1] - size // 2 * rot_sin,
+                        self.position[0] - self.size / 2 * rot_cos,
+                        self.position[1] - self.size / 2 * rot_sin,
                     ),
                 ]
             ]
@@ -75,7 +77,7 @@ class SimpleShape():
             vertices = [None] * (len(angle_list))
             index = 0
             for angle in angle_list:
-                rot_rad = math.radians(angle)
+                rot_rad = math.radians(angle + self.rotation)
                 rot_sin = math.sin(rot_rad)
                 rot_cos = math.cos(rot_rad)
                 rot_polar = np.array((rot_cos, rot_sin))
@@ -98,3 +100,34 @@ class SimpleShape():
     
     def check_overlap(self,other:"SimpleShape")->bool:
         return self.base_geometry.overlaps(other.base_geometry)
+    
+    def set_size(self,new_size:float):
+        self.size = new_size
+        self.compute_base_geometry()
+    
+    def search_touching_size(self,other:"SimpleShape"):
+        """with a initial size that guarantees to overlap, search the appropriate size that touches the other shape (with tolerance defined in the class), and set the own size to it
+
+        Args:
+            other (SimpleShape): the other size you want to touch
+        """        
+        #TODO: optimize performance
+        upper = self.size
+        lower = 0
+        other_shape = other.base_geometry
+        while not other_shape.touches(self.base_geometry) and (upper-lower)>self.touching_tolerance:
+            # print((upper,lower))
+            mid = (upper+lower)/2.0
+            self.set_size(mid)
+            # for point in self.base_geometry.exterior.coords:
+            #     print(point[0],point[1])
+            # print("=================")
+            if self.base_geometry.overlaps(other_shape) or self.base_geometry.intersects(other_shape):
+                upper = mid
+            else:
+                lower = mid
+        
+                
+    def shift(self,offset: np.ndarray):
+        self.position += offset
+        self.compute_base_geometry()
