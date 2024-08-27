@@ -49,6 +49,7 @@ class Pattern(Enum): # the pattern (dots, lines, etc) that fills up the shape
 class Composition(Enum):
     SIMPLE = 0
     CHAIN = 1
+    NESTING = 2
     
 class TouchingPoint(Enum):
     ENDPOINT = 0

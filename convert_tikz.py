@@ -3,7 +3,7 @@ from SimpleShape import SimpleShape
 
 def get_pattern_tikz_string(pattern: img_params.Pattern) -> str:
     lookup_dict = {
-        img_params.Pattern.NIL: "",
+        img_params.Pattern.NIL: "none",
         img_params.Pattern.DOT: "dots",
         img_params.Pattern.NEL: "north east lines",
         img_params.Pattern.NWL: "north west lines",
@@ -54,18 +54,15 @@ def convert_tikz_instruction(input_shape: SimpleShape):
     return tikz_instruction
 
 
-def convert_tikz_instructions(input_shapes: list):
-    instruction = ""
+def convert_tikz_instructions(input_shapes: list[SimpleShape]):
+    instructions = []
     for shape in input_shapes:
-        instruction += convert_tikz_instruction(shape)
-    return instruction
+        instructions.append(convert_tikz_instruction(shape)) 
+    return instructions
 
 
 def format_node_instruction(
-    pos_x, pos_y, size, color_stm: str, sides: int, pattern: str = "", rotation: int = 0
+    pos_x, pos_y, size, color_stm: str, sides: int, pattern: str, rotation: int = 0
 ):  # \node is used to draw regular shapes
-    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, inner sep=0pt, draw, rotate={rotation},fill={color_stm}] at ({pos_x},{pos_y}) {{}};"
-    pattern_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, inner sep=0pt, draw,rotate={rotation},pattern={pattern}] at ({pos_x},{pos_y}) {{}};"
-    if pattern != "":
-        base_instruction += pattern_instruction
+    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, inner sep=0pt, draw,rotate={rotation},pattern={pattern}] at ({pos_x},{pos_y}) {{}};"
     return base_instruction

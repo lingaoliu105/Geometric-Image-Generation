@@ -21,7 +21,7 @@ class SimpleShape():
         shape: Optional[img_params.Shape] = None,
         color: Optional[img_params.Color] = None,
         pattern: Optional[img_params.Pattern] = None,
-        excluded_shapes_set: Optional[set] = None,
+        excluded_shapes_set: set = {},
     ) -> None:
         self.position = position
         self.rotation = rotation
@@ -116,12 +116,8 @@ class SimpleShape():
         lower = 0
         other_shape = other.base_geometry
         while not other_shape.touches(self.base_geometry) and (upper-lower)>self.touching_tolerance:
-            # print((upper,lower))
             mid = (upper+lower)/2.0
             self.set_size(mid)
-            # for point in self.base_geometry.exterior.coords:
-            #     print(point[0],point[1])
-            # print("=================")
             if self.base_geometry.overlaps(other_shape) or self.base_geometry.intersects(other_shape):
                 upper = mid
             else:
