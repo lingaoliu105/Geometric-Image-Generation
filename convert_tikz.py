@@ -23,7 +23,7 @@ def convert_tikz_instruction(input_shape: SimpleShape):
         input_shape.position[1],
         input_shape.rotation,
         input_shape.size,
-        f"white!{input_shape.color.value}!black",
+        f"black!{input_shape.color.value}!white",
         get_pattern_tikz_string(input_shape.pattern),
     )
 
@@ -64,8 +64,8 @@ def convert_tikz_instructions(input_shapes: list):
 def format_node_instruction(
     pos_x, pos_y, size, color_stm: str, sides: int, pattern: str = "", rotation: int = 0
 ):  # \node is used to draw regular shapes
-    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, draw, rotate={rotation},fill={color_stm}] at ({pos_x},{pos_y}) {{}};"
-    pattern_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, draw,rotate={rotation},pattern={pattern}] at ({pos_x},{pos_y}) {{}};"
+    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, inner sep=0pt, draw, rotate={rotation},fill={color_stm}] at ({pos_x},{pos_y}) {{}};"
+    pattern_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, inner sep=0pt, draw,rotate={rotation},pattern={pattern}] at ({pos_x},{pos_y}) {{}};"
     if pattern != "":
         base_instruction += pattern_instruction
     return base_instruction
