@@ -14,11 +14,11 @@ import math
 generate_num = 1
 
 
-def combine_panel_images(composition_type: img_params.Composition) -> list[SimpleShape]:
+def combine_panel_images(composition_type: img_params.Composition, layout:Optional[img_params.Layout] = None) -> list[SimpleShape]:
     """combine images of each sub-panel"""
     print("invoke")
     print(composition_type)
-    layout = random.choice(list(img_params.Layout))
+    layout = random.choice(list(img_params.Layout)) if layout is None else layout
     panel_num = int(layout.value) if composition_type != img_params.Composition.NESTING else 1
     images = []
     # for each panel, draw simple shapes
@@ -82,7 +82,11 @@ def generate_composite_image_nested(outer_size = 20.0,recur_depth = 2)->list[Sim
         shape_list = []
         outer_shape = SimpleShape(np.array([0.0,0.0]),rotation,size=outer_size/2.0)
         shape_list.append(outer_shape)
-        shape_list += generate_composite_image_nested(outer_size=outer_size*0.8,recur_depth=recur_depth-1)
+        if outer_shape.shape == img_params.Shape.TRIANGLE_EQ:
+            shrink_ratio = 0.6
+        else:
+            shrink_ratio = 0.8
+        shape_list += generate_composite_image_nested(outer_size=outer_size*shrink_ratio,recur_depth=recur_depth-1)
         return shape_list
     
 def generate_composite_image_chaining(position, rotation, element_num=10) -> list[SimpleShape]:
@@ -126,7 +130,7 @@ def generate_composite_image_chaining(position, rotation, element_num=10) -> lis
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
-    shapes = combine_panel_images(composition_type=img_params.Composition.NESTING)
+    shapes = combine_panel_images(composition_type=img_params.Composition.NESTING,layout=img_params.Layout.SINGLE)
     tikz_instructions = convert_tikz_instructions(shapes)
     context = {"tikz_instructions": tikz_instructions}
     output = template.render(context)
