@@ -8,11 +8,11 @@ import img_params
 from shapely.geometry import Point, LineString, Polygon
 from shapely.geometry.base import BaseGeometry
 import json
-
+import uid_service
 
 class SimpleShape():
 
-    __slots__=["shape","size","position","pattern","rotation","color","base_geometry"]
+    __slots__=["uid","shape","size","position","pattern","rotation","color","base_geometry"]
     
     touching_tolerance = 1e-11
     def __init__(
@@ -25,6 +25,7 @@ class SimpleShape():
         pattern: Optional[img_params.Pattern] = None,
         excluded_shapes_set: set = {},
     ) -> None:
+        self.uid = uid_service.get_id_simple_shape()
         self.position = position
         self.rotation = rotation
         self.shape = (
@@ -145,4 +146,5 @@ class SimpleShape():
                     value = value.__geo_interface__
                 dict[key] = value
             
+        
         return dict
