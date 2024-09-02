@@ -6,6 +6,8 @@ import numpy as np
 
 import img_params
 from shapely.geometry import Point, LineString, Polygon
+from shapely.geometry.base import BaseGeometry
+import json
 
 
 class SimpleShape():
@@ -127,3 +129,20 @@ class SimpleShape():
     def shift(self,offset: np.ndarray):
         self.position += offset
         self.compute_base_geometry()
+        
+    def to_dict(self):
+        dict =  {slot: getattr(self, slot) for slot in self.__slots__}
+        for key in dict:
+            value = dict[key]
+            try:
+                json.dumps(value)
+            except TypeError:
+                if isinstance(value,np.ndarray):
+                    value = value.tolist()
+                elif isinstance(value,Enum):
+                    value = value.value
+                elif isinstance(value,BaseGeometry):
+                    value = value.__geo_interface__
+                dict[key] = value
+            
+        return dict

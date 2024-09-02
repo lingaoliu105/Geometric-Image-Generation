@@ -167,6 +167,7 @@ cython_debug/
 output_pdf/
 output_png/
 output_tex/
+output_json/
 
 #ignore temporary help files
 help/

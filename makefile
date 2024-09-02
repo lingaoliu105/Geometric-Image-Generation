@@ -1,4 +1,4 @@
-GEN_NUM = 10
+GEN_NUM = 1
 
 # latex源文件目录
 SRC_DIR = output_tex
@@ -9,6 +9,9 @@ OBJ_DIR = output_pdf
 # png图片输出目录
 TARGET_DIR = output_png
 
+# json文件输出目录
+JSON_DIR = output_json
+
 SRCS = $(wildcard $(SRC_DIR)/*.tex)
 
 OBJS = $(SRCS:$(SRC_DIR)/%.tex=$(OBJ_DIR)/%.pdf)
@@ -16,12 +19,15 @@ OBJS = $(SRCS:$(SRC_DIR)/%.tex=$(OBJ_DIR)/%.pdf)
 TARGETS = $(OBJS:$(OBJ_DIR)/%.pdf=$(TARGET_DIR)/%.png)
 
 # 默认目标
-all: dir tex pdf png
+all: dir tex 
+	docker-compose up
+	make png
 
 dir:
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(SRC_DIR)
 	mkdir -p $(TARGET_DIR)
+	mkdir -p $(JSON_DIR)
 
 tex: dir gen_rand_tikz.py
 	python gen_rand_tikz.py $(GEN_NUM)
@@ -38,7 +44,7 @@ png: $(TARGETS)
 
 # 清理生成的文件
 clean:
-	rm -f $(SRC_DIR)/* $(OBJ_DIR)/* $(TARGET_DIR)/*
+	rm -f $(SRC_DIR)/* $(OBJ_DIR)/* $(TARGET_DIR)/* $(JSON_DIR)/*
 
 # PHONY 目标表示这些目标不是实际文件
 .PHONY: all clean

@@ -1,3 +1,4 @@
+import json
 import random
 from typing import Optional
 from jinja2 import Environment, FileSystemLoader
@@ -16,8 +17,6 @@ generate_num = 1
 
 def combine_panel_images(composition_type: img_params.Composition, layout:Optional[img_params.Layout] = None) -> list[SimpleShape]:
     """combine images of each sub-panel"""
-    print("invoke")
-    print(composition_type)
     layout = random.choice(list(img_params.Layout)) if layout is None else layout
     panel_num = int(layout.value) if composition_type != img_params.Composition.NESTING else 1
     images = []
@@ -135,10 +134,15 @@ def main(n):
     context = {"tikz_instructions": tikz_instructions}
     output = template.render(context)
 
+    
     latex_filename = f"new{n}.tex"
     with open(f"./output_tex/{latex_filename}", "w", encoding="utf-8") as f:
         f.write(output)
-
+        
+    json_filename = f"new{n}.json"
+    with open(f"./output_json/{json_filename}", "w", encoding="utf-8") as f:
+        json.dump([item.to_dict() for item in shapes],f,indent=4)
+        
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1]:
