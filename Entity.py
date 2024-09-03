@@ -18,7 +18,7 @@ class Entity():
                 if isinstance(value, np.ndarray):
                     value = value.tolist()
                 elif isinstance(value, Enum):
-                    value = value.value
+                    value = value.name
                 elif isinstance(value, BaseGeometry):
                     value = value.__geo_interface__
                 elif isinstance(value,Entity): # when attribute is SimpleShape instance, only record down the id
