@@ -3,6 +3,8 @@ import random
 from typing import Optional
 from jinja2 import Environment, FileSystemLoader
 
+from Panel import Panel
+from TouchingPoint import TouchingPoint
 from convert_tikz import *
 import img_params
 import sys
@@ -11,27 +13,28 @@ import numpy as np
 import shapely
 from util import *
 import math
+import uid_service
 
 generate_num = 1
 
 
-def combine_panel_images(composition_type: img_params.Composition, layout:Optional[img_params.Layout] = None) -> list[SimpleShape]:
+def combine_panel_images(composition_type: img_params.Composition, layout:Optional[img_params.Layout] = None) -> list[Panel]:
     """combine images of each sub-panel"""
     layout = random.choice(list(img_params.Layout)) if layout is None else layout
     panel_num = int(layout.value) if composition_type != img_params.Composition.NESTING else 1
-    images = []
+    panels = []
     # for each panel, draw simple shapes
     for i in range(panel_num):
         pos = compute_panel_position(layout, i)
         rot = get_random_rotation()
         if composition_type == img_params.Composition.SIMPLE:
-            img = [SimpleShape(position=pos, rotation=rot)]
+            panel = [SimpleShape(position=pos, rotation=rot)]
         elif composition_type == img_params.Composition.CHAIN:
-            img = generate_composite_image_chaining(position=pos, rotation=rot)
+            panel = generate_composite_image_chaining(position=pos, rotation=rot)
         elif composition_type == img_params.Composition.NESTING:
-            img = generate_composite_image_nested()
-        images+=img
-    return images
+            panel = generate_composite_image_nested()
+        panels.append(panel)
+    return panels
 
 
 def compute_panel_position(layout, index):
@@ -88,7 +91,7 @@ def generate_composite_image_nested(outer_size = 20.0,recur_depth = 2)->list[Sim
         shape_list += generate_composite_image_nested(outer_size=outer_size*shrink_ratio,recur_depth=recur_depth-1)
         return shape_list
     
-def generate_composite_image_chaining(position, rotation, element_num=10) -> list[SimpleShape]:
+def generate_composite_image_chaining(position, rotation, element_num=10) -> Panel:
     """generate a composite geometry entity by chaining simple shapes
 
     Args:
@@ -121,16 +124,20 @@ def generate_composite_image_chaining(position, rotation, element_num=10) -> lis
         shapes.append(element)
         if i != 0:
             element.search_touching_size(shapes[i - 1])
-    for shape in shapes:
+    
+    touching_points = []
+    for i,shape in enumerate(shapes):
         shape.shift(position)
-    return shapes
+        if (i>0):
+            touching_points.append(TouchingPoint(shapes[i-1],shape))
+    return Panel(shapes,touching_points)
 
 
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
-    shapes = combine_panel_images(composition_type=img_params.Composition.NESTING,layout=img_params.Layout.SINGLE)
-    tikz_instructions = convert_tikz_instructions(shapes)
+    panels = combine_panel_images(composition_type=img_params.Composition.CHAIN,layout=img_params.Layout.SINGLE)
+    tikz_instructions = convert_panels(panels)
     context = {"tikz_instructions": tikz_instructions}
     output = template.render(context)
 
@@ -141,7 +148,8 @@ def main(n):
         
     json_filename = f"new{n}.json"
     with open(f"./output_json/{json_filename}", "w", encoding="utf-8") as f:
-        json.dump([item.to_dict() for item in shapes],f,indent=4)
+        # json.dump([item.to_dict() for item in panels],f,indent=4)
+        json.dump([panel.__dict__ for panel in panels],f,indent=4,default=lambda x:x.to_dict())
         
 
 if __name__ == "__main__":

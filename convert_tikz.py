@@ -1,3 +1,4 @@
+from Panel import Panel
 import img_params
 from SimpleShape import SimpleShape
 
@@ -54,10 +55,16 @@ def convert_tikz_instruction(input_shape: SimpleShape):
     return tikz_instruction
 
 
-def convert_tikz_instructions(input_shapes: list[SimpleShape]):
+def convert_tikz_instructions(input_shapes: list[SimpleShape]) -> list[str]:
     instructions = []
     for shape in input_shapes:
         instructions.append(convert_tikz_instruction(shape)) 
+    return instructions
+
+def convert_panels(panels:list[Panel]) -> list[str]:
+    instructions = []
+    for panel in panels:
+        instructions += convert_tikz_instructions(panel.shapes)
     return instructions
 
 

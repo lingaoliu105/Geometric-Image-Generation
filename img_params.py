@@ -1,4 +1,4 @@
- # The enumeration classes of different image parameters
+# The enumeration classes of different image parameters
 
 from enum import Enum
 
@@ -35,7 +35,7 @@ class Color(Enum): # color from white to black, 9 levels
 class Rotation(Enum): # only 2 types. actual rotation will be random times the basic angle
     ANGLE30 = 30
     ANGLE45 = 45
-    
+
 class Pattern(Enum): # the pattern (dots, lines, etc) that fills up the shape
     NIL=-1
     DOT=0
@@ -50,11 +50,25 @@ class Composition(Enum):
     SIMPLE = 0
     CHAIN = 1
     NESTING = 2
-    
+
 class TouchingPoint(Enum):
     ENDPOINT = 0
     MIDDLE = 0.5
     THIRD = 0.33
     QUARTER = 0.25
     FIFTH = 0.2
-    
+
+class AttachType(Enum):
+    """defines how 1 shape touches the other. 
+    """
+    EDGE = 0
+    ARC = 1
+    CORNER = 2
+
+class AttachPosition(Enum):
+    TOP = 0
+    NEAR_TOP = 0.25
+    MIDDLE = 0.5
+    NEAR_BOTTOM = 0.75
+    BOTTOM = 1
+    NA = -1 # not applicable, used for arc and corner
