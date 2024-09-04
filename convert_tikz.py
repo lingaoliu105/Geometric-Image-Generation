@@ -16,7 +16,7 @@ def get_pattern_tikz_string(pattern: img_params.Pattern) -> str:
     return lookup_dict[pattern]
 
 
-def convert_tikz_instruction(input_shape: SimpleShape):
+def convert_shape(input_shape: SimpleShape):
     tikz_instruction = ""
     shape, pos_x, pos_y, rotation, size, color_stm, pattern = (
         input_shape.shape,
@@ -55,16 +55,22 @@ def convert_tikz_instruction(input_shape: SimpleShape):
     return tikz_instruction
 
 
-def convert_tikz_instructions(input_shapes: list[SimpleShape]) -> list[str]:
+def convert_shapes(input_shapes: list[SimpleShape]) -> list[str]:
     instructions = []
     for shape in input_shapes:
-        instructions.append(convert_tikz_instruction(shape)) 
+        instructions.append(convert_shape(shape)) 
     return instructions
 
 def convert_panels(panels:list[Panel]) -> list[str]:
     instructions = []
     for panel in panels:
-        instructions += convert_tikz_instructions(panel.shapes)
+        instructions += convert_shapes(panel.shapes)
+        
+        # TODO: remove this after use
+        for touchingpt in panel.joints:
+            pos = touchingpt.position
+            instructions.append(format_node_instruction(pos[0],pos[1],0.1,"black",8,"None",0))
+
     return instructions
 
 
