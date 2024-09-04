@@ -49,9 +49,9 @@ class TouchingPoint(Entity):
         elif neighbor.shape in [img_params.Shape.TRIANGLE_EQ,img_params.Shape.SQUARE,img_params.Shape.PENTAGON,img_params.Shape.HEXAGON]:
             # first check if the point is on corner
             neighbor_vertices = neighbor.base_geometry.exterior.coords
-            buffered_point = Point(self.position).buffer(0.001)
+            buffered_point = Point(self.position).buffer(0.01)
             for vertex in neighbor_vertices:
-                if buffered_point.overlaps(Point(vertex)):
+                if buffered_point.contains(Point(vertex)):
                     return (img_params.AttachType.CORNER,img_params.AttachPosition.NA)
             edge = find_edge_with_point(neighbor.base_geometry,Point(self.position))
             endpoints = edge.coords
