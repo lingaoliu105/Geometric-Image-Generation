@@ -57,7 +57,9 @@ class TouchingPoint(Entity):
             endpoints = edge.coords
             upper_vertex, lower_vertex = (
                 endpoints[0],endpoints[1]) if endpoints[0][1] > endpoints[1][1] else (endpoints[1],endpoints[0])
-            fraction = (upper_vertex[1] - self.position[1]) / (upper_vertex[1]-lower_vertex[1])
-            position = min(img_params.AttachPosition, key=lambda x:abs(x.value-fraction))
-            print(fraction,position)
+            try:
+                fraction = (upper_vertex[1] - self.position[1]) / (upper_vertex[1]-lower_vertex[1])
+                position = min(img_params.AttachPosition, key=lambda x:abs(x.value-fraction))
+            except ZeroDivisionError: # happens when the edge is horizontal
+                position = img_params.AttachPosition.TOP #TODO: find more proper description
             return (img_params.AttachType.EDGE,position)
