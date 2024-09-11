@@ -171,3 +171,5 @@ output_json/
 
 #ignore temporary help files
 help/
+
+*dataset/
