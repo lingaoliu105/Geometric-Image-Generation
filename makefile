@@ -1,4 +1,4 @@
-GEN_NUM = 1
+GEN_NUM = 10
 
 # latex源文件目录
 SRC_DIR = output_tex
@@ -11,6 +11,8 @@ TARGET_DIR = output_png
 
 # json文件输出目录
 JSON_DIR = output_json
+
+DATASET_DIR=  my_dataset
 
 SRCS = $(wildcard $(SRC_DIR)/*.tex)
 
@@ -41,6 +43,10 @@ $(TARGET_DIR)/%.png : $(OBJ_DIR)/%.pdf
 	python convert_image.py $<
 
 png: $(TARGETS)
+	cp $(TARGET_DIR)/* $(DATASET_DIR)/data
+
+labels:
+	python combine_json.py $(GEN_NUM)
 
 # 清理生成的文件
 clean:

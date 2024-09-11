@@ -17,3 +17,4 @@ scipy==1.14.1
 shapely==2.0.6
 six==1.16.0
 tk==0.1.0
+fiftyone==0.25.1
