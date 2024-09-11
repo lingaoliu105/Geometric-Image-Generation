@@ -55,27 +55,37 @@ def convert_shape(input_shape: SimpleShape):
     return tikz_instruction
 
 
-def convert_shapes(input_shapes: list[SimpleShape]) -> list[str]:
+def convert_shapes(input_shapes: list[SimpleShape],show_center:bool) -> list[str]:
     instructions = []
     for shape in input_shapes:
         instructions.append(convert_shape(shape)) 
+        if show_center:
+            instructions.append(get_dot_mark_white(shape.position[0],shape.position[1]))
     return instructions
 
-def convert_panels(panels:list[Panel]) -> list[str]:
+def convert_panels(panels:list[Panel],show_center = False) -> list[str]:
     instructions = []
     for panel in panels:
-        instructions += convert_shapes(panel.shapes)
+        instructions += convert_shapes(panel.shapes,show_center)
         
         # TODO: remove this after use
         for touchingpt in panel.joints:
             pos = touchingpt.position
-            instructions.append(format_node_instruction(pos[0],pos[1],0.1,"black",8,"None",0))
+            instructions.append(get_dot_mark_black(pos_x=pos[0],pos_y=pos[1]))
 
     return instructions
 
+def get_dot_mark_black(pos_x,pos_y):
+    return format_node_instruction(pos_x, pos_y, 0.1, "black", 8, "None", 0)
+def get_dot_mark_white(pos_x,pos_y):
+    return format_node_instruction(pos_x, pos_y, 0.1, "white", 8, "None", 0)
 
 def format_node_instruction(
     pos_x, pos_y, size, color_stm: str, sides: int, pattern: str, rotation: int = 0
 ):  # \node is used to draw regular shapes
-    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={size}cm, inner sep=0pt, draw,rotate={rotation},pattern={pattern}] at ({pos_x},{pos_y}) {{}};"
+    if pattern=="None":
+        pattern_param=""
+    else:
+        pattern_param = f"pattern={pattern}"
+    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(size,3)}cm, fill={color_stm}, inner sep=0pt, draw,rotate={rotation},{pattern_param}] at ({pos_x},{pos_y}) {{}};"
     return base_instruction

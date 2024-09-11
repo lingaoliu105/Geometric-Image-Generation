@@ -106,13 +106,16 @@ def generate_composite_image_chaining(position, rotation, element_num=10) -> Pan
         for index in range(len(curve_point_set) // element_num)
     ]  # the set of all centers of the element shapes
 
-    shapes = []
+    shapes = [] # stack of shapes
     for i in range(element_num):
+        
+        # skip if current center is already covered by the previous shape
         if len(shapes) > 0 and shapely.Point(chain[i]).within(shapes[-1].base_geometry):
             continue
+        
         element_rotation = get_random_rotation()
         if i == 0:
-            element_size = get_point_distance(chain[0], chain[1]) * random.random()
+            element_size = get_point_distance(chain[0], chain[1]) * (random.random()/2+0.25)
         else:
             element_size = get_point_distance(chain[i], chain[i - 1]) * 2
         element = SimpleShape(
@@ -137,7 +140,7 @@ def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
     panels = combine_panel_images(composition_type=img_params.Composition.CHAIN,layout=img_params.Layout.SINGLE)
-    tikz_instructions = convert_panels(panels)
+    tikz_instructions = convert_panels(panels,show_center=True)
     context = {"tikz_instructions": tikz_instructions}
     output = template.render(context)
 
