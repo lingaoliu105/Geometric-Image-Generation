@@ -8,10 +8,10 @@
 \begin{document}
 
 \begin{tikzpicture}[scale=0.5]
-\draw[->] (-10,0) -- (10,0) node[right] {$x$};
+\draw[->] (-10,0) -- (10,0);
 
 % 画 y 轴
-\draw[->] (0,-10) -- (0,10) node[above] {$y$};
+\draw[->] (0,-10) -- (0,10);
 \draw[help lines] (0,0) grid (10,10);
 {% for instruction in tikz_instructions %}
 {{instruction}}
