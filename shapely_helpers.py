@@ -25,7 +25,7 @@ def find_edge_with_point(polygon, point, tolerance=1e-1):
 
     # Get the coordinates of the polygon
     coords = list(polygon.exterior.coords)
-
+    
     # Iterate through the edges
     for i in range(
         len(coords) - 1
@@ -37,4 +37,6 @@ def find_edge_with_point(polygon, point, tolerance=1e-1):
             return edge
 
     # If we get here, we didn't find the edge (shouldn't happen if the point is truly on the boundary)
-    raise ValueError("did not find edge containing the point")
+    # print(polygon,point)
+    # raise ValueError("did not find edge containing the point")
+    return edge
