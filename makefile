@@ -21,9 +21,7 @@ OBJS = $(SRCS:$(SRC_DIR)/%.tex=$(OBJ_DIR)/%.pdf)
 TARGETS = $(OBJS:$(OBJ_DIR)/%.pdf=$(TARGET_DIR)/%.png)
 
 # 默认目标
-all: dir tex 
-	docker-compose up
-	make png
+all: dir tex pdf png labels
 
 dir:
 	mkdir -p $(OBJ_DIR)
