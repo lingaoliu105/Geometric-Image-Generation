@@ -2,6 +2,7 @@ from enum import Enum
 import json
 
 import numpy as np
+import shapely
 from shapely.geometry.base import BaseGeometry
 
 
@@ -20,7 +21,7 @@ class Entity():
                 elif isinstance(value, Enum):
                     value = value.name
                 elif isinstance(value, BaseGeometry):
-                    value = value.__geo_interface__
+                    value = shapely.geometry.mapping(value)
                 elif isinstance(value,Entity): # when attribute is SimpleShape instance, only record down the id
                     value = value.uid
                 dict[key] = value
