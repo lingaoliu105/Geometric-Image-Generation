@@ -46,6 +46,9 @@ png: $(TARGETS)
 labels:
 	python combine_json.py $(GEN_NUM)
 
+show:
+	python dataset_visualization.py
+
 # 清理生成的文件
 clean:
 	rm -f $(SRC_DIR)/* $(OBJ_DIR)/* $(TARGET_DIR)/* $(JSON_DIR)/*

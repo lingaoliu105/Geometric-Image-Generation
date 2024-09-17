@@ -1,0 +1,862 @@
+[
+    {
+        "id": 0,
+        "name": "dot",
+        "supercategory": "Type"
+    },
+    {
+        "id": 1,
+        "name": "linesegment",
+        "supercategory": "Type"
+    },
+    {
+        "id": 2,
+        "name": "triangle",
+        "supercategory": "Type"
+    },
+    {
+        "id": 3,
+        "name": "square",
+        "supercategory": "Type"
+    },
+    {
+        "id": 4,
+        "name": "rectangle",
+        "supercategory": "Type"
+    },
+    {
+        "id": 5,
+        "name": "pentagon",
+        "supercategory": "Type"
+    },
+    {
+        "id": 6,
+        "name": "hexagon",
+        "supercategory": "Type"
+    },
+    {
+        "id": 7,
+        "name": "heptagon",
+        "supercategory": "Type"
+    },
+    {
+        "id": 8,
+        "name": "octagon",
+        "supercategory": "Type"
+    },
+    {
+        "id": 9,
+        "name": "nonagon",
+        "supercategory": "Type"
+    },
+    {
+        "id": 10,
+        "name": "decagon",
+        "supercategory": "Type"
+    },
+    {
+        "id": 11,
+        "name": "circle",
+        "supercategory": "Type"
+    },
+    {
+        "id": 12,
+        "name": "ellipse",
+        "supercategory": "Type"
+    },
+    {
+        "id": 13,
+        "name": "star",
+        "supercategory": "Type"
+    },
+    {
+        "id": 14,
+        "name": "diamond",
+        "supercategory": "Type"
+    },
+    {
+        "id": 15,
+        "name": "arrow",
+        "supercategory": "Type"
+    },
+    {
+        "id": 16,
+        "name": "doublearrow",
+        "supercategory": "Type"
+    },
+    {
+        "id": 17,
+        "name": "arc",
+        "supercategory": "Type"
+    },
+    {
+        "id": 18,
+        "name": "intersectionDot",
+        "supercategory": "Type"
+    },
+    {
+        "id": 19,
+        "name": "intersectionLineSegment",
+        "supercategory": "Type"
+    },
+    {
+        "id": 20,
+        "name": "intersectionArc",
+        "supercategory": "Type"
+    },
+    {
+        "id": 21,
+        "name": "intersectionRegion",
+        "supercategory": "Type"
+    },
+    {
+        "id": 22,
+        "name": "tiny",
+        "supercategory": "Size"
+    },
+    {
+        "id": 23,
+        "name": "nearTiny",
+        "supercategory": "Size"
+    },
+    {
+        "id": 24,
+        "name": "small",
+        "supercategory": "Size"
+    },
+    {
+        "id": 25,
+        "name": "slightlySmaller",
+        "supercategory": "Size"
+    },
+    {
+        "id": 26,
+        "name": "normalSize",
+        "supercategory": "Size"
+    },
+    {
+        "id": 27,
+        "name": "slightlyLarger",
+        "supercategory": "Size"
+    },
+    {
+        "id": 28,
+        "name": "large",
+        "supercategory": "Size"
+    },
+    {
+        "id": 29,
+        "name": "nearHuge",
+        "supercategory": "Size"
+    },
+    {
+        "id": 30,
+        "name": "huge",
+        "supercategory": "Size"
+    },
+    {
+        "id": 31,
+        "name": "left",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 32,
+        "name": "nearLeft",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 33,
+        "name": "leftwards",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 34,
+        "name": "slightlyLeftwards",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 35,
+        "name": "horizontalMiddle",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 36,
+        "name": "slightlyRightwards",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 37,
+        "name": "rightwards",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 38,
+        "name": "nearRight",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 39,
+        "name": "right",
+        "supercategory": "HorizontalPosition0"
+    },
+    {
+        "id": 40,
+        "name": "top",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 41,
+        "name": "nearTop",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 42,
+        "name": "high",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 43,
+        "name": "slightlyHigher",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 44,
+        "name": "verticalMiddle",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 45,
+        "name": "slightlyLower",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 46,
+        "name": "low",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 47,
+        "name": "nearBottom",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 48,
+        "name": "bottom",
+        "supercategory": "VerticalPosition"
+    },
+    {
+        "id": 49,
+        "name": "deg0",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 50,
+        "name": "deg15",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 51,
+        "name": "deg30",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 52,
+        "name": "deg45",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 53,
+        "name": "deg60",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 54,
+        "name": "deg75",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 55,
+        "name": "deg90",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 56,
+        "name": "deg105",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 57,
+        "name": "deg120",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 58,
+        "name": "deg135",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 59,
+        "name": "deg150",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 60,
+        "name": "deg165",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 61,
+        "name": "deg180",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 62,
+        "name": "degMinus15",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 63,
+        "name": "degMinus30",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 64,
+        "name": "degMinus45",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 65,
+        "name": "degMinus60",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 66,
+        "name": "degMinus75",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 67,
+        "name": "degMinus90",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 68,
+        "name": "degMinus105",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 69,
+        "name": "degMinus120",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 70,
+        "name": "degMinus135",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 71,
+        "name": "degMinus150",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 72,
+        "name": "degMinus165",
+        "supercategory": "Angle"
+    },
+    {
+        "id": 73,
+        "name": "white",
+        "supercategory": "Color"
+    },
+    {
+        "id": 74,
+        "name": "black",
+        "supercategory": "Color"
+    },
+    {
+        "id": 75,
+        "name": "red",
+        "supercategory": "Color"
+    },
+    {
+        "id": 76,
+        "name": "green",
+        "supercategory": "Color"
+    },
+    {
+        "id": 77,
+        "name": "blue",
+        "supercategory": "Color"
+    },
+    {
+        "id": 78,
+        "name": "cyan",
+        "supercategory": "Color"
+    },
+    {
+        "id": 79,
+        "name": "magenta",
+        "supercategory": "Color"
+    },
+    {
+        "id": 80,
+        "name": "yellow",
+        "supercategory": "Color"
+    },
+    {
+        "id": 81,
+        "name": "purple",
+        "supercategory": "Color"
+    },
+    {
+        "id": 82,
+        "name": "brown",
+        "supercategory": "Color"
+    },
+    {
+        "id": 83,
+        "name": "orange",
+        "supercategory": "Color"
+    },
+    {
+        "id": 84,
+        "name": "lightness20",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 85,
+        "name": "lightness25",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 86,
+        "name": "lightness33",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 87,
+        "name": "lightness40",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 88,
+        "name": "lightness50",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 89,
+        "name": "lightness60",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 90,
+        "name": "lightness67",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 91,
+        "name": "lightness75",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 92,
+        "name": "lightness80",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 93,
+        "name": "lightness100",
+        "supercategory": "Lightness"
+    },
+    {
+        "id": 94,
+        "name": "blank",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 95,
+        "name": "horizontalLines",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 96,
+        "name": "verticalLines",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 97,
+        "name": "northeastLines",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 98,
+        "name": "northwestLines",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 99,
+        "name": "grid",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 100,
+        "name": "crosshatch",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 101,
+        "name": "dots",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 102,
+        "name": "crosshatchDots",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 103,
+        "name": "fivepointedStars",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 104,
+        "name": "sixpointedStars",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 105,
+        "name": "bricks",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 106,
+        "name": "checkerboard",
+        "supercategory": "Pattern"
+    },
+    {
+        "id": 107,
+        "name": "patternWhite",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 108,
+        "name": "patternBlack",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 109,
+        "name": "patternRed",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 110,
+        "name": "patternGreen",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 111,
+        "name": "patternBlue",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 112,
+        "name": "patternCyan",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 113,
+        "name": "patternMagenta",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 114,
+        "name": "patternYellow",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 115,
+        "name": "patternPurple",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 116,
+        "name": "patternBrown",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 117,
+        "name": "patternOrange",
+        "supercategory": "PatternColor"
+    },
+    {
+        "id": 118,
+        "name": "patternLightness20",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 119,
+        "name": "patternLightness25",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 120,
+        "name": "patternLightness33",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 121,
+        "name": "patternLightness40",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 122,
+        "name": "patternLightness50",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 123,
+        "name": "patternLightness60",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 124,
+        "name": "patternLightness67",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 125,
+        "name": "patternLightness75",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 126,
+        "name": "patternLightness80",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 127,
+        "name": "patternLightness100",
+        "supercategory": "PatternLightness"
+    },
+    {
+        "id": 128,
+        "name": "solid",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 129,
+        "name": "dotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 130,
+        "name": "denselyDotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 131,
+        "name": "looselyDotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 132,
+        "name": "dashed",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 133,
+        "name": "denselyDashed",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 134,
+        "name": "looselyDashed",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 135,
+        "name": "dashdotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 136,
+        "name": "denselyDashdotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 137,
+        "name": "dashdotdotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 138,
+        "name": "denselydashdotdotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 139,
+        "name": "looselydashdotdotted",
+        "supercategory": "Outline"
+    },
+    {
+        "id": 140,
+        "name": "noOutline",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 141,
+        "name": "ultraThin",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 142,
+        "name": "veryThin",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 143,
+        "name": "thin",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 144,
+        "name": "semithick",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 145,
+        "name": "thick",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 146,
+        "name": "veryThick",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 147,
+        "name": "ultraThick",
+        "supercategory": "OutlineThickness"
+    },
+    {
+        "id": 148,
+        "name": "outlineWhite",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 149,
+        "name": "outlineBlack",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 150,
+        "name": "outlineRed",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 151,
+        "name": "outlineGreen",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 152,
+        "name": "outlineBlue",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 153,
+        "name": "outlineCyan",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 154,
+        "name": "outlineMagenta",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 155,
+        "name": "outlineYellow",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 156,
+        "name": "outlinePurple",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 157,
+        "name": "outlineBrown",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 158,
+        "name": "outlineOrange",
+        "supercategory": "OutlineColor"
+    },
+    {
+        "id": 159,
+        "name": "outlineLightness20outlineLightness25outlineLightness33outlineLightness40outlineLightness50outlineLightness60outlineLightness67outlineLightness75outlineLightness80outlineLightness100",
+        "supercategory": "OutlineLightness"
+    },
+    {
+        "id": 160,
+        "name": "first",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 161,
+        "name": "second",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 162,
+        "name": "third",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 163,
+        "name": "fourth",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 164,
+        "name": "fifth",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 165,
+        "name": "sixth",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 166,
+        "name": "seventh",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 167,
+        "name": "eighth",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 168,
+        "name": "ninth",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 169,
+        "name": "tenth",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 170,
+        "name": "eleventh",
+        "supercategory": "RelativeOrder"
+    },
+    {
+        "id": 171,
+        "name": "twelfth",
+        "supercategory": "RelativeOrder"
+    }
+]

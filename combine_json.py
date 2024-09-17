@@ -8,6 +8,9 @@ generate_num = 10
 get_image_id = (x for x in range (1000000)).__next__
 get_annotation_id = (x for x in range (100000)).__next__
 
+with open("./categories.json","r") as json_file:
+    categories = list(json.load(json_file))
+
 labels_dict = {"info":{},"licenses":[],"categories":[],"images":[],"annotations":[]}
 for i in range (generate_num):
     image_id = get_image_id()
@@ -36,10 +39,21 @@ for i in range (generate_num):
                 segmentation+= transformed_coord
             segmentation_x_coords = [segmentation[x] for x in range(0,len(segmentation),2)]
             segmentation_y_coords = [segmentation[x] for x in range(1,len(segmentation),2)]
+
+            # find category id of the shape
+            category_id = next(
+                (
+                    x["id"]
+                    for x in categories
+                    if x["name"].startswith(shape["shape"].lower())
+                    or shape["shape"].lower().startswith(x["name"])
+                ),
+                None,
+            )
             shape_annotation = {
                 "id": get_annotation_id(),
                 "image_id": image_id,
-                # "category_id": 2,
+                "category_id": category_id,
                 "bbox": [min(segmentation_x_coords),min(segmentation_y_coords),max(segmentation_x_coords)-min(segmentation_x_coords),max(segmentation_y_coords)-min(segmentation_y_coords)],
                 "segmentation": [segmentation],
                 "keypoints": vertices,
@@ -49,13 +63,13 @@ for i in range (generate_num):
                 "iscrowd": 0,
             }
             labels_dict["annotations"].append(shape_annotation)
-    
+
     # information unique to an image
     labels_dict["licenses"].append(license)
     labels_dict["images"].append(image)
-    
-    
+
     labels_dict["annotations"].append(shape_annotation)
+labels_dict["categories"] = categories
 
 with open("./my_dataset/labels.json","w") as json_file:
     json.dump(labels_dict,json_file,indent=4)
