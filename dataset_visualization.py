@@ -5,14 +5,17 @@ import fiftyone.zoo as foz
 
 
 # Path to your dataset (images or videos)
+# dataset_dir = "./coco_dataset/example"
 dataset_dir = "./my_dataset"
 
-# Create a dataset from COCO format
+# # Create a dataset from COCO format
 dataset = fo.Dataset.from_dir(
     dataset_type=fot.COCODetectionDataset,
     dataset_dir=dataset_dir,
-    # label_types=["detections", "segmentations"],
+    label_types=["detections", "segmentations","keypoints"],
 )
+
+
 # dataset = foz.load_zoo_dataset(
 #     "coco-2017",
 #     split="validation",

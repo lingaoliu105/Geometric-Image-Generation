@@ -5,7 +5,7 @@ pdf_path = sys.argv[1]
 
 # 将 PDF 转换为图片
 # dpi 参数控制图片的分辨率
-images = convert_from_path(pdf_path, dpi=300)
+images = convert_from_path(pdf_path, dpi=1000)
 
 # 保存每一页为图片
 for j, image in enumerate(images):
