@@ -14,15 +14,6 @@ class Shape(
     HEXAGON = 6
 
 
-class Layout(Enum):
-    SINGLE = 1
-    LR = 2.0  # left -- right
-    UD = 2.1  # up -- down
-    FEFT = 4.0  # the strange 5842 layout
-    QUADRANT = 4.1  # 2x2
-    GRID = 9  # 3x3
-
-
 class Color(Enum):  # color from white to black, 9 levels
     white = 0
     black = 1

@@ -1,6 +1,5 @@
 import json
 import random
-from typing import Optional
 from jinja2 import Environment, FileSystemLoader
 
 from Panel import Panel
@@ -12,8 +11,7 @@ from SimpleShape import SimpleShape
 import numpy as np
 import shapely
 from util import *
-import math
-import uid_service
+
 
 generate_num = 1
 canvas_width = 20.0
@@ -127,7 +125,7 @@ def generate_composite_image_chaining(position, rotation,panel_top_left,panel_bo
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
-    panels = generate_panels(composition_type=img_params.Composition.CHAIN,layout=(2,2))
+    panels = generate_panels(composition_type=img_params.Composition.CHAIN,layout=(1,1))
     tikz_instructions = convert_panels(panels)
     context = {"tikz_instructions": tikz_instructions,"canvas_width":canvas_width,"canvas_height":canvas_height}
     output = template.render(context)
