@@ -36,14 +36,19 @@ class Rotation(
 
 
 class Pattern(Enum):  # the pattern (dots, lines, etc) that fills up the shape
-    NIL = -1
-    DOT = 0
-    NEL = 1
-    NWL = 2
-    VERTICAL = 3
-    HORIZONTAL = 4
-    CROSSHATCH = 5
-    BRICK = 6
+    blank = 0
+    horizontalLines = 1
+    verticalLines = 2
+    northEastLines = 3
+    northWestLines = 4
+    grid = 5
+    crosshatch = 6
+    dots = 7
+    crosshatchDots = 8
+    fivepointedStars = 9
+    sixpointedStars = 10
+    bricks = 11
+    checkerboard = 12
 
 
 class Composition(Enum):

@@ -188,16 +188,16 @@ sup_to_cat = {
         "outlineOrange",
     ],
     "OutlineLightness": [
-        "outlineLightness20"
-        "outlineLightness25"
-        "outlineLightness33"
-        "outlineLightness40"
-        "outlineLightness50"
-        "outlineLightness60"
-        "outlineLightness67"
-        "outlineLightness75"
-        "outlineLightness80"
-        "outlineLightness100"
+        "outlineLightness20",
+        "outlineLightness25",
+        "outlineLightness33",
+        "outlineLightness40",
+        "outlineLightness50",
+        "outlineLightness60",
+        "outlineLightness67",
+        "outlineLightness75",
+        "outlineLightness80",
+        "outlineLightness100",
     ],
     "RelativeOrder": [
         "first",

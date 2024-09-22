@@ -62,18 +62,12 @@ class TikzConverter:
                 f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
             )
 
+    def partition_camel_case(self,string):
+        return re.sub(r"([a-z])([A-Z])", r"\1 \2", string).lower()
     def get_pattern_tikz_string(self, pattern: Pattern):
-        lookup_dict = {
-            Pattern.NIL: "none",
-            Pattern.DOT: "dots",
-            Pattern.NEL: "north east lines",
-            Pattern.NWL: "north west lines",
-            Pattern.VERTICAL: "vertical lines",
-            Pattern.HORIZONTAL: "horizontal lines",
-            Pattern.CROSSHATCH: "crosshatch",
-            Pattern.BRICK: "bricks",
-        }
-        self.pattern_str = f"pattern={lookup_dict[pattern]}"
+        if pattern==Pattern.blank:
+            return
+        self.pattern_str = f"pattern={self.partition_camel_case(pattern.name)}"
 
     def get_pattern_lightness_string(
         self, pattern_lightness: PatternLightness
@@ -90,7 +84,7 @@ class TikzConverter:
         self.lightness_str = f"!{lightness.value}"
 
     def get_outline_tikz_string(self, outline: Outline):
-        self.outline_str = re.sub(r'([a-z])([A-Z])', r'\1 \2', outline.name).lower()
+        self.outline_str = self.partition_camel_case(outline.name)
 
     def get_outline_color_tikz_string(self, outline_color: OutlineColor):
         self.outline_color_str = (

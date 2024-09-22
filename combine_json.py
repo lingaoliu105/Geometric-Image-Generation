@@ -2,6 +2,8 @@ import json
 import sys
 from PIL import Image
 
+from SimpleShape import SimpleShape
+
 generate_num = 10
 # if len(sys.argv) > 1 and sys.argv[1]:
 #     generate_num = int(sys.argv[1])
@@ -9,14 +11,18 @@ get_image_id = (x for x in range (1000000)).__next__
 get_annotation_id = (x for x in range (100000)).__next__
 width = 0
 height = 0
-def find_category_id_by_name(name,categories):
+def find_category_id_by_name(name:str,categories):
     # use non-case-sensitive comparison
-    return next((
+    name = name.replace("_","")
+    catid = next((
                     x["id"]
                     for x in categories
                     if x["name"].lower().startswith(name.lower())
                     or name.lower().startswith(x["name"].lower())
                 ),None)
+    if catid==None:
+        raise
+    return catid
 
 def transform_coordinate(coordinate):
     global width,height
@@ -32,6 +38,8 @@ def calc_bbox(segmentation):
     return [min(segmentation_x_coords),min(segmentation_y_coords),max(segmentation_x_coords)-min(segmentation_x_coords),max(segmentation_y_coords)-min(segmentation_y_coords)]
 def format_shape_annotations(shape): # multiple annotations for 1 shape, each annotation for each attribute (category)
     annotations = []
+    
+    # form boundary coordinates and segmentation and bounding box
     vertices = transform_coordinate(shape["position"])+[2]
     segmentation = []
     coordinates = shape["base_geometry"]["coordinates"][0]
@@ -40,15 +48,15 @@ def format_shape_annotations(shape): # multiple annotations for 1 shape, each an
         vertices += transformed_coord              
         vertices.append(2)
         segmentation+= transformed_coord
+    bbox = calc_bbox(segmentation)
 
     # find category id of the shape
     category_id = find_category_id_by_name(shape["shape"],categories=categories)
-
     shape_annotation = {
         "id": get_annotation_id(),
         "image_id": image_id,
         "category_id": category_id,
-        "bbox": calc_bbox(segmentation),
+        "bbox": bbox,
         "segmentation": [segmentation], # real seg is nested list
         "keypoints": vertices,
         "num_keypoints": len(vertices)/3,
@@ -57,6 +65,23 @@ def format_shape_annotations(shape): # multiple annotations for 1 shape, each an
         "iscrowd": 0,
     }
     annotations.append(shape_annotation)
+    
+    
+    for attr_name in SimpleShape.direct_categories:
+        attr_value = shape[attr_name]
+        category_id = find_category_id_by_name(attr_value,categories=categories)
+        attr_annotation = {
+            "id": get_annotation_id(),
+            "image_id": image_id,
+            "category_id": category_id,
+            "bbox": bbox,
+            "segmentation": [segmentation], # real seg is nested list
+            # omit keypoints for attribute annotations for simplicity
+            # "score": 0.95,
+            # "area": 45969,
+            "iscrowd": 0,
+        }
+        annotations.append(attr_annotation)
     
     return annotations
 
