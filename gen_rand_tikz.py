@@ -16,55 +16,43 @@ import math
 import uid_service
 
 generate_num = 1
+canvas_width = 20.0
+canvas_height = 20.0
 
-
-def combine_panel_images(composition_type: img_params.Composition, layout:Optional[img_params.Layout] = None) -> list[Panel]:
+def generate_panels(composition_type: img_params.Composition, layout:tuple[int,int]) -> list[Panel]:
     """combine images of each sub-panel"""
-    layout = random.choice(list(img_params.Layout)) if layout is None else layout
-    panel_num = int(layout.value) if composition_type != img_params.Composition.NESTING else 1
+    row_num = layout[0]
+    col_num = layout[1]
+    panel_num = row_num * col_num if composition_type != img_params.Composition.NESTING else 1
     panels = []
     # for each panel, draw simple shapes
     for i in range(panel_num):
-        pos = compute_panel_position(layout, i)
+        center, top_left, bottom_right = compute_panel_position(layout, i)
         rot = get_random_rotation()
         if composition_type == img_params.Composition.SIMPLE:
-            panel = [SimpleShape(position=pos, rotation=rot)]
+            panel = Panel(top_left=top_left,bottom_right=bottom_right,shapes=[SimpleShape(position=center,rotation=rot)],joints=[])
         elif composition_type == img_params.Composition.CHAIN:
-            panel = generate_composite_image_chaining(position=pos, rotation=rot)
+            panel = generate_composite_image_chaining(position=center, rotation=rot,panel_top_left=top_left,panel_bottom_right=bottom_right)
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
         panels.append(panel)
     return panels
 
+def compute_panel_position(layout:tuple[int,int], index:int):
+    convert = lambda x: [x[0]-canvas_width / 2.0, canvas_height / 2.0 -x[1]]
+    row_num = layout[0]
+    col_num = layout[1]
+    panel_row = index // col_num
+    panel_col = index % col_num
+    row_height = canvas_height * 1.0 / row_num
+    col_width = canvas_width * 1.0 / col_num
 
-def compute_panel_position(layout, index):
-    """
-    arguments:
-    layout(Layout): the layout of the image
-    index(int): the index of the panel to compute, starting from 0
-
-    output:
-    ndarray[(float,float)]: the x-coordinate and y-coordinate of the center of the panel (assume the whole image is 20cm x 20cm)
-    """
-    lookup_table = {
-        img_params.Layout.SINGLE: [(0.0, 0.0)],
-        img_params.Layout.LR: [(-5.0, 0.0), (5.0, 0.0)],
-        img_params.Layout.UD: [(0.0, 5.0), (0.0, -5.0)],
-        img_params.Layout.QUADRANT: [(-5.0, 5.0), (5.0, 5.0), (-5.0, -5.0), (5.0, -5.0)],
-        img_params.Layout.FEFT: [(-1.6, 1.6), (1.6, 1.6), (-1.6, -1.6), (1.6, -1.6)],
-        img_params.Layout.GRID: [
-            (-6.67, 6.67),
-            (0.0, 6.67),
-            (6.67, 6.67),
-            (-6.67, 0),
-            (0.0, 0),
-            (6.67, 0),
-            (-6.67, -6.67),
-            (0.0, -6.67),
-            (6.67, -6.67),
-        ],
-    }
-    return np.array(lookup_table[layout][index])
+    center_coord = convert(
+        [col_width / 2.0 * (panel_col * 2 + 1),row_height / 2.0 * (panel_row * 2 + 1)]
+    )
+    top_left_coord = convert([panel_col * col_width, panel_row * row_height])
+    bottom_right_coord = convert([(panel_col+1) * col_width, (panel_row+1) * row_height])
+    return center_coord,top_left_coord,bottom_right_coord
 
 def generate_composite_image_nested(outer_size = 20.0,recur_depth = 2)->list[SimpleShape]:
     """generate a nested image, centered at 0,0, and within a square area of outer_size * outer_size
@@ -73,7 +61,7 @@ def generate_composite_image_nested(outer_size = 20.0,recur_depth = 2)->list[Sim
         outer_size (int, optional): the length of edge of the square frame. Defaults to 20.
     """    
     if recur_depth==0:
-        panel_images = combine_panel_images(img_params.Composition.SIMPLE)
+        panel_images = generate_panels(img_params.Composition.SIMPLE)
         for image in panel_images:
             shrink_ratio = outer_size/20
             image.shift(-shrink_ratio*image.position)
@@ -90,8 +78,8 @@ def generate_composite_image_nested(outer_size = 20.0,recur_depth = 2)->list[Sim
             shrink_ratio = 0.8
         shape_list += generate_composite_image_nested(outer_size=outer_size*shrink_ratio,recur_depth=recur_depth-1)
         return shape_list
-    
-def generate_composite_image_chaining(position, rotation, element_num=10) -> Panel:
+
+def generate_composite_image_chaining(position, rotation,panel_top_left,panel_bottom_right, element_num=10) -> Panel:
     """generate a composite geometry entity by chaining simple shapes
 
     Args:
@@ -133,15 +121,15 @@ def generate_composite_image_chaining(position, rotation, element_num=10) -> Pan
         shape.shift(position)
         if (i>0):
             touching_points.append(TouchingPoint(shapes[i-1],shape))
-    return Panel(shapes,touching_points)
+    return Panel(top_left=panel_top_left,bottom_right=panel_bottom_right,shapes=shapes,joints=touching_points)
 
 
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
-    panels = combine_panel_images(composition_type=img_params.Composition.CHAIN,layout=img_params.Layout.SINGLE)
+    panels = generate_panels(composition_type=img_params.Composition.CHAIN,layout=(2,2))
     tikz_instructions = convert_panels(panels)
-    context = {"tikz_instructions": tikz_instructions}
+    context = {"tikz_instructions": tikz_instructions,"canvas_width":canvas_width,"canvas_height":canvas_height}
     output = template.render(context)
 
     
@@ -153,7 +141,7 @@ def main(n):
     with open(f"./output_json/{json_filename}", "w", encoding="utf-8") as f:
         # json.dump([item.to_dict() for item in panels],f,indent=4)
         json.dump([panel.__dict__ for panel in panels],f,indent=4,default=lambda x:x.to_dict())
-        
+
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1]:
