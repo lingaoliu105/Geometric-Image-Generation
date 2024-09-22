@@ -140,7 +140,7 @@ def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
     panels = combine_panel_images(composition_type=img_params.Composition.CHAIN,layout=img_params.Layout.SINGLE)
-    tikz_instructions = convert_panels(panels,show_center=True)
+    tikz_instructions = convert_panels(panels)
     context = {"tikz_instructions": tikz_instructions}
     output = template.render(context)
 

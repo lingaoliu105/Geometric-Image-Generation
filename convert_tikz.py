@@ -1,91 +1,132 @@
+import re
 from Panel import Panel
-import img_params
+from img_params import *
 from SimpleShape import SimpleShape
 
-def get_pattern_tikz_string(pattern: img_params.Pattern) -> str:
-    lookup_dict = {
-        img_params.Pattern.NIL: "none",
-        img_params.Pattern.DOT: "dots",
-        img_params.Pattern.NEL: "north east lines",
-        img_params.Pattern.NWL: "north west lines",
-        img_params.Pattern.VERTICAL: "vertical lines",
-        img_params.Pattern.HORIZONTAL: "horizontal lines",
-        img_params.Pattern.CROSSHATCH: "crosshatch",
-        img_params.Pattern.BRICK: "bricks",
-    }
-    return lookup_dict[pattern]
 
+class TikzConverter:
 
-def convert_shape(input_shape: SimpleShape):
-    tikz_instruction = ""
-    shape, pos_x, pos_y, rotation, size, color_stm, pattern = (
-        input_shape.shape,
-        input_shape.position[0],
-        input_shape.position[1],
-        input_shape.rotation,
-        input_shape.size,
-        f"black!{input_shape.color.value}!white",
-        get_pattern_tikz_string(input_shape.pattern),
-    )
+    def __init__(self) -> None:
+        self.color_str = ""
+        self.lightness_str = ""
+        self.pattern_str = ""
+        self.pattern_color_str = ""
+        self.pattern_lightness_str = ""
+        self.outline_str = ""
+        self.outline_color_str = ""
+        self.outline_thickness_str = ""
+        self.outline_lightness_str = ""
 
-    if shape == img_params.Shape.LINE:
-        tikz_instruction = f"\draw ({pos_x}, {pos_y})--++({rotation}:{size});\n\draw ({pos_x},{pos_y})--++({rotation}:{-size});\n"
-    elif shape == img_params.Shape.CIRCLE:
-        tikz_instruction = (
-            f"\draw [fill={color_stm}] ({pos_x},{pos_y}) circle ({size});\n"
-        )
-        if pattern != "":
-            tikz_instruction += f"\draw [fill={color_stm},pattern={pattern}] ({pos_x},{pos_y}) circle ({size});\n"
-    elif (
-        shape == img_params.Shape.TRIANGLE_EQ
-        or shape == img_params.Shape.SQUARE
-        or shape == img_params.Shape.PENTAGON
-        or shape == img_params.Shape.HEXAGON
+    def convert(self, shape: SimpleShape):
+
+        func_router = {
+            "pattern": self.get_pattern_tikz_string,
+            "color": self.get_color_tikz_string,
+            "lightness": self.get_lightness_tikz_string,
+            "pattern_color": self.get_pattern_color_tikz_string,
+            "pattern_lightness": self.get_pattern_lightness_string,
+            "outline": self.get_outline_tikz_string,
+            "outline_color": self.get_outline_color_tikz_string,
+            "outline_thickness": self.get_outline_thickness_tikz_string,
+            "outline_lightness": self.get_outline_lightness_tikz_string,
+        }
+
+        for attr in shape.__slots__:
+            if attr in func_router:
+                func_router[attr](getattr(shape, attr))
+
+        if shape.shape in [
+            Shape.TRIANGLE_EQ,
+            Shape.SQUARE,
+            Shape.PENTAGON,
+            Shape.HEXAGON,
+        ]:
+            sides = shape.shape.value
+            return (
+                # draw the background color in seperate instruction, otherwise will be covered by pattern
+                f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,"
+                f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={shape.rotation}]"
+                f"at ({shape.position[0]},{shape.position[1]}) {{}};\n"
+                
+                f"\\node[{self.outline_thickness_str},regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,"
+                f"inner sep=0pt,{self.outline_color_str+self.outline_lightness_str},rotate={shape.rotation},{self.pattern_str},"
+                f"{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] at ({shape.position[0]},{shape.position[1]}) {{}};\n"
+            )
+        elif shape.shape == Shape.CIRCLE:
+            return (
+                f"\draw [{self.color_str+self.lightness_str}]"
+                f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
+
+                f"\draw [{self.outline_thickness_str},{self.outline_color_str},{self.outline_str},"
+                f"{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str}]"
+                f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
+            )
+
+    def get_pattern_tikz_string(self, pattern: Pattern):
+        lookup_dict = {
+            Pattern.NIL: "none",
+            Pattern.DOT: "dots",
+            Pattern.NEL: "north east lines",
+            Pattern.NWL: "north west lines",
+            Pattern.VERTICAL: "vertical lines",
+            Pattern.HORIZONTAL: "horizontal lines",
+            Pattern.CROSSHATCH: "crosshatch",
+            Pattern.BRICK: "bricks",
+        }
+        self.pattern_str = f"pattern={lookup_dict[pattern]}"
+
+    def get_pattern_lightness_string(
+        self, pattern_lightness: PatternLightness
     ):
-        tikz_instruction = format_node_instruction(
-            pos_x,
-            pos_y,
-            size,
-            color_stm,
-            int(shape.value),
-            pattern=pattern,
-            rotation=rotation,
+        self.pattern_lightness_str = f"!{pattern_lightness.value}"
+
+    def get_pattern_color_tikz_string(self, patttern_color: PattenColor):
+        self.pattern_color_str = f"pattern color={patttern_color.name.removeprefix('pattern').lower()}"
+
+    def get_color_tikz_string(self, color: Color):
+        self.color_str = f"fill={color.name}"
+
+    def get_lightness_tikz_string(self, lightness: Lightness):
+        self.lightness_str = f"!{lightness.value}"
+
+    def get_outline_tikz_string(self, outline: Outline):
+        self.outline_str = re.sub(r'([a-z])([A-Z])', r'\1 \2', outline.name).lower()
+
+    def get_outline_color_tikz_string(self, outline_color: OutlineColor):
+        self.outline_color_str = (
+            f"draw={outline_color.name.removeprefix('outline').lower()}"
         )
 
-    return tikz_instruction
+    def get_outline_lightness_tikz_string(
+        self, outline_lightness: OutlineLightness
+    ):
+        self.outline_lightness_str = f"!{outline_lightness.value}"
+
+    def get_outline_thickness_tikz_string(
+        self, outline_thickness: OutlineThickness
+    ):
+        if outline_thickness == OutlineThickness.noOutline:
+            self.outline_str = "draw=none"
+            return
+        self.outline_thickness_str = f"line width={outline_thickness.value*0.1}mm"
 
 
-def convert_shapes(input_shapes: list[SimpleShape],show_center:bool) -> list[str]:
+def convert_shapes(input_shapes: list[SimpleShape], show_center: bool) -> list[str]:
     instructions = []
     for shape in input_shapes:
-        instructions.append(convert_shape(shape)) 
-        if show_center:
-            instructions.append(get_dot_mark_white(shape.position[0],shape.position[1]))
+        converter = TikzConverter()
+        instructions.append(converter.convert(shape))
+
     return instructions
 
-def convert_panels(panels:list[Panel],show_center = False) -> list[str]:
+
+def convert_panels(panels: list[Panel]) -> list[str]:
     instructions = []
     for panel in panels:
-        instructions += convert_shapes(panel.shapes,show_center)
-        
+        instructions += convert_shapes(panel.shapes, False)
+
         # TODO: remove this after use
         for touchingpt in panel.joints:
             pos = touchingpt.position
-            instructions.append(get_dot_mark_black(pos_x=pos[0],pos_y=pos[1]))
 
     return instructions
-
-def get_dot_mark_black(pos_x,pos_y):
-    return format_node_instruction(pos_x, pos_y, 0.1, "black", 8, "None", 0)
-def get_dot_mark_white(pos_x,pos_y):
-    return format_node_instruction(pos_x, pos_y, 0.1, "white", 8, "None", 0)
-
-def format_node_instruction(
-    pos_x, pos_y, size, color_stm: str, sides: int, pattern: str, rotation: int = 0
-):  # \node is used to draw regular shapes
-    if pattern=="None":
-        pattern_param=""
-    else:
-        pattern_param = f"pattern={pattern}"
-    base_instruction = f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(size,3)}cm, fill={color_stm}, inner sep=0pt, draw,rotate={rotation},{pattern_param}] at ({pos_x},{pos_y}) {{}};"
-    return base_instruction

@@ -13,7 +13,7 @@ from Entity import Entity
 
 class SimpleShape(Entity):
 
-    __slots__=["uid","shape","size","position","pattern","rotation","color","base_geometry"]
+    __slots__=["uid","shape","size","position","pattern","rotation","color","base_geometry","lightness","pattern_color","pattern_lightness","outline","outline_color","outline_thickness","outline_lightness"]
     
     touching_tolerance = 1e-11
     def __init__(
@@ -24,6 +24,14 @@ class SimpleShape(Entity):
         shape: Optional[img_params.Shape] = None,
         color: Optional[img_params.Color] = None,
         pattern: Optional[img_params.Pattern] = None,
+        lightness: Optional[img_params.Lightness] = None,
+        outline = None,
+        outline_lightness = None,
+        pattern_color = None,
+        pattern_lightness = None,
+        outline_color = None,
+        outline_thickness = None,
+        
         excluded_shapes_set: set = {},
     ) -> None:
         self.uid = uid_service.get_id_simple_shape()
@@ -40,7 +48,30 @@ class SimpleShape(Entity):
         )
         self.pattern = (
             pattern if pattern is not None else random.choice(list(img_params.Pattern))
-        )
+        )        
+        self.pattern_lightness = (
+            pattern_lightness if pattern_lightness is not None else random.choice(list(img_params.PatternLightness))
+        )        
+        self.pattern_color = (
+            pattern_color if pattern_color is not None else random.choice(list(img_params.PattenColor))
+        )        
+        self.outline = (
+            outline if outline is not None else random.choice(list(img_params.Outline))
+        )        
+        self.outline_color = (
+            outline_color if outline_color is not None else random.choice(list(img_params.OutlineColor))
+        )        
+        self.outline_thickness = (
+            outline_thickness if outline_thickness is not None else random.choice(list(img_params.OutlineThickness))
+        )        
+        self.outline_lightness = (
+            outline_lightness if outline_lightness is not None else random.choice(list(img_params.OutlineLightness))
+        )        
+        self.lightness = (
+            lightness if lightness is not None else random.choice(list(img_params.Lightness))
+        )        
+
+
         self.compute_base_geometry()
 
     def compute_base_geometry(self):
@@ -97,7 +128,7 @@ class SimpleShape(Entity):
         if self.shape==Shape.CIRCLE:
             rand_rad = random.random()*2*math.pi
             return self.position + self.size * np.array([math.cos(rand_rad),math.sin(rand_rad)])
-        fraction = random.choice(list(TouchingPoint)).value*random.randint(1,5)%1
+        fraction = random.choice(list(TouchingPosition)).value*random.randint(1,5)%1
         vertices = self.get_vertices()
         edge_index = random.randint(0,len(vertices)-2) # the edge is vert[index] -- vert[index+1]
         return vertices[edge_index]+fraction*(vertices[edge_index+1]-vertices[edge_index])
@@ -126,8 +157,14 @@ class SimpleShape(Entity):
                 upper = mid
             else:
                 lower = mid
-        
                 
+    def search_touching_rotation(self,other:"SimpleShape"):
+        self.size = 10000
+        self.compute_base_geometry()
+        
+        #iterate over all exterior coordinates to find valid rotaion range
+        # if other.shape == img_params.Shape.LINE:
+            
     def shift(self,offset: np.ndarray):
         self.position += offset
         self.compute_base_geometry()
