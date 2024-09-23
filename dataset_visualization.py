@@ -12,15 +12,17 @@ dataset_dir = "./my_dataset"
 dataset = fo.Dataset.from_dir(
     dataset_type=fot.COCODetectionDataset,
     dataset_dir=dataset_dir,
-    label_types=["detections", "segmentations","keypoints"],
+)
+dataset.default_skeleton = fo.KeypointSkeleton(
+    labels=["center", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9"],
+    edges=[[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [0, 9]],
 )
 
-
+# dataset.save()
 # dataset = foz.load_zoo_dataset(
 #     "coco-2017",
 #     split="validation",
 #     dataset_name="coco-2017-validation",
-#     label_types=["detections","segmentations"],  # Load only detection labels
 # )
 
 # while True:

@@ -130,16 +130,16 @@ class SimpleShape(Entity):
             self.base_geometry = LineString(endpoints)
 
         # TODO: complete other shapes. remember to add last -- first
-        elif self.shape == Shape.CIRCLE:
+        elif self.shape == Shape.circle:
             self.base_geometry = Point(self.position).buffer(self.size)
         else:
-            if self.shape == Shape.TRIANGLE_EQ:
+            if self.shape == Shape.triangle:
                 angle_list = [-30, 90, 210]
-            elif self.shape == Shape.SQUARE:
+            elif self.shape == Shape.square:
                 angle_list = [-45, 45, 135, 225]
-            elif self.shape == Shape.PENTAGON:
+            elif self.shape == Shape.pentagon:
                 angle_list = [-54 + 72 * x for x in range(5)]
-            elif self.shape == Shape.HEXAGON:
+            elif self.shape == Shape.hexagon:
                 angle_list = [60 * x for x in range(6)]
 
             vertices = [None] * (len(angle_list))
@@ -158,7 +158,7 @@ class SimpleShape(Entity):
         return self.base_geometry.exterior.coords
 
     def get_attach_point(self) -> np.ndarray:
-        if self.shape == Shape.CIRCLE:
+        if self.shape == Shape.circle:
             rand_rad = random.random() * 2 * math.pi
             return self.position + self.size * np.array(
                 [math.cos(rand_rad), math.sin(rand_rad)]

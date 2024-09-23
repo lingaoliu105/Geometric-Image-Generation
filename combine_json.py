@@ -18,14 +18,10 @@ def find_category_id_by_name(name: str, categories):
     # use non-case-sensitive comparison
     name = name.replace("_", "")
     catid = next(
-        (
-            x["id"]
-            for x in categories
-            if x["name"].lower()==name.lower()
-        ),
+        (x["id"] for x in categories if x["name"].lower() == name.lower()),
         None,
-    )    
-    if catid==None:
+    )
+    if catid == None:
         catid = next(
             (
                 x["id"]
@@ -65,10 +61,12 @@ def calc_relative_category(
 ):
     assert issubclass(category, Enum)
     enum_list = list(category)
-    if issubclass(category,img_params.VerticalPosition): # vertical position is ranked from high to low so need to reverse
+    if issubclass(
+        category, img_params.VerticalPosition
+    ):  # vertical position is ranked from high to low so need to reverse
         enum_list.reverse()
     num_cats = len(enum_list)
-    nums = [x / (num_cats+1) for x in range(1,num_cats+1)]
+    nums = [x / (num_cats + 1) for x in range(1, num_cats + 1)]
 
     item = enum_list[
         nums.index(
@@ -80,8 +78,8 @@ def calc_relative_category(
             )
         )
     ]
-    if issubclass(category,img_params.HorizontalPosition):
-        print((actual - lower_bound) / (upper_bound - lower_bound),",", item)
+    # if issubclass(category, img_params.HorizontalPosition):
+    #     print((actual - lower_bound) / (upper_bound - lower_bound), ",", item)
     return item
 
 
@@ -94,10 +92,22 @@ def format_shape_annotations(
     vertices = transform_coordinate(shape["position"]) + [2]
     segmentation = []
     coordinates = shape["base_geometry"]["coordinates"][0]
+    polygon_shapes = [
+        "triangle",
+        "square",
+        "rectangle",
+        "pentagon",
+        "hexagon",
+        "heptagon",
+        "octagon",
+        "nonagon",
+        "decagon",
+    ]
     for coordinate in coordinates[:-1]:
         transformed_coord = transform_coordinate(coordinate)
-        vertices += transformed_coord
-        vertices.append(2)
+        if shape["shape"] in polygon_shapes:
+            vertices += transformed_coord
+            vertices.append(2)
         segmentation += transformed_coord
     bbox = calc_bbox(segmentation)
 
@@ -193,12 +203,13 @@ def format_joint_annotation(joint):
         "id": get_annotation_id(),
         "image_id": image_id,
         "category_id": category_id,
-        "keypoints": keypoints,
+        # "keypoints": keypoints,
         "segmentation": [segmentation],
         "bbox": calc_bbox(segmentation),
     }
 
     return joint_annotation
+
 
 generate_num = 1
 if len(sys.argv) > 1 and sys.argv[1]:
@@ -251,4 +262,3 @@ labels_dict["categories"] = categories
 
 with open("./my_dataset/labels.json", "w") as json_file:
     json.dump(labels_dict, json_file, indent=4)
-

@@ -70,7 +70,7 @@ def generate_composite_image_nested(outer_size = 20.0,recur_depth = 2)->list[Sim
         shape_list = []
         outer_shape = SimpleShape(np.array([0.0,0.0]),rotation,size=outer_size/2.0)
         shape_list.append(outer_shape)
-        if outer_shape.shape == img_params.Shape.TRIANGLE_EQ:
+        if outer_shape.shape == img_params.Shape.triangle:
             shrink_ratio = 0.6
         else:
             shrink_ratio = 0.8

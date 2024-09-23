@@ -36,10 +36,10 @@ class TikzConverter:
                 func_router[attr](getattr(shape, attr))
 
         if shape.shape in [
-            Shape.TRIANGLE_EQ,
-            Shape.SQUARE,
-            Shape.PENTAGON,
-            Shape.HEXAGON,
+            Shape.triangle,
+            Shape.square,
+            Shape.pentagon,
+            Shape.hexagon,
         ]:
             sides = shape.shape.value
             return (
@@ -52,7 +52,7 @@ class TikzConverter:
                 f"inner sep=0pt,{self.outline_color_str+self.outline_lightness_str},rotate={shape.rotation},{self.pattern_str},"
                 f"{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] at ({shape.position[0]},{shape.position[1]}) {{}};\n"
             )
-        elif shape.shape == Shape.CIRCLE:
+        elif shape.shape == Shape.circle:
             return (
                 f"\draw [{self.color_str+self.lightness_str}]"
                 f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"

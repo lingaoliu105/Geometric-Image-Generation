@@ -44,9 +44,9 @@ class TouchingPoint(Entity):
         self.attach_type_B,self.attach_position_B = self.compute_neighbor_relation(self.neighbor_B)
 
     def compute_neighbor_relation(self,neighbor:SimpleShape)->Tuple[img_params.AttachType,img_params.AttachPosition]:
-        if neighbor.shape==img_params.Shape.CIRCLE:
+        if neighbor.shape==img_params.Shape.circle:
             return (img_params.AttachType.ARC,img_params.AttachPosition.NA)
-        elif neighbor.shape in [img_params.Shape.TRIANGLE_EQ,img_params.Shape.SQUARE,img_params.Shape.PENTAGON,img_params.Shape.HEXAGON]:
+        elif neighbor.shape in [img_params.Shape.triangle,img_params.Shape.square,img_params.Shape.pentagon,img_params.Shape.hexagon]:
             # first check if the point is on corner
             neighbor_vertices = neighbor.base_geometry.exterior.coords
             buffered_point = Point(self.position).buffer(0.01)

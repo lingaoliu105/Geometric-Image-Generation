@@ -7,11 +7,26 @@ class Shape(
     Enum
 ):  # representing categories under A_type, value normally indicates the number of edges
     LINE = 0
-    CIRCLE = 1
-    TRIANGLE_EQ = 3
-    SQUARE = 4
-    PENTAGON = 5
-    HEXAGON = 6
+    circle = 1
+    triangle = 3
+    square = 4
+    pentagon = 5
+    hexagon = 6
+    # dot = 
+    # linesegment =
+    # triangle =
+    # square =
+    # rectangle =
+    # pentagon =
+    # hexagon =
+    # heptagon =
+    # octagon =
+    # nonagon =
+    # decagon =
+    # circle =
+    # ellipse =
+    # star =
+    # diamond =
 
 
 class Color(Enum):  # color from white to black, 9 levels

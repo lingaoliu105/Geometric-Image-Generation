@@ -215,11 +215,63 @@ sup_to_cat = {
     ],
 }
 
+skeletons = {
+    "triangle": {
+        "keypoints": ["center", "p1", "p2", "p3"],
+        "skeleton": [[1, 2], [1, 3], [1, 4]],
+    },
+    "square": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4"],
+        "skeleton": [[1, 2], [1, 3], [1, 4], [1, 5]],
+    },
+    "rectangle": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4"],
+        "skeleton": [[1, 2], [1, 3], [1, 4], [1, 5]],
+    },
+    "pentagon": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4", "p5"],
+        "skeleton": [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6]],
+    },
+    "hexagon": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4", "p5", "p6"],
+        "skeleton": [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7]],
+    },
+    "heptagon": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4", "p5", "p6", "p7"],
+        "skeleton": [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8]],
+    },
+    "octagon": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4", "p5", "p6", "p7"],
+        "skeleton": [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8]],
+    },
+    "nonagon": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"],
+        "skeleton": [[1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7], [1, 8], [1, 9]],
+    },
+    "decagon": {
+        "keypoints": ["center", "p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8", "p9"],
+        "skeleton": [
+            [1, 2],
+            [1, 3],
+            [1, 4],
+            [1, 5],
+            [1, 6],
+            [1, 7],
+            [1, 8],
+            [1, 9],
+            [1, 10],
+        ],
+    },
+}
+
 cats_list = []
 get_category_id = (x for x in range(10000)).__next__
 for supcat in sup_to_cat:
     cats = sup_to_cat[supcat]
-    for cat in cats:
-        cats_list.append({"id":get_category_id(),"name":cat,"supercategory":supcat})
-with open("./categories.json","w") as j:
-    json.dump(cats_list,j,indent=4)
+    for cat_name in cats:
+        cat_obj = {"id": get_category_id(), "name": cat_name, "supercategory": supcat}
+        if cat_name in skeletons:
+            cat_obj |= skeletons[cat_name]  # merge dicts
+        cats_list.append(cat_obj)
+with open("./categories.json", "w") as j:
+    json.dump(cats_list, j, indent=4)
