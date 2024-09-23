@@ -173,3 +173,31 @@ class OutlineThickness(Enum):
     thick = 5
     veryThick = 6
     ultraThick = 7
+
+class HorizontalPosition(Enum):
+    """Given a single entity, this supercategory represents the horizontal position
+    of that entity, relative to the panel that the entity belongs to
+    """
+    left=0
+    nearLeft=1
+    leftwards=2
+    slightlyLeftwards=3
+    horizontalMiddle=4
+    slightlyRightwards=5
+    rightwards=6
+    nearRight=7
+    right=8
+
+class  VerticalPosition(Enum):
+    """Given a single entity, this supercategory represents the vertical position of
+    that entity, relative to the panel that the entity belongs to.
+    """
+    top=0
+    nearTop=1
+    high=2
+    slightlyHigher=3
+    verticalMiddle=4
+    slightlyLower=5
+    low=6
+    nearBottom=7
+    bottom=8
