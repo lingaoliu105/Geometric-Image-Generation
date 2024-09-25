@@ -1,0 +1,7 @@
+9.25:
+1. darker outline, lighter inside, use non uniform (beta) distribution
+2. different outline and inner color
+3. black and white version
+4. random number of entities (beta dist to choose number)
+5. try how to make different pattern for overlaps
+6. try variation on curve (or distribution)
