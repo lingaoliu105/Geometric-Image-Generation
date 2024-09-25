@@ -203,6 +203,8 @@ class SimpleShape(Entity):
                 upper = mid
             else:
                 lower = mid
+                
+        assert (self.size>0.1)
 
     def search_touching_rotation(self, other: "SimpleShape"):
         self.size = 10000

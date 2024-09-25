@@ -93,26 +93,33 @@ def generate_composite_image_chaining(position, rotation,panel_top_left,panel_bo
     ]  # the set of all centers of the element shapes
 
     shapes = [] # stack of shapes
-    for i in range(element_num):
-        
-        # skip if current center is already covered by the previous shape
-        if len(shapes) > 0 and shapely.Point(chain[i]).within(shapes[-1].base_geometry):
-            continue
-        
-        element_rotation = get_random_rotation()
-        if i == 0:
-            element_size = get_point_distance(chain[0], chain[1]) * (random.random()/2+0.25)
-        else:
-            element_size = get_point_distance(chain[i], chain[i - 1]) * 2
-        element = SimpleShape(
-            position=chain[i],
-            rotation=element_rotation,
-            size=element_size,
-            excluded_shapes_set=set([img_params.Shape.LINE]),
-        )  # exclude lines for now
-        shapes.append(element)
-        if i != 0:
-            element.search_touching_size(shapes[i - 1])
+    
+    flag = True
+    while flag:
+        try:
+            for i in range(element_num):
+                
+                # skip if current center is already covered by the previous shape
+                if len(shapes) > 0 and shapely.Point(chain[i]).within(shapes[-1].base_geometry):
+                    continue
+                
+                element_rotation = get_random_rotation()
+                if i == 0:
+                    element_size = get_point_distance(chain[0], chain[1]) * (random.random()/2+0.25)
+                else:
+                    element_size = get_point_distance(chain[i], chain[i - 1]) * 2
+                element = SimpleShape(
+                    position=chain[i],
+                    rotation=element_rotation,
+                    size=element_size,
+                    excluded_shapes_set=set([img_params.Shape.LINE]),
+                )  # exclude lines for now
+                shapes.append(element)
+                if i != 0:
+                    element.search_touching_size(shapes[i - 1])
+            flag = False
+        except AssertionError:
+            shapes.clear()
     
     touching_points = []
     for i,shape in enumerate(shapes):
