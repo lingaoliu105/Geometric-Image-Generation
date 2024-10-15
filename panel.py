@@ -1,5 +1,5 @@
-from SimpleShape import SimpleShape
-from TouchingPoint import TouchingPoint
+from simple_shape import SimpleShape
+from touching_point import TouchingPoint
 
 class Panel():
     def __init__(self,top_left:list[float],bottom_right:list[float],shapes:SimpleShape,joints:TouchingPoint) -> None:

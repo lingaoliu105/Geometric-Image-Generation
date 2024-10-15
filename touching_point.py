@@ -4,13 +4,13 @@ import math
 
 import numpy as np
 
-from SimpleShape import SimpleShape
+from simple_shape import SimpleShape
 
 from shapely_helpers import *
 
 import img_params
 from typing import Tuple
-from Entity import Entity
+from entity import Entity
 
 
 class TouchingPoint(Entity):

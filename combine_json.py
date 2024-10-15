@@ -4,7 +4,7 @@ import sys
 from PIL import Image
 from matplotlib.pyplot import xkcd
 
-from SimpleShape import SimpleShape
+from simple_shape import SimpleShape
 import img_params
 
 

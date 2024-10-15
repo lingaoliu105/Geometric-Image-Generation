@@ -1,4 +1,5 @@
 from typing import Optional
+import generation_config
 from img_params import *
 import math
 import random
@@ -9,7 +10,9 @@ from shapely.geometry import Point, LineString, Polygon
 from shapely.geometry.base import BaseGeometry
 import json
 import uid_service
-from Entity import Entity
+from entity import Entity
+from util import choose_param_with_beta
+
 
 
 class SimpleShape(Entity):
@@ -68,26 +71,30 @@ class SimpleShape(Entity):
         self.color = (
             color if color is not None else random.choice(list(img_params.Color))
         )
+        if generation_config.GenerationConfig.color_mode=="mono":
+            self.color = img_params.Color.black
         self.pattern = (
             pattern if pattern is not None else random.choice(list(img_params.Pattern))
         )
         self.pattern_lightness = (
             pattern_lightness
             if pattern_lightness is not None
-            else random.choice(list(img_params.PatternLightness))
+            else choose_param_with_beta(0.3, img_params.Lightness)
         )
         self.pattern_color = (
             pattern_color
             if pattern_color is not None
             else random.choice(list(img_params.PattenColor))
         )
+        if generation_config.GenerationConfig.color_mode=="mono":
+            self.pattern_color = img_params.PattenColor.patternBlack
         self.outline = (
             outline if outline is not None else random.choice(list(img_params.Outline))
         )
-        self.outline_color = (
+        self.outline_color = (            
             outline_color
             if outline_color is not None
-            else random.choice(list(img_params.OutlineColor))
+            else self.get_available_outline_color()
         )
         self.outline_thickness = (
             outline_thickness
@@ -97,7 +104,7 @@ class SimpleShape(Entity):
         self.outline_lightness = (
             outline_lightness
             if outline_lightness is not None
-            else random.choice(list(img_params.OutlineLightness))
+            else choose_param_with_beta(0.8, img_params.OutlineLightness)
         )
         self.lightness = (
             lightness
@@ -106,6 +113,16 @@ class SimpleShape(Entity):
         )
 
         self.compute_base_geometry()
+        
+    def get_available_outline_color(self):
+        available_outline_colors = list(img_params.OutlineColor)
+        if self.color != None:
+            for color_item in available_outline_colors:
+                if color_item.name.lower().endswith(self.color.name.lower()):
+                    available_outline_colors.remove(color_item)
+
+        return random.choice(available_outline_colors)
+            
 
     def compute_base_geometry(self):
         rot_rad = math.radians(self.rotation)

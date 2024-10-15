@@ -1,5 +1,7 @@
 GEN_NUM = 10
 
+COLOR_MODE = colored
+
 # latex源文件目录
 SRC_DIR = output_tex
 
@@ -30,7 +32,7 @@ dir:
 	mkdir -p $(JSON_DIR)
 
 tex: dir gen_rand_tikz.py
-	python gen_rand_tikz.py $(GEN_NUM)
+	python gen_rand_tikz.py $(GEN_NUM) $(COLOR_MODE)
 
 $(OBJ_DIR)/%.pdf : $(SRC_DIR)/%.tex
 	pdflatex -interaction=batchmode -output-directory=$(OBJ_DIR) $<

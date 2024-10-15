@@ -2,12 +2,13 @@ import json
 import random
 from jinja2 import Environment, FileSystemLoader
 
-from Panel import Panel
-from TouchingPoint import TouchingPoint
+import generation_config
+from panel import Panel
+from touching_point import TouchingPoint
 from convert_tikz import *
 import img_params
 import sys
-from SimpleShape import SimpleShape
+from simple_shape import SimpleShape
 import numpy as np
 import shapely
 from util import *
@@ -149,7 +150,10 @@ def main(n):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1 and sys.argv[1]:
-        generate_num = int(sys.argv[1])
+    if len(sys.argv) > 1 :
+        if sys.argv[1]:
+            generate_num = int(sys.argv[1])
+        if sys.argv[2]:
+            generation_config.GenerationConfig.color_mode = sys.argv[2]
     for i in range(generate_num):
         main(i)

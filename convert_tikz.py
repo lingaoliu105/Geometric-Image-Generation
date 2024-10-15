@@ -1,7 +1,7 @@
 import re
-from Panel import Panel
+from panel import Panel
 from img_params import *
-from SimpleShape import SimpleShape
+from simple_shape import SimpleShape
 
 
 class TikzConverter:

@@ -1,8 +1,10 @@
+from enum import Enum
 import random
 import numpy as np
 
 import img_params
 
+from scipy.stats import beta
 
 def compute_angle_between_vectors(
     point_out: np.ndarray,
@@ -111,8 +113,47 @@ def get_random_rotation()->int:
 def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
     # Calculate the difference between the points
     diff = point1 - point2
-    
+
     # Compute the Euclidean distance
     distance = np.linalg.norm(diff)
-    
+
     return distance
+
+
+def generate_beta_random_with_mode(mode, alpha, min_val=0.0, max_val=1.0):
+    """
+    根据给定的众数 (mode) 和 α 参数生成 Beta 分布，并返回一个在 [min_val, max_val] 范围内的随机数。
+
+    参数:
+    mode (float): 期望的众数 (0到1之间的某数)
+    alpha (float): Beta 分布的 α 参数 (大于1, 越大越尖)
+    min_val (float): 随机数返回的最小值 (默认是0)
+    max_val (float): 随机数返回的最大值 (默认是1)
+
+    返回:
+    float: 按指定 Beta 分布生成的随机数
+    """
+    if not (0 < mode < 1):
+        raise ValueError("Mode must be between 0 and 1.")
+
+    if alpha <= 1:
+        raise ValueError("Alpha must be greater than 1 for a proper distribution.")
+
+    # 根据众数和α参数反推β参数
+    beta_param = (alpha - 1) * (1 - mode) / mode + 1
+
+    # 生成标准 Beta 分布随机数
+    sample = beta.rvs(alpha, beta_param)
+
+    # 将随机数缩放到 [min_val, max_val] 范围
+    scaled_sample = min_val + sample * (max_val - min_val)
+
+    return scaled_sample
+
+def choose_param_with_beta(mode, param_class, alpha = 2):
+    assert(issubclass(param_class,Enum))
+    rand_num = generate_beta_random_with_mode(mode=mode, alpha=alpha)
+    param_num = len(list(param_class))
+    params_float_list = [i * 1.0/param_num for i in range(param_num)]
+    nearest_index = min([i for i in range(param_num)],key=lambda x: abs(params_float_list[x] - rand_num))
+    return list(param_class)[nearest_index]
