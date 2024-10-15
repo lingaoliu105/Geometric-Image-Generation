@@ -14,7 +14,6 @@ from entity import Entity
 from util import choose_param_with_beta
 
 
-
 class SimpleShape(Entity):
 
     direct_categories = [
@@ -28,7 +27,7 @@ class SimpleShape(Entity):
         "outline_thickness",
         "outline_lightness",
     ]  # attributes that can be directly interpreted as categories in dataset annotations
-    
+
     __slots__ = [
         "uid",
         "shape",
@@ -37,7 +36,7 @@ class SimpleShape(Entity):
         "rotation",
         "base_geometry",
     ] + direct_categories
-    
+
     touching_tolerance = 1e-11
 
     def __init__(
@@ -71,8 +70,6 @@ class SimpleShape(Entity):
         self.color = (
             color if color is not None else random.choice(list(img_params.Color))
         )
-        if generation_config.GenerationConfig.color_mode=="mono":
-            self.color = img_params.Color.black
         self.pattern = (
             pattern if pattern is not None else random.choice(list(img_params.Pattern))
         )
@@ -86,8 +83,7 @@ class SimpleShape(Entity):
             if pattern_color is not None
             else random.choice(list(img_params.PattenColor))
         )
-        if generation_config.GenerationConfig.color_mode=="mono":
-            self.pattern_color = img_params.PattenColor.patternBlack
+
         self.outline = (
             outline if outline is not None else random.choice(list(img_params.Outline))
         )
@@ -112,8 +108,12 @@ class SimpleShape(Entity):
             else random.choice(list(img_params.Lightness))
         )
 
+        if generation_config.GenerationConfig.color_mode == "mono":
+            self.color = img_params.Color.black
+            self.pattern_color = img_params.PattenColor.patternBlack
+            self.outline_color = img_params.OutlineColor.outlineBlack
         self.compute_base_geometry()
-        
+
     def get_available_outline_color(self):
         available_outline_colors = list(img_params.OutlineColor)
         if self.color != None:
@@ -122,7 +122,6 @@ class SimpleShape(Entity):
                     available_outline_colors.remove(color_item)
 
         return random.choice(available_outline_colors)
-            
 
     def compute_base_geometry(self):
         rot_rad = math.radians(self.rotation)
@@ -220,7 +219,7 @@ class SimpleShape(Entity):
                 upper = mid
             else:
                 lower = mid
-                
+
         assert (self.size>0.1)
 
     def search_touching_rotation(self, other: "SimpleShape"):
