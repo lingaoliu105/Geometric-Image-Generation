@@ -22,6 +22,9 @@ OBJS = $(SRCS:$(SRC_DIR)/%.tex=$(OBJ_DIR)/%.pdf)
 
 TARGETS = $(OBJS:$(OBJ_DIR)/%.pdf=$(TARGET_DIR)/%.png)
 
+IS_CONTAINER := $(shell grep -i docker /proc/self/cgroup > /dev/null && echo "true" || echo "false")
+
+
 # 默认目标
 all: dir tex pdf png labels
 
@@ -35,9 +38,18 @@ tex: dir gen_rand_tikz.py
 	python gen_rand_tikz.py $(GEN_NUM) $(COLOR_MODE)
 
 $(OBJ_DIR)/%.pdf : $(SRC_DIR)/%.tex
-	pdflatex -interaction=batchmode -output-directory=$(OBJ_DIR) $<
+
+	@if [ "$(IS_CONTAINER)" = "true" ]; then pdflatex -interaction=batchmode -output-directory=$(OBJ_DIR) $< ; fi
+	
 
 pdf: $(OBJS)
+	@if [ "$(IS_CONTAINER)" = "false" ]; then \
+		echo "Running in WSL environment."; \
+		docker-compose up; \
+	else \
+		echo "Not running in WSL environment."; \
+	fi
+
 
 $(TARGET_DIR)/%.png : $(OBJ_DIR)/%.pdf
 	python convert_image.py $<
