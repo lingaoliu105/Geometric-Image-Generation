@@ -29,7 +29,7 @@ class TouchingPoint(Entity):
         center2 = neighbor2.position
         if center1[0]<center2[0]:
             self.neighbor_A,self.neighbor_B = neighbor1,neighbor2  # convert to uid while serializing
-        elif math.abs(center1[0]-center2[0])<1e-10:
+        elif abs(center1[0]-center2[0])<1e-10:
             if center1[1]>center2[1]:
                 self.neighbor_A,self.neighbor_B = neighbor1,neighbor2
             else:

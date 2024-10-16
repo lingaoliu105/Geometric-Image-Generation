@@ -30,7 +30,7 @@ def generate_panels(composition_type: img_params.Composition, layout:tuple[int,i
         elif composition_type == img_params.Composition.CHAIN:
             # random number of base elements, selected by beta distribution, ranged from 0 to 20
             element_num = ceil(generate_beta_random_with_mode(0.5,2) * 19) + 1
-            panel = generate_composite_image_chaining(position=center, rotation=rot,panel_top_left=top_left,panel_bottom_right=bottom_right,element_num=element_num)
+            panel = generate_composite_image_chaining(position=center, rotation=rot,panel_top_left=top_left,panel_bottom_right=bottom_right,element_num=element_num,chain_shape="circle")
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
         panels.append(panel)
@@ -77,7 +77,8 @@ def generate_composite_image_nested(outer_size = 20.0,recur_depth = 2)->list[Sim
         shape_list += generate_composite_image_nested(outer_size=outer_size*shrink_ratio,recur_depth=recur_depth-1)
         return shape_list
 
-def generate_composite_image_chaining(position, rotation,panel_top_left,panel_bottom_right, element_num=10) -> Panel:
+
+def generate_composite_image_chaining(position, rotation,panel_top_left,panel_bottom_right, element_num=10,chain_shape = "circle") -> Panel:
     """generate a composite geometry entity by chaining simple shapes
 
     Args:
@@ -87,12 +88,19 @@ def generate_composite_image_chaining(position, rotation,panel_top_left,panel_bo
 
     assert(element_num>=2 and element_num <= 20)
     # composite the image first, then shift to the center pos
-    curve_point_set = generate_bezier_curve_single_param(1)
-    step_length = len(curve_point_set) // element_num
-    chain = [
-        curve_point_set[step_length * index]
-        for index in range(element_num)
-    ]  # the set of all centers of the element shapes
+    
+    def get_chain(curve_function):
+        curve_point_set = curve_function()
+        step_length = len(curve_point_set) // element_num
+        chain = [
+            curve_point_set[step_length * index]
+            for index in range(element_num)
+        ]  # the set of all centers of the element shapes
+        return chain
+    if chain_shape=="bezier":
+        chain = get_chain(lambda:generate_bezier_curve_single_param(1))
+    elif chain_shape=="circle":
+        chain = get_chain(lambda:generate_circle_curve(random.randrange(4,8)))
 
     shapes = [] # stack of shapes
     

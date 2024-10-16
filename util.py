@@ -1,6 +1,7 @@
 from enum import Enum
 import random
 import numpy as np
+import shapely
 
 import img_params
 
@@ -108,6 +109,8 @@ def generate_bezier_curve_single_param(curvature:float)->np.ndarray:
     
     return generate_bezier_curve(np.array([-1,0]),np.array([-0.5,curvature]),np.array([0.5,-curvature]),np.array([1,0]),scale=8)
 
+def generate_circle_curve(radius:float)->np.ndarray:
+    return np.array(shapely.Point(0,0).buffer(radius).exterior.coords)
 def get_random_rotation()->int:
     return random.choice(list(img_params.Rotation)).value * random.randint(0, 23)
 def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
