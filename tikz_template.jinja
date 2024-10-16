@@ -8,11 +8,11 @@
 \begin{document}
 
 \begin{tikzpicture}[scale=0.5]
-\draw[->] (-{{canvas_width/2}},0) -- ({{canvas_width/2}},0);
+\draw[->,white] (-{{canvas_width/2}},0) -- ({{canvas_width/2}},0);
 
 % 画 y 轴
-\draw[->] (0,-{{ canvas_height/2 }}) -- (0,{{canvas_height/2}});
-\draw[help lines] (0,0) grid (10,10);
+\draw[->,white] (0,-{{ canvas_height/2 }}) -- (0,{{canvas_height/2}});
+\draw[help lines,white] (0,0) grid (10,10);
 {% for instruction in tikz_instructions %}
 {{instruction}}
 {% endfor %}
