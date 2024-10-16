@@ -1,4 +1,5 @@
 import json
+from math import ceil
 import random
 from jinja2 import Environment, FileSystemLoader
 
@@ -31,7 +32,9 @@ def generate_panels(composition_type: img_params.Composition, layout:tuple[int,i
         if composition_type == img_params.Composition.SIMPLE:
             panel = Panel(top_left=top_left,bottom_right=bottom_right,shapes=[SimpleShape(position=center,rotation=rot)],joints=[])
         elif composition_type == img_params.Composition.CHAIN:
-            panel = generate_composite_image_chaining(position=center, rotation=rot,panel_top_left=top_left,panel_bottom_right=bottom_right)
+            # random number of base elements, selected by beta distribution, ranged from 0 to 20
+            element_num = ceil(generate_beta_random_with_mode(0.5,2) * 19) + 1
+            panel = generate_composite_image_chaining(position=center, rotation=rot,panel_top_left=top_left,panel_bottom_right=bottom_right,element_num=element_num)
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
         panels.append(panel)
@@ -86,11 +89,13 @@ def generate_composite_image_chaining(position, rotation,panel_top_left,panel_bo
         rotation (float): rotation of the overall composite chained shapes in degree
     """
 
+    assert(element_num>=2 and element_num <= 20)
     # composite the image first, then shift to the center pos
     curve_point_set = generate_bezier_curve_single_param(1)
+    step_length = len(curve_point_set) // element_num
     chain = [
-        curve_point_set[element_num * index]
-        for index in range(len(curve_point_set) // element_num)
+        curve_point_set[step_length * index]
+        for index in range(element_num)
     ]  # the set of all centers of the element shapes
 
     shapes = [] # stack of shapes
