@@ -68,4 +68,4 @@ clean:
 	rm -f $(SRC_DIR)/* $(OBJ_DIR)/* $(TARGET_DIR)/* $(JSON_DIR)/*
 
 # PHONY 目标表示这些目标不是实际文件
-.PHONY: all clean
+.PHONY: all clean $(TARGET_DIR)/%.png

@@ -12,6 +12,7 @@ import json
 import uid_service
 from entity import Entity
 from util import choose_param_with_beta
+from generation_config import GenerationConfig
 
 
 class SimpleShape(Entity):
@@ -66,7 +67,17 @@ class SimpleShape(Entity):
                 [x for x in list(img_params.Shape) if x not in excluded_shapes_set]
             )
         )
-        self.size = size if size is not None else (random.random() + 0.25) * 2
+        self.size = (
+            min(
+                size,
+                abs(self.position[0] - GenerationConfig.left_canvas_bound),
+                abs(self.position[0] - GenerationConfig.right_canvas_bound),
+                abs(self.position[1] - GenerationConfig.upper_canvas_bound),
+                abs(self.position[1] - GenerationConfig.lower_canvas_bound),
+            )
+            if size is not None
+            else (random.random() + 0.25) * 2
+        )
         self.color = (
             color if color is not None else random.choice(list(img_params.Color))
         )
@@ -87,7 +98,7 @@ class SimpleShape(Entity):
         self.outline = (
             outline if outline is not None else random.choice(list(img_params.Outline))
         )
-        self.outline_color = (            
+        self.outline_color = (
             outline_color
             if outline_color is not None
             else self.get_available_outline_color()
@@ -220,7 +231,7 @@ class SimpleShape(Entity):
             else:
                 lower = mid
 
-        assert (self.size>0.1)
+        assert self.size > 0.1
 
     def search_touching_rotation(self, other: "SimpleShape"):
         self.size = 10000

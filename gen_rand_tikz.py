@@ -15,10 +15,6 @@ import shapely
 from util import *
 
 
-generate_num = 1
-canvas_width = 20.0
-canvas_height = 20.0
-
 def generate_panels(composition_type: img_params.Composition, layout:tuple[int,int]) -> list[Panel]:
     """combine images of each sub-panel"""
     row_num = layout[0]
@@ -41,13 +37,13 @@ def generate_panels(composition_type: img_params.Composition, layout:tuple[int,i
     return panels
 
 def compute_panel_position(layout:tuple[int,int], index:int):
-    convert = lambda x: [x[0]-canvas_width / 2.0, canvas_height / 2.0 -x[1]]
+    convert = lambda x: [x[0]-generation_config.GenerationConfig.canvas_width / 2.0, generation_config.GenerationConfig.canvas_height / 2.0 -x[1]]
     row_num = layout[0]
     col_num = layout[1]
     panel_row = index // col_num
     panel_col = index % col_num
-    row_height = canvas_height * 1.0 / row_num
-    col_width = canvas_width * 1.0 / col_num
+    row_height = generation_config.GenerationConfig.canvas_height * 1.0 / row_num
+    col_width = generation_config.GenerationConfig.canvas_width * 1.0 / col_num
 
     center_coord = convert(
         [col_width / 2.0 * (panel_col * 2 + 1),row_height / 2.0 * (panel_row * 2 + 1)]
@@ -140,7 +136,7 @@ def main(n):
     template = env.get_template("tikz_template.jinja")
     panels = generate_panels(composition_type=img_params.Composition.CHAIN,layout=(1,1))
     tikz_instructions = convert_panels(panels)
-    context = {"tikz_instructions": tikz_instructions,"canvas_width":canvas_width,"canvas_height":canvas_height}
+    context = {"tikz_instructions": tikz_instructions,"canvas_width":generation_config.GenerationConfig.canvas_width,"canvas_height":generation_config.GenerationConfig.canvas_height}
     output = template.render(context)
 
     
@@ -157,8 +153,8 @@ def main(n):
 if __name__ == "__main__":
     if len(sys.argv) > 1 :
         if sys.argv[1]:
-            generate_num = int(sys.argv[1])
+            generation_config.GenerationConfig.generate_num = int(sys.argv[1])
         if sys.argv[2]:
             generation_config.GenerationConfig.color_mode = sys.argv[2]
-    for i in range(generate_num):
+    for i in range(generation_config.GenerationConfig.generate_num):
         main(i)
