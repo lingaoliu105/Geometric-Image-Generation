@@ -212,8 +212,11 @@ def format_joint_annotation(joint):
 
 
 generate_num = 1
-if len(sys.argv) > 1 and sys.argv[1]:
+if len(sys.argv) >= 2 and sys.argv[1]:
     generate_num = int(sys.argv[1])
+
+if len(sys.argv) >= 3 and sys.argv[2]:
+    file_prefix = sys.argv[2]
 with open("./categories.json", "r") as json_file:
     categories = list(json.load(json_file))
 
@@ -227,17 +230,17 @@ labels_dict = {
 for i in range(generate_num):
     image_id = get_image_id()
     license = {"id": image_id}
-    with Image.open(f"./output_png/new{i}.png") as img:
+    with Image.open(f"./output_png/{file_prefix}{i}.png") as img:
         width, height = img.size
     image = {
         "id": image_id,
         "license": license["id"],
-        "file_name": f"new{i}.png",
+        "file_name": f"{file_prefix}{i}.png",
         "height": height,
         "width": width,
         "date_captured": None,
     }
-    with open(f"./output_json/new{i}.json", "r") as file:
+    with open(f"./output_json/{file_prefix}{i}.json", "r") as file:
         data = json.load(file)
     for panel in data:
         for shape in panel["shapes"]:

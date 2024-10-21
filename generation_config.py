@@ -6,7 +6,7 @@ class GenerationConfig:
     canvas_width: float = 20.0
     canvas_height: float = 20.0
     generate_num: int = 1
-
+    generated_file_prefix:str = ""
     @classmethod
     @property
     def left_canvas_bound(self):

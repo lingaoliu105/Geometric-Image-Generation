@@ -1,5 +1,7 @@
 GEN_NUM = 10
 
+GEN_FILE_PREFIX = new-
+
 COLOR_MODE = colored
 
 # latex源文件目录
@@ -16,16 +18,13 @@ JSON_DIR = output_json
 
 DATASET_DIR=  my_dataset
 
-TEXES = $(wildcard $(TEX_DIR)/*.tex)
-
-PDFS = $(TEXES:$(TEX_DIR)/%.tex=$(PDF_DIR)/%.pdf)
-
-PNGS = $(PDFS:$(PDF_DIR)/%.pdf=$(PNG_DIR)/%.png)
+NUMS = $(shell seq 0 $(shell expr $(GEN_NUM) - 1))
+TEX_FILES = $(foreach n,$(NUMS),$(TEX_DIR)/$(GEN_FILE_PREFIX)$(n).tex)
+PDF_FILES = $(foreach n,$(NUMS),$(PDF_DIR)/$(GEN_FILE_PREFIX)$(n).pdf)
+PNG_FILES = $(foreach n,$(NUMS),$(PNG_DIR)/$(GEN_FILE_PREFIX)$(n).png)
 
 IS_CONTAINER := $(shell grep -i docker /proc/self/cgroup > /dev/null && echo "true" || echo "false")
 
-
-# 默认目标
 all: dir tex pdf png labels
 
 dir:
@@ -35,14 +34,12 @@ dir:
 	mkdir -p $(JSON_DIR)
 
 tex: dir gen_rand_tikz.py
-	python gen_rand_tikz.py $(GEN_NUM) $(COLOR_MODE)
+	python gen_rand_tikz.py $(GEN_NUM) $(COLOR_MODE) $(GEN_FILE_PREFIX)
 
 $(PDF_DIR)/%.pdf : $(TEX_DIR)/%.tex
-
 	@if [ "$(IS_CONTAINER)" = "true" ]; then pdflatex -interaction=batchmode -output-directory=$(PDF_DIR) $< ; fi
 	
-
-pdf: $(PDFS)
+pdf: $(PDF_FILES)
 	@if [ "$(IS_CONTAINER)" = "false" ]; then \
 		echo "Running in WSL environment."; \
 		docker-compose up; \
@@ -52,14 +49,13 @@ pdf: $(PDFS)
 
 
 $(PNG_DIR)/%.png : $(PDF_DIR)/%.pdf
-	echo "convert"
 	python convert_image.py $<
 
-png: $(TARGETS)
+png: $(PNG_FILES)
 	cp $(PNG_DIR)/* $(DATASET_DIR)/data
 
 labels:
-	python combine_json.py $(GEN_NUM)
+	python combine_json.py $(GEN_NUM) $(GEN_FILE_PREFIX)
 
 show:
 	python dataset_visualization.py
@@ -69,4 +65,4 @@ clean:
 	rm -f $(TEX_DIR)/* $(PDF_DIR)/* $(PNG_DIR)/* $(JSON_DIR)/*
 
 # PHONY 目标表示这些目标不是实际文件
-.PHONY: all clean $(PNGS)
+.PHONY: all clean 
