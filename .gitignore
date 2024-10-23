@@ -173,3 +173,6 @@ output_json/
 help/
 
 *dataset/
+
+#no need to keep track of test.py, where i write temporary codes
+test.py
