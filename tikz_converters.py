@@ -1,14 +1,23 @@
 import re
-from panel import Panel
+import entity
 from img_params import *
-from simple_shape import SimpleShape
+from abc import ABC, abstractmethod
 
-
-class TikzConverter:
-
+class BaseConverter: # enclose in classes to store temporary strings that makes the tikz strings
     def __init__(self) -> None:
         self.color_str = ""
         self.lightness_str = ""
+        
+    def partition_camel_case(self,string):
+        return re.sub(r"([a-z])([A-Z])", r"\1 \2", string).lower()
+    
+    @abstractmethod
+    def convert(self,target:entity.Entity):
+        pass
+        
+class SimpleShapeConverter(BaseConverter):
+    def __init__(self) -> None:
+        super().__init__()
         self.pattern_str = ""
         self.pattern_color_str = ""
         self.pattern_lightness_str = ""
@@ -17,7 +26,7 @@ class TikzConverter:
         self.outline_thickness_str = ""
         self.outline_lightness_str = ""
 
-    def convert(self, shape: SimpleShape):
+    def convert(self, shape):
 
         func_router = {
             "pattern": self.get_pattern_tikz_string,
@@ -62,8 +71,7 @@ class TikzConverter:
                 f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
             )
 
-    def partition_camel_case(self,string):
-        return re.sub(r"([a-z])([A-Z])", r"\1 \2", string).lower()
+
     def get_pattern_tikz_string(self, pattern: Pattern):
         if pattern==Pattern.blank:
             return
@@ -104,17 +112,25 @@ class TikzConverter:
             return
         self.outline_thickness_str = f"line width={outline_thickness.value*0.1}mm"
 
-
-def convert_shapes(input_shapes: list[SimpleShape], show_center: bool) -> list[str]:
+class LineSegmentConverter(BaseConverter):
+    def __init__(self) -> None:
+        super().__init__()
+        
+    def convert(self, target):
+        tikz = f"\draw[color={target.color.name.lower()}] ({target.endpt_lu[0]},{target.endpt_lu[1]}) -- ({target.endpt_rd[0]},{target.endpt_rd[1]});"
+        return tikz
+        
+    
+def convert_shapes(input_shapes, show_center: bool) -> list[str]:
     instructions = []
     for shape in input_shapes:
-        converter = TikzConverter()
+        converter = SimpleShapeConverter()
         instructions.append(converter.convert(shape))
 
     return instructions
 
 
-def convert_panels(panels: list[Panel]) -> list[str]:
+def convert_panels(panels) -> list[str]:
     instructions = []
     for panel in panels:
         instructions += convert_shapes(panel.shapes, False)

@@ -30,7 +30,7 @@ class Shape(
 
 
 class Color(Enum):  # color from white to black, 9 levels
-    white = 0
+    # white = 0
     black = 1
     red = 2
     green = 3

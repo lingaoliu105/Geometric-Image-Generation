@@ -5,10 +5,17 @@ import numpy as np
 import shapely
 from shapely.geometry.base import BaseGeometry
 
+import uid_service
 
-class Entity():
+from abc import ABC, abstractmethod
 
 
+class Entity(ABC):
+
+    def __init__(self,tikz_converter) -> None:
+        self.uid = uid_service.get_new_entity_uid()
+        assert tikz_converter is not None
+        self.tikz_converter  = tikz_converter
     def to_dict(self):
         dict = {slot: getattr(self, slot) for slot in self.__slots__}
         for key in dict:
@@ -27,3 +34,8 @@ class Entity():
                 dict[key] = value
 
         return dict
+    
+    def to_tikz(self)->str:
+        return self.tikz_converter.convert(self)
+    
+

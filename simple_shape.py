@@ -9,6 +9,7 @@ import img_params
 from shapely.geometry import Point, LineString, Polygon
 from shapely.geometry.base import BaseGeometry
 import json
+from tikz_converters import SimpleShapeConverter
 import uid_service
 from entity import Entity
 from util import choose_param_with_beta
@@ -57,7 +58,7 @@ class SimpleShape(Entity):
         outline_thickness=None,
         excluded_shapes_set: set = {},
     ) -> None:
-        self.uid = uid_service.get_id_simple_shape()
+        super().__init__(tikz_converter=SimpleShapeConverter())
         self.position = position
         self.rotation = rotation
         self.shape = (
