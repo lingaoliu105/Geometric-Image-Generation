@@ -7,13 +7,13 @@ from typing import List, Literal
 from jinja2 import Environment, FileSystemLoader
 
 import generation_config
-from line_segment import LineSegment
+from entities.line_segment import LineSegment
 from panel import Panel
-from touching_point import TouchingPoint
+from entities.touching_point import TouchingPoint
 from tikz_converters import *
 import img_params
 import sys
-from simple_shape import SimpleShape
+from entities.simple_shape import SimpleShape
 import numpy as np
 import shapely
 from util import *
@@ -184,7 +184,7 @@ def generate_composite_image_chaining(
     )
     
 
-def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal["orthogonal","random"] = "orthogonal") -> List[LineSegment]:
+def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal["orthogonal","random"] = "random") -> List[LineSegment]:
     init = np.array([0.0,0.0])
     output_line_segments = []
     left_bound, right_bound,upper_bound, lower_bound = init[0],init[0],init[1],init[1]
@@ -216,6 +216,19 @@ def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal
         l.shift(offset)
     return output_line_segments
 
+def generate_comb_line_segments(position,num_teeth = 8) -> List[LineSegment]:
+    mid_string = LineSegment([-5,0],[5,0])
+    output_line_segs = []
+    fractions = sorted([random.random() for _ in range(num_teeth)])
+    intersection_points = [mid_string.find_fraction_point(f) for f in fractions]
+    for pt in intersection_points:
+        other_pt = get_rand_point()
+        new_ls = LineSegment(pt,other_pt,color=img_params.Color.black)
+        output_line_segs.append(new_ls)
+    # left_bound,right_bound,lower_bound,upper_bound = 
+    return output_line_segs
+    
+
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
@@ -223,7 +236,7 @@ def main(n):
     #     composition_type=img_params.Composition.CHAIN, layout=(1, 1)
     # )
     # tikz_instructions = convert_panels(panels)
-    tikz_instructions = [line.to_tikz() for line in generate_consecutive_line_segments(position=(0,0))]
+    tikz_instructions = [line.to_tikz() for line in generate_comb_line_segments(position=(0,0))]
     context = {
         "tikz_instructions": tikz_instructions,
         "canvas_width": generation_config.GenerationConfig.canvas_width,

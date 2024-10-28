@@ -4,16 +4,16 @@ import math
 
 import numpy as np
 
-from simple_shape import SimpleShape
+from entities.simple_shape import SimpleShape
 
 from shapely_helpers import *
 
 import img_params
 from typing import Tuple
-from entity import Entity
+from entities.entity import Entity, Relationship
 
 
-class TouchingPoint(Entity):
+class TouchingPoint(Relationship):
     __slots__ = [
         "position",
         "neighbor_A",  # how to order A and B: compare left/right first, left is A right is B,if same, up is A, down is B

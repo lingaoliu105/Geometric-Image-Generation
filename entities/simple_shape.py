@@ -11,12 +11,12 @@ from shapely.geometry.base import BaseGeometry
 import json
 from tikz_converters import SimpleShapeConverter
 import uid_service
-from entity import Entity
+from entities.entity import ClosedShape, Entity
 from util import choose_param_with_beta
 from generation_config import GenerationConfig
 
 
-class SimpleShape(Entity):
+class SimpleShape(ClosedShape):
 
     direct_categories = [
         "pattern",

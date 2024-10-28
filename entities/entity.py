@@ -1,3 +1,6 @@
+'''
+This file defines the abstract class for the entities' hierachy
+'''
 from enum import Enum
 import json
 
@@ -37,5 +40,17 @@ class Entity(ABC):
     
     def to_tikz(self)->str:
         return self.tikz_converter.convert(self)
+    
+class Relationship(Entity,ABC):
+    pass
+    
+class VisibleShape(Entity,ABC):
+    pass
+
+class ClosedShape(VisibleShape):
+    pass
+
+class OpenShape(VisibleShape):
+    pass
     
 

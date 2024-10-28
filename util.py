@@ -1,8 +1,10 @@
 from enum import Enum
 import random
+from typing import List
 import numpy as np
 import shapely
 
+import generation_config
 import img_params
 
 from scipy.stats import beta
@@ -160,3 +162,32 @@ def choose_param_with_beta(mode, param_class, alpha = 2):
     params_float_list = [i * 1.0/param_num for i in range(param_num)]
     nearest_index = min([i for i in range(param_num)],key=lambda x: abs(params_float_list[x] - rand_num))
     return list(param_class)[nearest_index]
+
+def get_rand_point():
+    """get a random point in the range of the canvas"""
+    x = random.uniform(generation_config.GenerationConfig.left_canvas_bound,generation_config.GenerationConfig.right_canvas_bound)
+    y = random.uniform(generation_config.GenerationConfig.lower_canvas_bound,generation_config.GenerationConfig.upper_canvas_bound)
+    return [x,y]
+
+
+def rotate_point(x, y, x0, y0, theta):
+    """
+    旋转单个点 (x, y) 绕旋转中心 (x0, y0) 旋转角度 theta.
+    """
+    # 将角度转换为弧度
+    theta_rad = np.radians(theta)
+
+    # 平移到旋转中心
+    x_shifted = x - x0
+    y_shifted = y - y0
+
+    # 应用旋转矩阵
+    x_rotated = x_shifted * np.cos(theta_rad) - y_shifted * np.sin(theta_rad)
+    y_rotated = x_shifted * np.sin(theta_rad) + y_shifted * np.cos(theta_rad)
+
+    # 平移回原位置
+    x_final = x_rotated + x0
+    y_final = y_rotated + y0
+
+    return x_final, y_final
+

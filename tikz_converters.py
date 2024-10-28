@@ -1,5 +1,5 @@
 import re
-import entity
+import entities.entity as entity
 from img_params import *
 from abc import ABC, abstractmethod
 

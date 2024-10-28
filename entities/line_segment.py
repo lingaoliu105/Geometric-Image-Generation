@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from entity import Entity
+from entities.entity import Entity, OpenShape
 from typing import Optional, Union
 
 import generation_config
@@ -9,7 +9,7 @@ from tikz_converters import LineSegmentConverter
 from uid_service import get_new_entity_uid
 
 
-class LineSegment(Entity):
+class LineSegment(OpenShape):
     direct_categories = [
         "color",
         "lightness",
@@ -71,8 +71,9 @@ class LineSegment(Entity):
             )
             self.endpt_rd = np.array([r, d])
         else:
-            self.endpt_lu = np.array(lu)
-            self.endpt_rd = np.array(rd)
+            comp_key = lambda p: (p[0], -p[1])
+            self.endpt_lu = np.array(min(lu, rd, key=comp_key))
+            self.endpt_rd = np.array(max(lu, rd, key=comp_key))
 
         self.color = (
             color if color is not None else random.choice(list(img_params.Color))
@@ -86,5 +87,6 @@ class LineSegment(Entity):
     def shift(self,offset:np.ndarray):
         self.endpt_lu += offset
         self.endpt_rd+= offset
-        
 
+    def find_fraction_point(self, fraction:float):
+        return self.endpt_lu + (self.endpt_rd-self.endpt_lu) * fraction
