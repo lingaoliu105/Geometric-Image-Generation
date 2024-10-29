@@ -48,7 +48,7 @@ def generate_panels(
                 panel_top_left=top_left,
                 panel_bottom_right=bottom_right,
                 element_num=element_num,
-                chain_shape="bezier",
+                chain_shape="line",
             )
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
@@ -109,7 +109,7 @@ def generate_composite_image_nested(
 
 
 def generate_composite_image_chaining(
-    position, panel_top_left, panel_bottom_right, element_num=10, chain_shape="circle"
+    position, panel_top_left, panel_bottom_right, element_num=10, chain_shape="circle", interval:float = 1.0
 ) -> Panel:
     """generate a composite geometry entity by chaining simple shapes
 
@@ -133,6 +133,8 @@ def generate_composite_image_chaining(
         chain = get_chain(lambda: generate_bezier_curve_single_param(1))
     elif chain_shape == "circle":
         chain = get_chain(lambda: generate_circle_curve(random.randrange(4, 8)))
+    elif chain_shape =="line":
+        chain = get_chain(lambda:get_points_on_line((-5.0,5.0),(5.0,-5.0)))
     else:
         print("curve type not assigned")
         raise
@@ -189,7 +191,7 @@ def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal
     output_line_segments = []
     left_bound, right_bound,upper_bound, lower_bound = init[0],init[0],init[1],init[1]
     direction = -1
-    for i in range (num_lines):
+    for _ in range (num_lines):
         if mode=="orthogonal":
             direction = random.choice([x for x in [0,90,180,270] if x!=direction])
         elif mode=="random":
@@ -206,6 +208,8 @@ def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal
         if end[1]>upper_bound:
             upper_bound = end[1]
         comp_key = lambda p: (p[0], -p[1])
+        print(init)
+        print(end)
         line_seg = LineSegment(pt1 = min(init,end,key=comp_key),pt2 = max(init,end,key=comp_key))
         output_line_segments.append(line_seg)
         init = end
@@ -232,11 +236,11 @@ def generate_comb_line_segments(position,num_teeth = 8) -> List[LineSegment]:
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
-    # panels = generate_panels(
-    #     composition_type=img_params.Composition.CHAIN, layout=(1, 1)
-    # )
-    # tikz_instructions = convert_panels(panels)
-    tikz_instructions = [line.to_tikz() for line in generate_comb_line_segments(position=(0,0))]
+    panels = generate_panels(
+        composition_type=img_params.Composition.CHAIN, layout=(1, 1)
+    )
+    tikz_instructions = convert_panels(panels)
+    # tikz_instructions = [line.to_tikz() for line in generate_consecutive_line_segments(position=(0,0))]
     context = {
         "tikz_instructions": tikz_instructions,
         "canvas_width": generation_config.GenerationConfig.canvas_width,
@@ -250,17 +254,17 @@ def main(n):
     with open(f"./output_tex/{latex_filename}", "w", encoding="utf-8") as f:
         f.write(output)
 
-    # json_filename = (
-    #     f"{generation_config.GenerationConfig.generated_file_prefix}{n}.json"
-    # )
-    # with open(f"./output_json/{json_filename}", "w", encoding="utf-8") as f:
-    #     # json.dump([item.to_dict() for item in panels],f,indent=4)
-    #     json.dump(
-    #         [panel.__dict__ for panel in panels],
-    #         f,
-    #         indent=4,
-    #         default=lambda x: x.to_dict(),
-    #     )
+    json_filename = (
+        f"{generation_config.GenerationConfig.generated_file_prefix}{n}.json"
+    )
+    with open(f"./output_json/{json_filename}", "w", encoding="utf-8") as f:
+        # json.dump([item.to_dict() for item in panels],f,indent=4)
+        json.dump(
+            [panel.__dict__ for panel in panels],
+            f,
+            indent=4,
+            default=lambda x: x.to_dict(),
+        )
 
 
 if __name__ == "__main__":

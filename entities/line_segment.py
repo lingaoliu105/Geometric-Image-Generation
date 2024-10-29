@@ -14,7 +14,6 @@ from util import get_rand_point, rotate_point
 from shapely.affinity import translate
 
 
-
 class LineSegment(OpenShape):
     direct_categories = [
         "color",
@@ -25,7 +24,7 @@ class LineSegment(OpenShape):
         "uid",
         "base_geometry",
     ] + direct_categories
-    
+
     endpt_comp_key = lambda p: (p[0], -p[1])
 
     def __init__(
@@ -54,40 +53,39 @@ class LineSegment(OpenShape):
             if lightness is not None
             else random.choice(list(img_params.Lightness))
         )
-        
-        
+
     @property
     def endpt_lu(self):
         endpt_coords = self.base_geometry.coords
         assert len(endpt_coords)==2
-        pt1,pt2 = endpt_coords
-        return min(pt1,pt2,self.endpt_comp_key)
+        pt1,pt2 = np.array(endpt_coords)
+        print(pt1)
+        return min(pt1, pt2, key=LineSegment.endpt_comp_key)
 
     @property
     def endpt_rd(self):
         endpt_coords = self.base_geometry.coords
         assert len(endpt_coords)==2
         pt1,pt2 = endpt_coords
-        return max(pt1,pt2,self.endpt_comp_key)
+        return max(pt1,pt2,key=LineSegment.endpt_comp_key)
 
     def shift(self,offset:np.ndarray):
         self.base_geometry = translate(self.base_geometry,offset[0],offset[1])
-        
+
     def set_endpoints(self,pt1:common_types.Coordinate,pt2:common_types.Coordinate):
         self.base_geometry = LineString([pt1,pt2])
-        
+
     def find_fraction_point(self, fraction:float):
         return self.endpt_lu + (self.endpt_rd-self.endpt_lu) * fraction
-    
+
     def rotated_copy(self,pivot, angle):
         cpy = copy.deepcopy(self)
         cpy.rotate(pivot,angle)
         return cpy
-        
+
     def rotate(self,pivot,angle):
         """rotate the linesegment counter-clockwise
         """
         new_pt1 = rotate_point(self.endpt_lu,pivot_point=pivot,theta=angle)
         new_pt2 = rotate_point(self.endpt_rd,pivot,angle)
         self.set_endpoints(new_pt1,new_pt2)
-

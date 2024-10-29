@@ -8,6 +8,7 @@ from typing import List
 import numpy as np
 import shapely
 
+import common_types
 import generation_config
 import img_params
 
@@ -117,6 +118,29 @@ def generate_bezier_curve_single_param(curvature:float)->np.ndarray:
 
 def generate_circle_curve(radius:float)->np.ndarray:
     return np.array(shapely.Point(0,0).buffer(radius).exterior.coords)
+
+
+def get_points_on_line(start, end, n=100):
+    """
+    在给定的起点和终点之间生成等间距的 n 个点。
+
+    参数:
+    start -- 起点坐标，二元数组，例如 [x1, y1]
+    end -- 终点坐标，二元数组，例如 [x2, y2]
+    n -- 要生成的等间距点数
+
+    返回:
+    points -- n 个等间距的点的列表
+    """
+    start = np.array(start)
+    end = np.array(end)
+
+    # 生成包含 n 个点的等差数列，并根据比例计算每个点的坐标
+    points = np.array([((1 - t) * start + t * end).tolist() for t in np.linspace(0, 1, n)])
+
+    return points
+
+
 def get_random_rotation()->int:
     return random.choice(list(img_params.Rotation)).value * random.randint(0, 23)
 def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
@@ -194,4 +218,3 @@ def rotate_point(original_point,pivot_point, theta):
     y_final = y_rotated + y0
 
     return x_final, y_final
-
