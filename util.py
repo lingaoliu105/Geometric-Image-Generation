@@ -1,3 +1,7 @@
+"""
+This module includes pure computation functions used in the code base
+"""
+
 from enum import Enum
 import random
 from typing import List
@@ -170,10 +174,10 @@ def get_rand_point():
     return [x,y]
 
 
-def rotate_point(x, y, x0, y0, theta):
-    """
-    旋转单个点 (x, y) 绕旋转中心 (x0, y0) 旋转角度 theta.
-    """
+def rotate_point(original_point,pivot_point, theta):
+    
+    x,y,x0,y0 = original_point+pivot_point
+
     # 将角度转换为弧度
     theta_rad = np.radians(theta)
 

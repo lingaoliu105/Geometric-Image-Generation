@@ -206,7 +206,7 @@ def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal
         if end[1]>upper_bound:
             upper_bound = end[1]
         comp_key = lambda p: (p[0], -p[1])
-        line_seg = LineSegment(lu = min(init,end,key=comp_key),rd = max(init,end,key=comp_key))
+        line_seg = LineSegment(pt1 = min(init,end,key=comp_key),pt2 = max(init,end,key=comp_key))
         output_line_segments.append(line_seg)
         init = end
         
