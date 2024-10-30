@@ -53,7 +53,7 @@ class SimpleShapeConverter(BaseConverter):
             sides = shape.shape.value
             return (
                 # draw the background color in seperate instruction, otherwise will be covered by pattern
-                f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,"
+                f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,fill opacity=0.5,"
                 f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={shape.rotation}]"
                 f"at ({shape.position[0]},{shape.position[1]}) {{}};\n"
                 

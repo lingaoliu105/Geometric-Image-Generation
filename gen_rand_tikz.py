@@ -42,13 +42,14 @@ def generate_panels(
             )
         elif composition_type == img_params.Composition.CHAIN:
             # random number of base elements, selected by beta distribution, ranged from 0 to 20
-            element_num = ceil(generate_beta_random_with_mode(0.5, 2) * 19) + 1
+            element_num = ceil(generate_beta_random_with_mode(0.3, 2) * 19) + 1
             panel = generate_composite_image_chaining(
                 position=center,
                 panel_top_left=top_left,
                 panel_bottom_right=bottom_right,
                 element_num=element_num,
                 chain_shape="line",
+                interval=-0.3
             )
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
@@ -109,7 +110,7 @@ def generate_composite_image_nested(
 
 
 def generate_composite_image_chaining(
-    position, panel_top_left, panel_bottom_right, element_num=10, chain_shape="circle", interval:float = 1.0
+    position, panel_top_left, panel_bottom_right, element_num=10, chain_shape="circle", interval:float = -0.4
 ) -> Panel:
     """generate a composite geometry entity by chaining simple shapes
 
@@ -167,7 +168,7 @@ def generate_composite_image_chaining(
                     excluded_shapes_set=set([img_params.Shape.LINE]),
                 )  # exclude lines for now
                 if i != 0:
-                    element.search_touching_size(shapes[-1])
+                    element.search_size_by_interval(shapes[-1],interval)
                 shapes.append(element)
             flag = False
         except AssertionError:

@@ -1,4 +1,4 @@
-GEN_NUM = 10
+GEN_NUM = 3
 
 GEN_FILE_PREFIX = new-
 
@@ -25,7 +25,7 @@ PNG_FILES = $(foreach n,$(NUMS),$(PNG_DIR)/$(GEN_FILE_PREFIX)$(n).png)
 
 IS_CONTAINER := $(shell grep -i docker /proc/self/cgroup > /dev/null && echo "true" || echo "false")
 
-all: dir tex pdf png labels
+all: dir tex pdf $(PNG_FILES) dataset
 
 dir:
 	mkdir -p $(PDF_DIR)
@@ -51,11 +51,9 @@ pdf: $(PDF_FILES)
 $(PNG_DIR)/%.png : $(PDF_DIR)/%.pdf
 	python convert_image.py $<
 
-png: $(PNG_FILES)
-	cp $(PNG_DIR)/* $(DATASET_DIR)/data
-
-labels:
+dataset:
 	python combine_json.py $(GEN_NUM) $(GEN_FILE_PREFIX)
+	cp $(PNG_DIR)/* $(DATASET_DIR)/data
 
 show:
 	python dataset_visualization.py

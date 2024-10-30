@@ -1,6 +1,7 @@
 '''
 This file defines the abstract class for the entities' hierachy
 '''
+import copy
 from enum import Enum
 import json
 
@@ -37,20 +38,40 @@ class Entity(ABC):
                 dict[key] = value
 
         return dict
-    
+
     def to_tikz(self)->str:
         return self.tikz_converter.convert(self)
-    
+
+    def copy(self):
+        return copy.deepcopy(self)
+
+    @property
+    def copy(self):
+        return copy.deepcopy(self)
+
+
 class Relationship(Entity,ABC):
     pass
-    
+
 class VisibleShape(Entity,ABC):
-    pass
+    @abstractmethod
+    def expand(self,ratio):
+        pass
+    
+    @abstractmethod
+    def expand_fixed(self,length):
+        """change the shape by a fixed length (delta of size)
+        if the shape is closed, the size (radius) changes by length
+        if the shape is linesegment, the half-length changes by length, total length changes by 2*length
+        length can be positive (expand) or negative (shrink)
+
+        Args:
+            length (_type_): _description_
+        """
+        pass
 
 class ClosedShape(VisibleShape):
     pass
 
 class OpenShape(VisibleShape):
     pass
-    
-
