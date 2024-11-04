@@ -7,6 +7,7 @@ class GenerationConfig:
     canvas_height: float = 20.0
     generate_num: int = 1
     generated_file_prefix:str = ""
+    search_threshhold = 1e-5 #the threshhold used when finding appropriate size / rotation using binary search
     @classmethod
     @property
     def left_canvas_bound(self):

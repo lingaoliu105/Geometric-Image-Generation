@@ -66,7 +66,7 @@ class SimpleShape(ClosedShape):
             shape
             if shape is not None
             else random.choice(
-                [x for x in list(img_params.Shape) if x not in excluded_shapes_set]
+                [x for x in list(img_params.Shape) if x not in excluded_shapes_set and x != img_params.Shape.LINE]
             )
         )
         self.size = (
@@ -238,12 +238,6 @@ class SimpleShape(ClosedShape):
     def search_size_by_interval(self,other:"VisibleShape",interval:float):
         padded_other = other.copy.expand_fixed(interval)
         self.search_touching_size(padded_other)
-    def search_touching_rotation(self, other: "SimpleShape"):
-        self.size = 10000
-        self.compute_base_geometry()
-
-        # iterate over all exterior coordinates to find valid rotaion range
-        # if other.shape == img_params.Shape.LINE:
 
     def shift(self, offset: np.ndarray):
         self.position += offset
@@ -256,3 +250,11 @@ class SimpleShape(ClosedShape):
     def expand(self,ratio):
         self.set_size(self.size * ratio)
         return self
+    
+    @property
+    def center(self):
+        return self.position
+    
+    @property
+    def overlaps(self, other: VisibleShape):
+        return super().overlaps(other)

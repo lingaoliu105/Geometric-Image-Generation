@@ -54,6 +54,10 @@ class Relationship(Entity,ABC):
     pass
 
 class VisibleShape(Entity,ABC):
+    def __init__(self, tikz_converter) -> None:
+        super().__init__(tikz_converter)
+        self.base_geometry = None
+        self.shape = None
     @abstractmethod
     def expand(self,ratio):
         pass
@@ -68,6 +72,15 @@ class VisibleShape(Entity,ABC):
         Args:
             length (_type_): _description_
         """
+        pass
+    
+    @abstractmethod
+    def overlaps(self,other:"VisibleShape"):
+        pass
+    
+    @property
+    @abstractmethod
+    def center(self):
         pass
 
 class ClosedShape(VisibleShape):

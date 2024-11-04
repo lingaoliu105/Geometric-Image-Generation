@@ -12,6 +12,7 @@ import common_types
 import generation_config
 import img_params
 
+
 from scipy.stats import beta
 
 def compute_angle_between_vectors(
@@ -140,6 +141,12 @@ def get_points_on_line(start, end, n=100):
 
     return points
 
+def get_line_rotation(pt1:common_types.Coordinate,pt2:common_types.Coordinate)->float:
+    delta = pt1-pt2
+    # 使用 arctan2 计算角度，并转换为度数
+    angle = np.degrees(np.arctan2(delta[1], delta[0]))
+    return angle
+
 
 def get_random_rotation()->int:
     return random.choice(list(img_params.Rotation)).value * random.randint(0, 23)
@@ -200,7 +207,7 @@ def get_rand_point():
 
 def rotate_point(original_point,pivot_point, theta):
     
-    x,y,x0,y0 = original_point+pivot_point
+    x,y,x0,y0 = list(original_point)+list(pivot_point)
 
     # 将角度转换为弧度
     theta_rad = np.radians(theta)

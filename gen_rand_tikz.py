@@ -2,7 +2,6 @@ import json
 from math import ceil
 import math
 import random
-from turtle import pos
 from typing import List, Literal
 from jinja2 import Environment, FileSystemLoader
 
@@ -17,6 +16,7 @@ from entities.simple_shape import SimpleShape
 import numpy as np
 import shapely
 from util import *
+from image_generators import ChainingImageGenerator
 
 
 def generate_panels(
@@ -43,14 +43,14 @@ def generate_panels(
         elif composition_type == img_params.Composition.CHAIN:
             # random number of base elements, selected by beta distribution, ranged from 0 to 20
             element_num = ceil(generate_beta_random_with_mode(0.3, 2) * 19) + 1
-            panel = generate_composite_image_chaining(
-                position=center,
-                panel_top_left=top_left,
-                panel_bottom_right=bottom_right,
-                element_num=element_num,
-                chain_shape="line",
-                interval=-0.3
-            )
+            generator = ChainingImageGenerator()
+            generator.position = center
+            generator.panel_top_left=top_left
+            generator.panel_bottom_right=bottom_right
+            generator.element_num=element_num
+            generator.chain_shape="line"
+            generator.interval = -0.3
+            panel = generator.generate()
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
         panels.append(panel)
@@ -107,85 +107,6 @@ def generate_composite_image_nested(
             outer_size=outer_size * shrink_ratio, recur_depth=recur_depth - 1
         )
         return shape_list
-
-
-def generate_composite_image_chaining(
-    position, panel_top_left, panel_bottom_right, element_num=10, chain_shape="circle", interval:float = -0.4
-) -> Panel:
-    """generate a composite geometry entity by chaining simple shapes
-
-    Args:
-        position (numpy 2-d array): coordinate of the center of the chained shape
-        rotation (float): rotation of the overall composite chained shapes in degree
-    """
-
-    assert element_num >= 2 and element_num <= 20
-    # composite the image first, then shift to the center pos
-
-    def get_chain(curve_function):
-        curve_point_set = curve_function()
-        step_length = len(curve_point_set) // element_num
-        chain = [
-            curve_point_set[step_length * index] for index in range(element_num)
-        ]  # the set of all centers of the element shapes
-        return chain
-
-    if chain_shape == "bezier":
-        chain = get_chain(lambda: generate_bezier_curve_single_param(1))
-    elif chain_shape == "circle":
-        chain = get_chain(lambda: generate_circle_curve(random.randrange(4, 8)))
-    elif chain_shape =="line":
-        chain = get_chain(lambda:get_points_on_line((-5.0,5.0),(5.0,-5.0)))
-    else:
-        print("curve type not assigned")
-        raise
-
-    shapes = []  # stack of shapes
-
-    flag = True
-    while flag:
-
-        try:
-            for i in range(element_num):
-
-                # skip if current center is already covered by the previous shape
-                if len(shapes) > 0 and shapely.Point(chain[i]).within(
-                    shapes[-1].base_geometry
-                ):
-                    continue
-
-                element_rotation = get_random_rotation()
-                if i == 0:
-                    element_size = get_point_distance(chain[0], chain[1]) * (
-                        random.random() / 2 + 0.25
-                    )
-                else:
-                    element_size = get_point_distance(chain[i], shapes[-1].position) * 2
-                element = SimpleShape(
-                    position=chain[i],
-                    rotation=element_rotation,
-                    size=element_size,
-                    excluded_shapes_set=set([img_params.Shape.LINE]),
-                )  # exclude lines for now
-                if i != 0:
-                    element.search_size_by_interval(shapes[-1],interval)
-                shapes.append(element)
-            flag = False
-        except AssertionError:
-            shapes.clear()
-
-    touching_points = []
-    for i, shape in enumerate(shapes):
-        shape.shift(position)
-        if i > 0:
-            touching_points.append(TouchingPoint(shapes[i - 1], shape))
-    return Panel(
-        top_left=panel_top_left,
-        bottom_right=panel_bottom_right,
-        shapes=shapes,
-        joints=touching_points,
-    )
-    
 
 def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal["orthogonal","random"] = "random") -> List[LineSegment]:
     init = np.array([0.0,0.0])

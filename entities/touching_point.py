@@ -4,13 +4,14 @@ import math
 
 import numpy as np
 
+from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
 
 from shapely_helpers import *
 
 import img_params
 from typing import Tuple
-from entities.entity import Entity, Relationship
+from entities.entity import Entity, Relationship, VisibleShape
 
 
 class TouchingPoint(Relationship):
@@ -43,7 +44,7 @@ class TouchingPoint(Relationship):
         self.attach_type_A,self.attach_position_A = self.compute_neighbor_relation(self.neighbor_A)
         self.attach_type_B,self.attach_position_B = self.compute_neighbor_relation(self.neighbor_B)
 
-    def compute_neighbor_relation(self,neighbor:SimpleShape)->Tuple[img_params.AttachType,img_params.AttachPosition]:
+    def compute_neighbor_relation(self,neighbor:VisibleShape)->Tuple[img_params.AttachType,img_params.AttachPosition]:
         if neighbor.shape==img_params.Shape.circle:
             return (img_params.AttachType.ARC,img_params.AttachPosition.NA)
         elif neighbor.shape in [img_params.Shape.triangle,img_params.Shape.square,img_params.Shape.pentagon,img_params.Shape.hexagon]:
@@ -62,4 +63,13 @@ class TouchingPoint(Relationship):
                 position = min(img_params.AttachPosition, key=lambda x:abs(x.value-fraction))
             except ZeroDivisionError: # happens when the edge is horizontal
                 position = img_params.AttachPosition.TOP #TODO: find more proper description
-            return (img_params.AttachType.EDGE,position)
+            finally:
+                return (img_params.AttachType.EDGE,position)
+        elif neighbor.shape==img_params.Shape.LINE and isinstance(neighbor,LineSegment):
+            try:
+                fraction = (neighbor.endpt_up[1] - self.position[1]) / (neighbor.endpt_up[1]-neighbor.endpt_down[1])
+                position = min(img_params.AttachPosition, key=lambda x:abs(x.value-fraction))
+            except ZeroDivisionError:
+                position = img_params.AttachPosition.TOP
+            finally:
+                return (img_params.AttachType.EDGE,position)
