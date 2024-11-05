@@ -1,9 +1,10 @@
+from typing import List
 import re
 import entities.entity as entity
 from img_params import *
 from abc import ABC, abstractmethod
 
-class BaseConverter: # enclose in classes to store temporary strings that makes the tikz strings
+class BaseConverter: # enclose in classes to store temporary strings that makes the tikz strings, held by each individual VisibleShape instance to avoid data miswrite
     def __init__(self) -> None:
         self.color_str = ""
         self.lightness_str = ""
@@ -26,7 +27,7 @@ class SimpleShapeConverter(BaseConverter):
         self.outline_thickness_str = ""
         self.outline_lightness_str = ""
 
-    def convert(self, shape):
+    def convert(self, shape:entity.VisibleShape):
 
         func_router = {
             "pattern": self.get_pattern_tikz_string,
@@ -40,7 +41,7 @@ class SimpleShapeConverter(BaseConverter):
             "outline_lightness": self.get_outline_lightness_tikz_string,
         }
 
-        for attr in shape.__slots__:
+        for attr in shape.dataset_annotation_categories:
             if attr in func_router:
                 func_router[attr](getattr(shape, attr))
 
@@ -117,15 +118,14 @@ class LineSegmentConverter(BaseConverter):
         super().__init__()
         
     def convert(self, target):
-        tikz = f"\draw[color={target.color.name.lower()}] ({target.endpt_lu[0]},{target.endpt_lu[1]}) -- ({target.endpt_rd[0]},{target.endpt_rd[1]});"
+        tikz = f"\draw[color={target.color.name.lower()}] ({target.endpt_up[0]},{target.endpt_up[1]}) -- ({target.endpt_down[0]},{target.endpt_down[1]});"
         return tikz
         
     
-def convert_shapes(input_shapes, show_center: bool) -> list[str]:
+def convert_shapes(input_shapes:List[entity.VisibleShape]) -> list[str]:
     instructions = []
     for shape in input_shapes:
-        converter = SimpleShapeConverter()
-        instructions.append(converter.convert(shape))
+        instructions.append(shape.tikz_converter.convert(shape))
 
     return instructions
 
@@ -133,10 +133,5 @@ def convert_shapes(input_shapes, show_center: bool) -> list[str]:
 def convert_panels(panels) -> list[str]:
     instructions = []
     for panel in panels:
-        instructions += convert_shapes(panel.shapes, False)
-
-        # TODO: remove this after use
-        for touchingpt in panel.joints:
-            pos = touchingpt.position
-
+        instructions += convert_shapes(panel.shapes)
     return instructions

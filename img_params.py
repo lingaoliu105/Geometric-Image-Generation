@@ -6,7 +6,7 @@ from enum import Enum
 class Shape(
     Enum
 ):  # representing categories under A_type, value normally indicates the number of edges
-    LINE = 0
+    linesegment = 0
     circle = 1
     triangle = 3
     square = 4

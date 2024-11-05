@@ -76,7 +76,7 @@ class ChainingImageGenerator(ImageGenerator):
                             position=chain[i],
                             rotation=element_rotation,
                             size=element_size,
-                            excluded_shapes_set=set([img_params.Shape.LINE]),
+                            excluded_shapes_set=set([img_params.Shape.linesegment]),
                         )  # exclude lines for now
                         if i != 0:
                             element.search_size_by_interval(shapes[-1],self.interval)

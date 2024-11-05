@@ -15,7 +15,7 @@ from entities.entity import Entity, Relationship, VisibleShape
 
 
 class TouchingPoint(Relationship):
-    __slots__ = [
+    serialized_fields = [
         "position",
         "neighbor_A",  # how to order A and B: compare left/right first, left is A right is B,if same, up is A, down is B
         "neighbor_B",
@@ -65,7 +65,7 @@ class TouchingPoint(Relationship):
                 position = img_params.AttachPosition.TOP #TODO: find more proper description
             finally:
                 return (img_params.AttachType.EDGE,position)
-        elif neighbor.shape==img_params.Shape.LINE and isinstance(neighbor,LineSegment):
+        elif neighbor.shape==img_params.Shape.linesegment and isinstance(neighbor,LineSegment):
             try:
                 fraction = (neighbor.endpt_up[1] - self.position[1]) / (neighbor.endpt_up[1]-neighbor.endpt_down[1])
                 position = min(img_params.AttachPosition, key=lambda x:abs(x.value-fraction))

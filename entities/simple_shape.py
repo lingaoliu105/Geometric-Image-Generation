@@ -19,7 +19,7 @@ from generation_config import GenerationConfig
 
 class SimpleShape(ClosedShape):
 
-    direct_categories = [
+    dataset_annotation_categories = [
         "pattern",
         "color",
         "lightness",
@@ -31,14 +31,14 @@ class SimpleShape(ClosedShape):
         "outline_lightness",
     ]  # attributes that can be directly interpreted as categories in dataset annotations
 
-    __slots__ = [
+    serialized_fields = [
         "uid",
         "shape",
         "size",
         "position",
         "rotation",
         "base_geometry",
-    ] + direct_categories
+    ] + dataset_annotation_categories
 
     touching_tolerance = 1e-11
 
@@ -66,7 +66,7 @@ class SimpleShape(ClosedShape):
             shape
             if shape is not None
             else random.choice(
-                [x for x in list(img_params.Shape) if x not in excluded_shapes_set and x != img_params.Shape.LINE]
+                [x for x in list(img_params.Shape) if x not in excluded_shapes_set and x != img_params.Shape.linesegment]
             )
         )
         self.size = (
@@ -142,7 +142,7 @@ class SimpleShape(ClosedShape):
         rot_cos = math.cos(rot_rad)
         rot_polar = np.array((rot_cos, rot_sin))
         rot_cart = self.size * rot_polar
-        if self.shape == Shape.LINE:
+        if self.shape == Shape.linesegment:
             endpoints = [
                 np.array(x)
                 for x in [

@@ -17,15 +17,17 @@ from shapely.ops import nearest_points
 
 
 class LineSegment(OpenShape):
-    direct_categories = [
+    dataset_annotation_categories = [
+        "position",
+        "shape",
         "color",
         "lightness",
     ]  # attributes that can be directly interpreted as categories in dataset annotations
 
-    __slots__ = [
+    serialized_fields = [
         "uid",
         "base_geometry",
-    ] + direct_categories
+    ] + dataset_annotation_categories
 
     endpt_comp_key_lr = lambda p: (p[0], -p[1])
     endpt_comp_key_ud = lambda p: (p[1], -p[0])
@@ -38,7 +40,7 @@ class LineSegment(OpenShape):
         lightness: Optional[img_params.Lightness] = None,
     ) -> None:
         super().__init__(tikz_converter=LineSegmentConverter())
-        self.shape = img_params.Shape.LINE
+        self.shape = img_params.Shape.linesegment
         if pt1 is None and pt2 is None:
             # if neither points is specified, choose both points randomly
             self.base_geometry = LineString([get_rand_point() for _ in range(2)])

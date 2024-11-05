@@ -16,12 +16,10 @@ from abc import ABC, abstractmethod
 
 class Entity(ABC):
 
-    def __init__(self,tikz_converter) -> None:
+    def __init__(self) -> None:
         self.uid = uid_service.get_new_entity_uid()
-        assert tikz_converter is not None
-        self.tikz_converter  = tikz_converter
     def to_dict(self):
-        dict = {slot: getattr(self, slot) for slot in self.__slots__}
+        dict = {attr_name: getattr(self, attr_name) for attr_name in self.serialized_fields}
         for key in dict:
             value = dict[key]
             try:
@@ -55,9 +53,11 @@ class Relationship(Entity,ABC):
 
 class VisibleShape(Entity,ABC):
     def __init__(self, tikz_converter) -> None:
-        super().__init__(tikz_converter)
+        super().__init__()
         self.base_geometry = None
         self.shape = None
+        assert tikz_converter is not None
+        self.tikz_converter  = tikz_converter
     @abstractmethod
     def expand(self,ratio):
         pass
@@ -82,6 +82,10 @@ class VisibleShape(Entity,ABC):
     @abstractmethod
     def center(self):
         pass
+    
+    def to_tikz(self)->str:
+        return self.tikz_converter.convert(self)
+        
 
 class ClosedShape(VisibleShape):
     pass

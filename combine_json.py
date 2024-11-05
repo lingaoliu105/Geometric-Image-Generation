@@ -6,7 +6,7 @@ from matplotlib.pyplot import xkcd
 
 from entities.simple_shape import SimpleShape
 import img_params
-
+from common_types import *
 
 get_image_id = (x for x in range(1000000)).__next__
 get_annotation_id = (x for x in range(100000)).__next__
@@ -36,7 +36,8 @@ def find_category_id_by_name(name: str, categories):
     return catid
 
 
-def transform_coordinate(coordinate):
+def transform_coordinate(coordinate:Coordinate):
+    """transform the coordinate on the latex canvas to coordinate on the png image (by pixels)"""
     global width, height
     return [
         coordinate[0] / 20 * width + width / 2,
@@ -91,7 +92,11 @@ def format_shape_annotations(
     # form boundary coordinates and segmentation and bounding box
     vertices = transform_coordinate(shape["position"]) + [2]
     segmentation = []
-    coordinates = shape["base_geometry"]["coordinates"][0]
+    coordinates = (
+        shape["base_geometry"]["coordinates"][0]
+        if shape["base_geometry"]["type"] != "LineString"
+        else shape["base_geometry"]["coordinates"]
+    )
     polygon_shapes = [
         "triangle",
         "square",
@@ -150,6 +155,7 @@ def format_shape_annotations(
     annotations.append(hori_ann)
     annotations.append(vert_ann)
 
+    # COMMENTED FOR SAVING TIME, UNCOMMENT TO PRODUCE ANNOTATION ON ALL CATEGORIES
     # for attr_name in SimpleShape.direct_categories:
     #     attr_value = shape[attr_name]
     #     category_id = find_category_id_by_name(attr_value,categories=categories)
