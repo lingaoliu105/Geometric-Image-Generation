@@ -61,28 +61,28 @@ class LineSegment(OpenShape):
         )
 
     @property
-    def endpt_left(self)->np.ndarray:
+    def endpt_left(self) -> np.ndarray:
         endpt_coords = self.base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = np.array(endpt_coords)
         return min(pt1, pt2, key=LineSegment.endpt_comp_key_lr)
 
     @property
-    def endpt_right(self)->np.ndarray:
+    def endpt_right(self) -> np.ndarray:
         endpt_coords = self.base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = endpt_coords
         return max(pt1, pt2, key=LineSegment.endpt_comp_key_lr)
 
     @property
-    def endpt_up(self)->np.ndarray:
+    def endpt_up(self) -> np.ndarray:
         endpt_coords = self.base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = endpt_coords
         return max(pt1, pt2, key=LineSegment.endpt_comp_key_ud)
 
     @property
-    def endpt_down(self)->np.ndarray:
+    def endpt_down(self) -> np.ndarray:
         endpt_coords = self.base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = endpt_coords
@@ -136,19 +136,20 @@ class LineSegment(OpenShape):
     def overlaps(self, other: VisibleShape):
         return self.base_geometry.intersects(other.base_geometry)
 
-    def expand_fixed(self,length):
+    def expand_fixed(self, length):
         self.base_geometry.buffer(length)
         return self
 
     def scale(self, ratio):
         offset = self.endpt_left - self.center
-        self.base_geometry = LineString(self.center + offset * ratio, self.center - offset.ratio)
+        self.base_geometry = LineString(
+            self.center + offset * ratio, self.center - offset.ratio
+        )
 
-    def expand(self,ratio):
+    def expand(self, ratio):
         cpy = self.copy
         cpy.scale(ratio=ratio)
         return cpy
-
 
     def adjust_by_interval(
         self,
@@ -168,7 +169,7 @@ class LineSegment(OpenShape):
                 minimum_achievable_distance <= interval
             ):  # the interval is achievable with rotation
                 nearest_point_on_shape, _ = nearest_points(
-                    mid_point, other_copy.base_geometry
+                    other_copy.base_geometry, mid_point
                 )
                 perpendicular_line_rotation = get_line_rotation(
                     nearest_point_on_shape.coords[0], self.center
@@ -179,7 +180,7 @@ class LineSegment(OpenShape):
                     > generation_config.GenerationConfig.search_threshhold
                 ):
                     mid = (upper + lower) / 2
-                    self.rotate(self.center,mid - self.rotation)
+                    self.rotate(self.center, mid - self.rotation)
                     distance = self.base_geometry.distance(other_copy.base_geometry)
                     if distance > interval:
                         lower = mid
