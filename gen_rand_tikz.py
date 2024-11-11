@@ -43,6 +43,8 @@ def generate_panels(
         elif composition_type == img_params.Composition.CHAIN:
             # random number of base elements, selected by beta distribution, ranged from 0 to 20
             generator = ChainingImageGenerator()
+            generator.panel_top_left=top_left
+            generator.panel_bottom_right=bottom_right
             panel = generator.generate()
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
