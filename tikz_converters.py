@@ -52,7 +52,7 @@ class SimpleShapeConverter(BaseConverter):
             Shape.hexagon,
         ]:
             sides = shape.shape.value
-            return (
+            tikz_instruction = (
                 # draw the background color in seperate instruction, otherwise will be covered by pattern
                 f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,fill opacity=0.5,"
                 f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={shape.rotation}]"
@@ -63,7 +63,7 @@ class SimpleShapeConverter(BaseConverter):
                 f"{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] at ({shape.position[0]},{shape.position[1]}) {{}};\n"
             )
         elif shape.shape == Shape.circle:
-            return (
+            tikz_instruction = (
                 f"\draw [{self.color_str+self.lightness_str}]"
                 f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
 
@@ -71,7 +71,9 @@ class SimpleShapeConverter(BaseConverter):
                 f"{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str}]"
                 f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
             )
-
+            
+        # tikz_instruction += f"\\fill [black] ({shape.position[0]},{shape.position[1]}) circle (0.1);\n"
+        return tikz_instruction
 
     def get_pattern_tikz_string(self, pattern: Pattern):
         if pattern==Pattern.blank:

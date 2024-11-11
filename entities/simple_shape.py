@@ -1,5 +1,6 @@
 import copy
 from typing import Optional
+from entities.line_segment import LineSegment
 import generation_config
 from img_params import *
 import math
@@ -13,7 +14,7 @@ import json
 from tikz_converters import SimpleShapeConverter
 import uid_service
 from entities.entity import ClosedShape, Entity, VisibleShape
-from util import choose_param_with_beta
+from util import almost_equal, choose_param_with_beta
 from generation_config import GenerationConfig
 
 
@@ -210,7 +211,7 @@ class SimpleShape(ClosedShape):
         self.size = new_size
         self.compute_base_geometry()
 
-    def search_touching_size(self, other: "SimpleShape"):
+    def search_touching_size(self, other: VisibleShape):
         """with a initial size that guarantees to overlap, search the appropriate size that touches the other shape (with tolerance defined in the class), and set the own size to it
 
         Args:
@@ -228,7 +229,7 @@ class SimpleShape(ClosedShape):
             self.set_size(mid)
             if self.base_geometry.overlaps(
                 other_shape
-            ) or self.base_geometry.intersects(other_shape):
+            ) or self.base_geometry.intersects(other_shape) or self.base_geometry.contains(other_shape):
                 upper = mid
             else:
                 lower = mid
@@ -238,12 +239,13 @@ class SimpleShape(ClosedShape):
     def search_size_by_interval(self,other:"VisibleShape",interval:float):
         padded_other = other.copy.expand_fixed(interval)
         self.search_touching_size(padded_other)
-
+            
     def shift(self, offset: np.ndarray):
         self.position += offset
         self.compute_base_geometry()
 
     def expand_fixed(self, length):
+        assert self.size +length >= 0
         self.set_size(self.size + length)
         return self
 

@@ -160,6 +160,40 @@ def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
     return distance
 
 
+def almost_equal(a, b, tol=1e-6):
+    """
+    Check if two numbers (float or int) or two NumPy arrays are approximately equal within a tolerance.
+
+    Parameters:
+    a, b : float, int, or np.ndarray
+        The values or arrays to compare.
+    tol : float
+        The tolerance for comparison. Default is 1e-6.
+
+    Returns:
+    bool
+        True if `a` and `b` are approximately equal within the specified tolerance, otherwise False.
+    """
+    # Convert lists or tuples to numpy arrays for uniform handling
+    if isinstance(a, (list, tuple)):
+        a = np.array(a)
+    if isinstance(b, (list, tuple)):
+        b = np.array(b)
+        
+    # Check if both inputs are numbers (int or float)
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) <= tol
+
+    # Check if both inputs are numpy arrays
+    elif isinstance(a, np.ndarray) and isinstance(b, np.ndarray):
+        return np.allclose(a, b, atol=tol)
+
+    else:
+        raise TypeError(
+            "Inputs must both be numbers (int/float) or both be NumPy arrays."
+        )
+
+
 def generate_beta_random_with_mode(mode, alpha, min_val=0.0, max_val=1.0):
     """
     根据给定的众数 (mode) 和 α 参数生成 Beta 分布，并返回一个在 [min_val, max_val] 范围内的随机数。

@@ -4,14 +4,20 @@ import sys
 from networkx import center
 import numpy as np
 from shapely import LineString, Point
-import common_types
+from common_types import *
 from entities.entity import Entity, OpenShape, VisibleShape
 from typing import Literal, Optional, Union
 
 import generation_config
 import img_params
 from tikz_converters import LineSegmentConverter
-from util import get_line_rotation, get_point_distance, get_rand_point, rotate_point
+from util import (
+    almost_equal,
+    get_line_rotation,
+    get_point_distance,
+    get_rand_point,
+    rotate_point,
+)
 from shapely.affinity import translate
 from shapely.ops import nearest_points
 
@@ -116,7 +122,7 @@ class LineSegment(OpenShape):
     def shift(self, offset: np.ndarray):
         self.base_geometry = translate(self.base_geometry, offset[0], offset[1])
 
-    def set_endpoints(self, pt1: common_types.Coordinate, pt2: common_types.Coordinate):
+    def set_endpoints(self, pt1: Coordinate, pt2: Coordinate):
         self.base_geometry = LineString([pt1, pt2])
 
     def find_fraction_point(self, fraction: float):
@@ -137,13 +143,29 @@ class LineSegment(OpenShape):
         return self.base_geometry.intersects(other.base_geometry)
 
     def expand_fixed(self, length):
-        self.base_geometry.buffer(length)
+        if almost_equal(length,0.0):
+            pass
+        elif length > 0:
+            self.base_geometry = self.base_geometry.buffer(length)
+        elif length < 0:
+            self.scale(1 - 2 * abs(length) / self.length)
         return self
 
     def scale(self, ratio):
-        offset = self.endpt_left - self.center
+        """scale the line segment with the center as pivot
+
+        Args:
+            ratio (_type_): _description_
+        """
+        self.scale_with_pivot(ratio, self.center)
+
+    def scale_with_pivot(self, ratio, pivot: Coordinate):
+        assert self.base_geometry.contains(Point(pivot))
+        pivot = np.array(pivot)
+        offset1 = self.endpt_left - pivot
+        offset2 = self.endpt_right - pivot
         self.base_geometry = LineString(
-            self.center + offset * ratio, self.center - offset.ratio
+            self.center + offset1 * ratio, self.center + offset2.ratio
         )
 
     def expand(self, ratio):
@@ -165,15 +187,15 @@ class LineSegment(OpenShape):
             if maximum_achievable_distance < interval:
                 print("interval too large", file=sys.stderr)
                 return
+            nearest_point_on_shape, _ = nearest_points(
+                other_copy.base_geometry, mid_point
+            )
+            perpendicular_line_rotation = get_line_rotation(
+                nearest_point_on_shape.coords[0], self.center
+            )
             if (
                 minimum_achievable_distance <= interval
             ):  # the interval is achievable with rotation
-                nearest_point_on_shape, _ = nearest_points(
-                    other_copy.base_geometry, mid_point
-                )
-                perpendicular_line_rotation = get_line_rotation(
-                    nearest_point_on_shape.coords[0], self.center
-                )
                 upper, lower = perpendicular_line_rotation, self.rotation
                 while (
                     abs(upper - lower)
@@ -186,5 +208,17 @@ class LineSegment(OpenShape):
                         lower = mid
                     else:
                         upper = mid
+            else:
+                self.rotate(self.center, perpendicular_line_rotation - self.rotation)
+
         else:
             return
+
+    # def adjust_by_scaling(self,other:VisibleShape,interval:float,pivot:Coordinate):
+    #     # if almost_equal(pivot,self.endpt_up) or almost_equal(pivot,self.endpt_down):
+    #     # check if the desired interval is achievable by simply scaling
+    #     cpy = self.copy
+    #     cpy.scale_with_pivot((generation_config.GenerationConfig.canvas_height + generation_config.GenerationConfig.canvas_width)*10/cpy.length)
+    #     minimum_achievable_distance = cpy.base_geometry.distance(other.base_geometry)
+    #     if minimum_achievable_distance <= interval:
+    #         min_ratio =
