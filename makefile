@@ -1,4 +1,4 @@
-GEN_NUM = 3
+GEN_NUM = 10
 
 GEN_FILE_PREFIX = new-
 
@@ -27,7 +27,7 @@ IS_CONTAINER := $(shell grep -i docker /proc/self/cgroup > /dev/null && echo "tr
 
 .PHONY: all clean png
 
-all: tex pdf png dataset
+all: clean tex pdf png dataset
 
 png: $(PNG_FILES)
 
@@ -47,7 +47,6 @@ $(DATASET_DIR):
 	@mkdir -p $(DATASET_DIR)
 
 tex: | $(TEX_DIR) $(JSON_DIR)
-	echo $(PNG_FILES)
 	python gen_rand_tikz.py $(GEN_NUM) $(COLOR_MODE) $(GEN_FILE_PREFIX)
 
 $(PDF_DIR)%.pdf : $(TEX_DIR)%.tex | $(PDF_DIR)
@@ -67,6 +66,7 @@ $(PNG_DIR)%.png : $(PDF_DIR)%.pdf | $(PNG_DIR)
 
 dataset: | $(DATASET_DIR)
 	python combine_json.py $(GEN_NUM) $(GEN_FILE_PREFIX)
+	@mkdir -p $(DATASET_DIR)data
 	cp $(PNG_DIR)* $(DATASET_DIR)data
 
 show:
@@ -74,4 +74,4 @@ show:
 
 # 清理生成的文件
 clean:
-	rm -f $(TEX_DIR)* $(PDF_DIR)* $(PNG_DIR)* $(JSON_DIR)*
+	@rm -rf $(TEX_DIR)* $(PDF_DIR)* $(PNG_DIR)* $(JSON_DIR)* $(DATASET_DIR)*
