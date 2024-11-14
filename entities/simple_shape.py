@@ -126,6 +126,7 @@ class SimpleShape(ClosedShape):
             self.color = img_params.Color.black
             self.pattern_color = img_params.PattenColor.patternBlack
             self.outline_color = img_params.OutlineColor.outlineBlack
+        self.is_expanded = False
         self.compute_base_geometry()
 
     def get_available_outline_color(self):
@@ -143,25 +144,10 @@ class SimpleShape(ClosedShape):
         rot_cos = math.cos(rot_rad)
         rot_polar = np.array((rot_cos, rot_sin))
         rot_cart = self.size * rot_polar
-        if self.shape == Shape.linesegment:
-            endpoints = [
-                np.array(x)
-                for x in [
-                    (
-                        self.position[0] + self.size / 2 * rot_cos,
-                        self.position[1] + self.size / 2 * rot_sin,
-                    ),
-                    (
-                        self.position[0] - self.size / 2 * rot_cos,
-                        self.position[1] - self.size / 2 * rot_sin,
-                    ),
-                ]
-            ]
-            self.base_geometry = LineString(endpoints)
 
         # TODO: complete other shapes. remember to add last -- first
-        elif self.shape == Shape.circle:
-            self.base_geometry = Point(self.position).buffer(self.size)
+        if self.shape == Shape.circle:
+            self._base_geometry = Point(self.position).buffer(self.size)
         else:
             if self.shape == Shape.triangle:
                 angle_list = [-30, 90, 210]
@@ -182,10 +168,10 @@ class SimpleShape(ClosedShape):
                 rot_cart = self.size * rot_polar
                 vertices[index] = self.position + rot_cart
                 index += 1
-            self.base_geometry = Polygon(vertices)
+            self._base_geometry = Polygon(vertices)
 
     def get_vertices(self) -> list:
-        return self.base_geometry.exterior.coords
+        return self._base_geometry.exterior.coords
 
     def get_attach_point(self) -> np.ndarray:
         if self.shape == Shape.circle:
@@ -205,7 +191,7 @@ class SimpleShape(ClosedShape):
         )
 
     def check_overlap(self, other: "SimpleShape") -> bool:
-        return self.base_geometry.overlaps(other.base_geometry)
+        return self._base_geometry.overlaps(other._base_geometry)
 
     def set_size(self, new_size: float):
         self.size = new_size
@@ -219,25 +205,23 @@ class SimpleShape(ClosedShape):
         """
         # TODO: optimize performance
         upper = self.size
-        lower = 0
+        lower = 0.1
         other_shape = other.base_geometry
         while (
-            not other_shape.touches(self.base_geometry)
+            not other_shape.touches(self._base_geometry)
             and (upper - lower) > self.touching_tolerance
         ):
             mid = (upper + lower) / 2.0
             self.set_size(mid)
-            if self.base_geometry.overlaps(
+            if self._base_geometry.overlaps(
                 other_shape
-            ) or self.base_geometry.intersects(other_shape) or self.base_geometry.contains(other_shape):
+            ) or self._base_geometry.intersects(other_shape) or self._base_geometry.contains(other_shape):
                 upper = mid
             else:
                 lower = mid
-
-        assert self.size > 0.1
         
     def search_size_by_interval(self,other:"VisibleShape",interval:float):
-        padded_other = other.copy.expand_fixed(interval)
+        padded_other = other.expand_fixed(interval)
         self.search_touching_size(padded_other)
             
     def shift(self, offset: np.ndarray):
@@ -246,8 +230,9 @@ class SimpleShape(ClosedShape):
 
     def expand_fixed(self, length):
         assert self.size +length >= 0
-        self.set_size(self.size + length)
-        return self
+        cpy = self.copy
+        cpy.set_size(self.size + length)
+        return cpy
 
     def expand(self,ratio):
         self.set_size(self.size * ratio)

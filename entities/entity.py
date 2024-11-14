@@ -54,7 +54,7 @@ class Relationship(Entity,ABC):
 class VisibleShape(Entity,ABC):
     def __init__(self, tikz_converter) -> None:
         super().__init__()
-        self.base_geometry = None
+        self._base_geometry = None
         self.shape = None
         assert tikz_converter is not None
         self.tikz_converter  = tikz_converter
@@ -64,14 +64,6 @@ class VisibleShape(Entity,ABC):
     
     @abstractmethod
     def expand_fixed(self,length):
-        """change the shape by a fixed length (delta of size)
-        if the shape is closed, the size (radius) changes by length
-        if the shape is linesegment, the half-length changes by length, total length changes by 2*length
-        length can be positive (expand) or negative (shrink)
-
-        Args:
-            length (_type_): _description_
-        """
         pass
     
     @abstractmethod
@@ -86,6 +78,9 @@ class VisibleShape(Entity,ABC):
     def to_tikz(self)->str:
         return self.tikz_converter.convert(self)
         
+    @property
+    def base_geometry(self):
+        return self._base_geometry
 
 class ClosedShape(VisibleShape):
     pass

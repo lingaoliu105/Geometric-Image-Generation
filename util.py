@@ -179,7 +179,7 @@ def almost_equal(a, b, tol=1e-6):
         a = np.array(a)
     if isinstance(b, (list, tuple)):
         b = np.array(b)
-        
+
     # Check if both inputs are numbers (int or float)
     if isinstance(a, (int, float)) and isinstance(b, (int, float)):
         return abs(a - b) <= tol
@@ -192,6 +192,35 @@ def almost_equal(a, b, tol=1e-6):
         raise TypeError(
             "Inputs must both be numbers (int/float) or both be NumPy arrays."
         )
+
+
+def generate_random_points_around_point(center, distance):
+    """
+    Generate two random points such that the line between them
+    is at a specified distance from a given center point.
+
+    Parameters:
+    center (tuple): The coordinates of the center point (x, y).
+    distance (float): The perpendicular distance of the line from the center point.
+
+    Returns:
+    tuple: A tuple of two points, each being a tuple (x, y).
+    """
+    # Unpack center point
+    x, y = center
+
+    # Random angle for line orientation
+    angle = np.random.uniform(0, 2 * np.pi)
+
+    # Compute the offsets along the direction perpendicular to the desired line
+    dx = distance * np.cos(angle + np.pi / 2)
+    dy = distance * np.sin(angle + np.pi / 2)
+
+    # Two points on the line at the specified distance from the center point
+    point1 = (x + dx, y + dy)
+    point2 = (x - dx, y - dy)
+
+    return point1, point2
 
 
 def generate_beta_random_with_mode(mode, alpha, min_val=0.0, max_val=1.0):
@@ -223,6 +252,7 @@ def generate_beta_random_with_mode(mode, alpha, min_val=0.0, max_val=1.0):
     scaled_sample = min_val + sample * (max_val - min_val)
 
     return scaled_sample
+
 
 def choose_param_with_beta(mode, param_class, alpha = 2):
     assert(issubclass(param_class,Enum))

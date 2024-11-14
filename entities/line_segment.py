@@ -13,6 +13,7 @@ import img_params
 from tikz_converters import LineSegmentConverter
 from util import (
     almost_equal,
+    generate_random_points_around_point,
     get_line_rotation,
     get_point_distance,
     get_rand_point,
@@ -49,13 +50,13 @@ class LineSegment(OpenShape):
         self.shape = img_params.Shape.linesegment
         if pt1 is None and pt2 is None:
             # if neither points is specified, choose both points randomly
-            self.base_geometry = LineString([get_rand_point() for _ in range(2)])
+            self._base_geometry = LineString([get_rand_point() for _ in range(2)])
         elif pt1 is None:
-            self.base_geometry = LineString([pt2, get_rand_point()])
+            self._base_geometry = LineString([pt2, get_rand_point()])
         elif pt2 is None:
-            self.base_geometry = LineString([pt1, get_rand_point()])
+            self._base_geometry = LineString([pt1, get_rand_point()])
         else:
-            self.base_geometry = LineString([pt1, pt2])
+            self._base_geometry = LineString([pt1, pt2])
 
         self.color = (
             color if color is not None else random.choice(list(img_params.Color))
@@ -65,31 +66,46 @@ class LineSegment(OpenShape):
             if lightness is not None
             else random.choice(list(img_params.Lightness))
         )
-
+        self.is_expanded = False
+        
+    @property
+    def base_geometry(self):
+        if self.is_expanded:
+            return self._base_geometry_expanded
+        else:
+            return self._base_geometry
+        
+    @staticmethod
+    def within_distance(point:Coordinate, distance:float):
+        pt1,pt2 = generate_random_points_around_point(center=point,distance=distance)
+        ls = LineSegment(pt1,pt2)
+        if ls.length <= 0.5:
+            ls.scale(2)
+        return ls
     @property
     def endpt_left(self) -> np.ndarray:
-        endpt_coords = self.base_geometry.coords
+        endpt_coords = self._base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = np.array(endpt_coords)
         return min(pt1, pt2, key=LineSegment.endpt_comp_key_lr)
 
     @property
     def endpt_right(self) -> np.ndarray:
-        endpt_coords = self.base_geometry.coords
+        endpt_coords = self._base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = endpt_coords
         return max(pt1, pt2, key=LineSegment.endpt_comp_key_lr)
 
     @property
     def endpt_up(self) -> np.ndarray:
-        endpt_coords = self.base_geometry.coords
+        endpt_coords = self._base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = endpt_coords
         return max(pt1, pt2, key=LineSegment.endpt_comp_key_ud)
 
     @property
     def endpt_down(self) -> np.ndarray:
-        endpt_coords = self.base_geometry.coords
+        endpt_coords = self._base_geometry.coords
         assert len(endpt_coords) == 2
         pt1, pt2 = endpt_coords
         return min(pt1, pt2, key=LineSegment.endpt_comp_key_ud)
@@ -120,10 +136,10 @@ class LineSegment(OpenShape):
         return get_line_rotation(self.endpt_left, self.endpt_right)
 
     def shift(self, offset: np.ndarray):
-        self.base_geometry = translate(self.base_geometry, offset[0], offset[1])
+        self._base_geometry = translate(self._base_geometry, offset[0], offset[1])
 
     def set_endpoints(self, pt1: Coordinate, pt2: Coordinate):
-        self.base_geometry = LineString([pt1, pt2])
+        self._base_geometry = LineString([pt1, pt2])
 
     def find_fraction_point(self, fraction: float):
         return self.endpt_left + (self.endpt_right - self.endpt_left) * fraction
@@ -140,13 +156,16 @@ class LineSegment(OpenShape):
         self.set_endpoints(new_pt1, new_pt2)
 
     def overlaps(self, other: VisibleShape):
-        return self.base_geometry.intersects(other.base_geometry)
+        return self._base_geometry.intersects(other.base_geometry)
 
     def expand_fixed(self, length):
         if almost_equal(length,0.0):
             pass
         elif length > 0:
-            self.base_geometry = self.base_geometry.buffer(length)
+            if self.is_expanded: # reset if already expanded before
+                self._base_geometry_expanded = self._base_geometry
+            self._base_geometry_expanded = self._base_geometry.buffer(length)
+            self.is_expanded = True
         elif length < 0:
             self.scale(1 - 2 * abs(length) / self.length)
         return self
@@ -160,18 +179,16 @@ class LineSegment(OpenShape):
         self.scale_with_pivot(ratio, self.center)
 
     def scale_with_pivot(self, ratio, pivot: Coordinate):
-        assert self.base_geometry.contains(Point(pivot))
+        assert self._base_geometry.buffer(0.01).contains(Point(pivot))
         pivot = np.array(pivot)
         offset1 = self.endpt_left - pivot
         offset2 = self.endpt_right - pivot
-        self.base_geometry = LineString(
-            self.center + offset1 * ratio, self.center + offset2.ratio
+        self._base_geometry = LineString(
+            [pivot + offset1 * ratio, pivot + offset2 * ratio]
         )
 
     def expand(self, ratio):
-        cpy = self.copy
-        cpy.scale(ratio=ratio)
-        return cpy
+        self.scale(ratio=ratio)
 
     def adjust_by_interval(
         self,
@@ -203,7 +220,7 @@ class LineSegment(OpenShape):
                 ):
                     mid = (upper + lower) / 2
                     self.rotate(self.center, mid - self.rotation)
-                    distance = self.base_geometry.distance(other_copy.base_geometry)
+                    distance = self._base_geometry.distance(other_copy.base_geometry)
                     if distance > interval:
                         lower = mid
                     else:
