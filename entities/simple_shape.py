@@ -1,5 +1,6 @@
 import copy
 from typing import Optional
+import common_types
 from entities.line_segment import LineSegment
 import generation_config
 from img_params import *
@@ -50,8 +51,8 @@ class SimpleShape(ClosedShape):
         size: Optional[float] = None,
         shape: Optional[img_params.Shape] = None,
         color: Optional[img_params.Color] = None,
-        pattern: Optional[img_params.Pattern] = None,
         lightness: Optional[img_params.Lightness] = None,
+        pattern: Optional[img_params.Pattern] = None,
         outline=None,
         outline_lightness=None,
         pattern_color=None,
@@ -60,14 +61,30 @@ class SimpleShape(ClosedShape):
         outline_thickness=None,
         excluded_shapes_set: set = {},
     ) -> None:
-        super().__init__(tikz_converter=SimpleShapeConverter())
+        super().__init__(
+            tikz_converter=SimpleShapeConverter(),
+            color=color,
+            lightness=lightness,
+            pattern=pattern,
+            outline=outline,
+            outline_lightness=outline_lightness,
+            pattern_color=pattern_color,
+            pattern_lightness=pattern_lightness,
+            outline_color=outline_color,
+            outline_thickness=outline_thickness,
+        )
         self.position = position
         self.rotation = rotation
         self.shape = (
             shape
             if shape is not None
             else random.choice(
-                [x for x in list(img_params.Shape) if x not in excluded_shapes_set and x != img_params.Shape.linesegment]
+                [
+                    x
+                    for x in list(img_params.Shape)
+                    if x not in excluded_shapes_set
+                    and x != img_params.Shape.linesegment
+                ]
             )
         )
         self.size = (
@@ -81,46 +98,6 @@ class SimpleShape(ClosedShape):
             if size is not None
             else (random.random() + 0.25) * 2
         )
-        self.color = (
-            color if color is not None else random.choice(list(img_params.Color))
-        )
-        self.pattern = (
-            pattern if pattern is not None else random.choice(list(img_params.Pattern))
-        )
-        self.pattern_lightness = (
-            pattern_lightness
-            if pattern_lightness is not None
-            else choose_param_with_beta(0.3, img_params.Lightness)
-        )
-        self.pattern_color = (
-            pattern_color
-            if pattern_color is not None
-            else random.choice(list(img_params.PattenColor))
-        )
-
-        self.outline = (
-            outline if outline is not None else random.choice(list(img_params.Outline))
-        )
-        self.outline_color = (
-            outline_color
-            if outline_color is not None
-            else self.get_available_outline_color()
-        )
-        self.outline_thickness = (
-            outline_thickness
-            if outline_thickness is not None
-            else random.choice(list(img_params.OutlineThickness))
-        )
-        self.outline_lightness = (
-            outline_lightness
-            if outline_lightness is not None
-            else choose_param_with_beta(0.8, img_params.OutlineLightness)
-        )
-        self.lightness = (
-            lightness
-            if lightness is not None
-            else random.choice(list(img_params.Lightness))
-        )
 
         if generation_config.GenerationConfig.color_mode == "mono":
             self.color = img_params.Color.black
@@ -128,15 +105,6 @@ class SimpleShape(ClosedShape):
             self.outline_color = img_params.OutlineColor.outlineBlack
         self.is_expanded = False
         self.compute_base_geometry()
-
-    def get_available_outline_color(self):
-        available_outline_colors = list(img_params.OutlineColor)
-        if self.color != None:
-            for color_item in available_outline_colors:
-                if color_item.name.lower().endswith(self.color.name.lower()):
-                    available_outline_colors.remove(color_item)
-
-        return random.choice(available_outline_colors)
 
     def compute_base_geometry(self):
         rot_rad = math.radians(self.rotation)
@@ -213,35 +181,36 @@ class SimpleShape(ClosedShape):
         ):
             mid = (upper + lower) / 2.0
             self.set_size(mid)
-            if self._base_geometry.overlaps(
-                other_shape
-            ) or self._base_geometry.intersects(other_shape) or self._base_geometry.contains(other_shape):
+            if (
+                self._base_geometry.overlaps(other_shape)
+                or self._base_geometry.intersects(other_shape)
+                or self._base_geometry.contains(other_shape)
+            ):
                 upper = mid
             else:
                 lower = mid
-        
-    def search_size_by_interval(self,other:"VisibleShape",interval:float):
+
+    def search_size_by_interval(self, other: "VisibleShape", interval: float):
         padded_other = other.expand_fixed(interval)
         self.search_touching_size(padded_other)
-            
-    def shift(self, offset: np.ndarray):
+
+    def shift(self, offset: common_types.Coordinate):
+        offset = np.array(offset)
         self.position += offset
         self.compute_base_geometry()
 
     def expand_fixed(self, length):
-        assert self.size +length >= 0
         cpy = self.copy
-        cpy.set_size(self.size + length)
+        cpy.set_size(max(self.size + length,0.1))
         return cpy
 
-    def expand(self,ratio):
+    def expand(self, ratio):
         self.set_size(self.size * ratio)
         return self
-    
+
     @property
     def center(self):
         return self.position
-    
-    @property
+
     def overlaps(self, other: VisibleShape):
         return super().overlaps(other)

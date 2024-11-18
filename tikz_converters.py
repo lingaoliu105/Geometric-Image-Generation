@@ -120,9 +120,17 @@ class LineSegmentConverter(BaseConverter):
         super().__init__()
         
     def convert(self, target):
-        tikz = f"\draw[color={target.color.name.lower()}] ({target.endpt_up[0]},{target.endpt_up[1]}) -- ({target.endpt_down[0]},{target.endpt_down[1]});"
+        tikz = f"\draw[color={target.color.name.lower()},ultra thick] ({target.endpt_up[0]},{target.endpt_up[1]}) -- ({target.endpt_down[0]},{target.endpt_down[1]});"
         return tikz
         
+class ComplexShapeConverter(BaseConverter):
+    def __init__(self) -> None:
+        super().__init__()
+        
+    def convert(self,target):
+        trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
+        tikz = f"\\fill [{target.color.name.lower()}] {trace};\n"
+        return tikz
     
 def convert_shapes(input_shapes:List[entity.VisibleShape]) -> list[str]:
     instructions = []

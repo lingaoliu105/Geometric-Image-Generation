@@ -110,14 +110,17 @@ def format_shape_annotations(
     ]
     for coordinate in coordinates[:-1]:
         transformed_coord = transform_coordinate(coordinate)
-        if shape["shape"] in polygon_shapes:
+        if "shape" in shape and shape["shape"] in polygon_shapes:
             vertices += transformed_coord
             vertices.append(2)
         segmentation += transformed_coord
     bbox = calc_bbox(segmentation)
 
     # find category id of the shape
-    category_id = find_category_id_by_name(shape["shape"], categories=categories)
+    if "shape" in shape:
+        category_id = find_category_id_by_name(shape["shape"], categories=categories)
+    else:
+        category_id=1000
     shape_annotation = {
         "id": get_annotation_id(),
         "image_id": image_id,

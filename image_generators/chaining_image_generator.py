@@ -2,6 +2,7 @@ from math import ceil
 
 from shapely import LineString, Point, Polygon, within
 from common_types import *
+from entities.complex_shape import ComplexShape
 from entities.entity import ClosedShape, VisibleShape
 from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
@@ -14,12 +15,15 @@ from util import *
 class ChainingImageGenerator(ImageGenerator):
     def __init__(self) -> None:
         self.position: Coordinate = (0, 0)
+        #TODO: combine the chain linesegments into one entity for json labelling
         self.draw_chain = False
         self.chain_shape = "line"
         self.shapes = []
-        self.element_num = ceil(generate_beta_random_with_mode(0.2, 2) * 19) 
-        self.interval = 0.0
+        self.shapes_layer_2 = []
+        self.element_num = ceil(generate_beta_random_with_mode(0.3, 2) * 19) +1
+        self.interval = -0.4
         self.chain = []
+        
 
     def generate_chain(self):
         assert self.element_num >= 2 and self.element_num <= 20
@@ -56,10 +60,11 @@ class ChainingImageGenerator(ImageGenerator):
         for i in range(self.element_num):
             # skip if current center is already covered by the previous shape
             if len(self.shapes) > 0 and shapely.Point(self.chain[i]).within(
-                self.shapes[-1].expand_fixed(self.interval).base_geometry
+                self.shapes[-1].expand_fixed(max(self.interval,0.0)).base_geometry
             ):
                 continue
-
+            if i>0:
+                prev_shape = self.shapes[-1]
             use_closed_shape = random.random() < 0.6
             if use_closed_shape:
                 element_rotation = get_random_rotation()
@@ -69,7 +74,7 @@ class ChainingImageGenerator(ImageGenerator):
                     )
                 else:
                     element_size = (
-                        get_point_distance(self.chain[i], self.shapes[-1].position) * 2
+                        get_point_distance(self.chain[i], prev_shape.position) * 2
                     )
                 element = SimpleShape(
                     position=self.chain[i],
@@ -77,7 +82,9 @@ class ChainingImageGenerator(ImageGenerator):
                     size=element_size,
                 )  
                 if i != 0:
-                    element.search_size_by_interval(self.shapes[-1], self.interval)
+                    element.search_size_by_interval(prev_shape, self.interval)
+                    if isinstance(prev_shape,SimpleShape) and prev_shape.overlaps(element):
+                        self.shapes_layer_2.append(ComplexShape.from_overlapping_simple_shapes(element,prev_shape))
             else:
                 if i == 0:
                     # for the line segment as the head, randomly choose endpoints
@@ -101,8 +108,7 @@ class ChainingImageGenerator(ImageGenerator):
                                 sampled_points.append(geometry.interpolate(i).coords[0])
                             return sampled_points
 
-                        prev = self.shapes[-1]
-                        expanded_prev: VisibleShape = prev if isinstance(prev,LineSegment) and prev.is_expanded else prev.expand_fixed(self.interval)
+                        expanded_prev: VisibleShape = prev_shape if isinstance(prev_shape,LineSegment) and prev_shape.is_expanded else prev_shape.expand_fixed(self.interval)
                         # pick a point on the expanded shape, which faces the next endpoint
                         bound_points: list = sample_geometry_boundary(
                             expanded_prev.base_geometry
@@ -119,7 +125,7 @@ class ChainingImageGenerator(ImageGenerator):
                             )
                         )
                         if len(filtered_bound_points) == 0: # don't know why no point passed the filter. if so, simply choose the point directly facing the next endpoint
-                            return LineString([next_endpoint,expanded_prev.position]).intersection().coords[0]
+                            return LineString([next_endpoint,expanded_prev.position]).intersection(expanded_prev.base_geometry.buffer(0.01)).coords[0]
                         return random.choice(filtered_bound_points)
 
                     start_point = choose_endpoint_around_shape()
@@ -129,7 +135,7 @@ class ChainingImageGenerator(ImageGenerator):
 
                 # if i != 0:
                 #     element.adjust_by_interval(
-                #         self.shapes[-1], self.interval, prior_method="rotate"
+                #         prev_shape, self.interval, prior_method="rotate"
                 #     )
 
             self.shapes.append(element)
@@ -147,11 +153,11 @@ class ChainingImageGenerator(ImageGenerator):
         touching_points = []
         for i, shape in enumerate(self.shapes):
             shape.shift(self.position)
-            if i > 0:
-                touching_points.append(TouchingPoint(self.shapes[i - 1], shape))
+            # if i > 0:
+            #     touching_points.append(TouchingPoint(self.shapes[i - 1], shape))
         return Panel(
             top_left=self.panel_top_left,
             bottom_right=self.panel_bottom_right,
-            shapes=self.shapes,
+            shapes=self.shapes + self.shapes_layer_2,
             joints=touching_points,
         )
