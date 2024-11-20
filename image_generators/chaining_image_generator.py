@@ -1,3 +1,4 @@
+from functools import reduce
 from math import ceil
 
 from shapely import LineString, Point, Polygon, within
@@ -14,12 +15,13 @@ from util import *
 
 class ChainingImageGenerator(ImageGenerator):
     def __init__(self) -> None:
+        super().__init__()
         self.position: Coordinate = (0, 0)
         #TODO: combine the chain linesegments into one entity for json labelling
         self.draw_chain = False
         self.chain_shape = "line"
-        self.shapes = []
         self.shapes_layer_2 = []
+        self.shapes.append(self.shapes_layer_2)
         self.element_num = ceil(generate_beta_random_with_mode(0.3, 2) * 19) +1
         self.interval = -0.4
         self.chain = []
@@ -67,7 +69,7 @@ class ChainingImageGenerator(ImageGenerator):
                 prev_shape = self.shapes[-1]
             use_closed_shape = random.random() < 0.6
             if use_closed_shape:
-                element_rotation = get_random_rotation()
+                element_rotation = random.choice(list(img_params.Angle))
                 if i == 0:
                     element_size = get_point_distance(self.chain[0], self.chain[1]) * (
                         random.random() / 2 + 0.25
@@ -84,7 +86,7 @@ class ChainingImageGenerator(ImageGenerator):
                 if i != 0:
                     element.search_size_by_interval(prev_shape, self.interval)
                     if isinstance(prev_shape,SimpleShape) and prev_shape.overlaps(element):
-                        self.shapes_layer_2.append(ComplexShape.from_overlapping_simple_shapes(element,prev_shape))
+                        self.shapes_layer_2+=(ComplexShape.from_overlapping_geometries(element.base_geometry,prev_shape.base_geometry))
             else:
                 if i == 0:
                     # for the line segment as the head, randomly choose endpoints
@@ -158,6 +160,6 @@ class ChainingImageGenerator(ImageGenerator):
         return Panel(
             top_left=self.panel_top_left,
             bottom_right=self.panel_bottom_right,
-            shapes=self.shapes + self.shapes_layer_2,
+            shapes=reduce(lambda x,y:x+y,self.shapes),
             joints=touching_points,
         )

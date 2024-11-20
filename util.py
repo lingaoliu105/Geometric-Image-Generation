@@ -149,7 +149,7 @@ def get_line_rotation(pt1:common_types.Coordinate,pt2:common_types.Coordinate)->
 
 
 def get_random_rotation()->int:
-    return random.choice(list(img_params.Rotation)).value * random.randint(0, 23)
+    return random.choice(list(img_params.Angle)).value * random.randint(0, 23)
 def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
     # Calculate the difference between the points
     diff = point1 - point2

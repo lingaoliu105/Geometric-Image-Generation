@@ -7,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 
 import generation_config
 from entities.line_segment import LineSegment
+from image_generators.random_image_generator import RandomImageGenerator
 from panel import Panel
 from entities.touching_point import TouchingPoint
 from tikz_converters import *
@@ -32,7 +33,7 @@ def generate_panels(
     # for each panel, draw simple shapes
     for i in range(panel_num):
         center, top_left, bottom_right = compute_panel_position(layout, i)
-        rot = get_random_rotation()
+        rot = random.choice(list(img_params.Angle))
         if composition_type == img_params.Composition.SIMPLE:
             panel = Panel(
                 top_left=top_left,
@@ -48,6 +49,11 @@ def generate_panels(
             panel = generator.generate()
         elif composition_type == img_params.Composition.NESTING:
             panel = generate_composite_image_nested()
+        elif composition_type == img_params.Composition.RANDOM:
+            generator = RandomImageGenerator()
+            generator.panel_top_left=top_left
+            generator.panel_bottom_right=bottom_right
+            panel = generator.generate()
         panels.append(panel)
     return panels
 
@@ -154,7 +160,7 @@ def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
     panels = generate_panels(
-        composition_type=img_params.Composition.CHAIN, layout=(1, 1)
+        composition_type=img_params.Composition.RANDOM, layout=(1, 1)
     )
     tikz_instructions = convert_panels(panels)
     # tikz_instructions = [line.to_tikz() for line in generate_consecutive_line_segments(position=(0,0))]

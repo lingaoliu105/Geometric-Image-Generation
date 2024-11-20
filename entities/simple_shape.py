@@ -1,4 +1,5 @@
 import copy
+from token import OP
 from typing import Optional
 import common_types
 from entities.line_segment import LineSegment
@@ -47,7 +48,7 @@ class SimpleShape(ClosedShape):
     def __init__(
         self,
         position: np.ndarray,
-        rotation: float,
+        rotation: Optional[img_params.Angle] = None,
         size: Optional[float] = None,
         shape: Optional[img_params.Shape] = None,
         color: Optional[img_params.Color] = None,
@@ -74,7 +75,7 @@ class SimpleShape(ClosedShape):
             outline_thickness=outline_thickness,
         )
         self.position = position
-        self.rotation = rotation
+        self.rotation = rotation if rotation is not None else random.choice(list(img_params.Angle))
         self.shape = (
             shape
             if shape is not None
@@ -107,7 +108,7 @@ class SimpleShape(ClosedShape):
         self.compute_base_geometry()
 
     def compute_base_geometry(self):
-        rot_rad = math.radians(self.rotation)
+        rot_rad = math.radians(self.rotation.value)
         rot_sin = math.sin(rot_rad)
         rot_cos = math.cos(rot_rad)
         rot_polar = np.array((rot_cos, rot_sin))
@@ -129,7 +130,7 @@ class SimpleShape(ClosedShape):
             vertices = [None] * (len(angle_list))
             index = 0
             for angle in angle_list:
-                rot_rad = math.radians(angle + self.rotation)
+                rot_rad = math.radians(angle + self.rotation.value)
                 rot_sin = math.sin(rot_rad)
                 rot_cos = math.cos(rot_rad)
                 rot_polar = np.array((rot_cos, rot_sin))

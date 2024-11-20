@@ -1,4 +1,8 @@
-from typing import Optional
+from typing import List, Optional
+
+from matplotlib.pyplot import isinteractive
+from numpy import shape
+import shapely
 from entities.entity import ClosedShape, VisibleShape
 import img_params
 from tikz_converters import ComplexShapeConverter
@@ -35,6 +39,7 @@ class ComplexShape(ClosedShape):
         pattern_lightness=None,
         outline_color=None,
         outline_thickness=None,
+        geometry:shapely.geometry.base.BaseGeometry = None
     ) -> None:
         super().__init__(
             tikz_converter=ComplexShapeConverter(),
@@ -48,12 +53,19 @@ class ComplexShape(ClosedShape):
             pattern_color=pattern_color,
             pattern_lightness=pattern_lightness,
         )
+        if geometry is not None:
+            self._base_geometry = geometry
 
     @staticmethod
-    def from_overlapping_simple_shapes(shape1: ClosedShape, shape2: ClosedShape):
-        overlap = ComplexShape()
-        overlap._base_geometry = shape1.base_geometry.intersection(shape2.base_geometry)
-        return overlap
+    def from_overlapping_geometries(shape1: shapely.geometry.base.BaseGeometry, shape2: shapely.geometry.base.BaseGeometry)->List[shapely.geometry.base.BaseGeometry]:
+        overlaping_base_geometry = shape1.intersection(shape2)
+        if isinstance(overlaping_base_geometry,shapely.MultiPolygon):
+            overlapping_geoms = list(overlaping_base_geometry.geoms)
+        else:
+            overlapping_geoms = [overlaping_base_geometry]
+        overlaps = [ComplexShape(geometry=geom) for geom in overlapping_geoms]
+        
+        return overlaps
 
     @property
     def center(self):

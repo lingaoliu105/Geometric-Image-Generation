@@ -43,11 +43,33 @@ class Color(Enum):  # color from white to black, 9 levels
     orange = 10
 
 
-class Rotation(
+class Angle(
     Enum
-):  # only 2 types. actual rotation will be random times the basic angle
-    ANGLE30 = 30
-    ANGLE45 = 45
+):  
+    deg0 = 0
+    deg15 = 15
+    deg30 = 30
+    deg45 = 45
+    deg60 = 60
+    deg75 = 75
+    deg90 = 90
+    deg105 = 105
+    deg120 = 120
+    deg135 = 135
+    deg150 = 150
+    deg165 = 165
+    deg180 = 180
+    degMinus15 = -15
+    degMinus30 = -30
+    degMinus45 = -45
+    degMinus60 = -60
+    degMinus75 = -75
+    degMinus90 = -90
+    degMinus105 = -105
+    degMinus120 = -120
+    degMinus135 = -135
+    degMinus150 = -150
+    degMinus165 = -165
 
 
 class Pattern(Enum):  # the pattern (dots, lines, etc) that fills up the shape
@@ -70,6 +92,7 @@ class Composition(Enum):
     SIMPLE = 0
     CHAIN = 1
     NESTING = 2
+    RANDOM = 3
 
 
 class TouchingPosition(Enum):

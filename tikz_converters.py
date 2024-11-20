@@ -55,11 +55,11 @@ class SimpleShapeConverter(BaseConverter):
             tikz_instruction = (
                 # draw the background color in seperate instruction, otherwise will be covered by pattern
                 f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,fill opacity=0.5,"
-                f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={shape.rotation}]"
+                f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={shape.rotation.value}]"
                 f"at ({shape.position[0]},{shape.position[1]}) {{}};\n"
                 
                 f"\\node[{self.outline_thickness_str},regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,"
-                f"inner sep=0pt,{self.outline_color_str+self.outline_lightness_str},rotate={shape.rotation},{self.pattern_str},"
+                f"inner sep=0pt,{self.outline_color_str+self.outline_lightness_str},rotate={shape.rotation.value},{self.pattern_str},"
                 f"{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] at ({shape.position[0]},{shape.position[1]}) {{}};\n"
             )
         elif shape.shape == Shape.circle:
