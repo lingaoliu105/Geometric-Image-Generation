@@ -266,7 +266,7 @@ def get_rand_point():
     """get a random point in the range of the canvas"""
     x = random.uniform(generation_config.GenerationConfig.left_canvas_bound,generation_config.GenerationConfig.right_canvas_bound)
     y = random.uniform(generation_config.GenerationConfig.lower_canvas_bound,generation_config.GenerationConfig.upper_canvas_bound)
-    return [x,y]
+    return np.array([x,y])
 
 
 def rotate_point(original_point,pivot_point, theta):

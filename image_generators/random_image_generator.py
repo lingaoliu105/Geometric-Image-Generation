@@ -14,12 +14,13 @@ class RandomImageGenerator(ImageGenerator):
         super().__init__()
         self.element_num = ceil(generate_beta_random_with_mode(0.3, 2) * 19) + 1
         self.union_geometries = [] #index is layer of display
-        
+        self.centralization = 0.3
         
 
     def generate(self):
         for _ in range (self.element_num):
-            shape = SimpleShape(position=get_rand_point())
+            pos = get_rand_point()
+            shape = SimpleShape(position=pos + (np.array([0,0])-pos) * generate_beta_random_with_mode(self.centralization,2) )
             self.shapes[0].append(shape)
             new_overlaps = [shape]
             for layer,union_geometry in enumerate(self.union_geometries):
