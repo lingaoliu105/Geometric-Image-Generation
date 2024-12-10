@@ -3,13 +3,13 @@ from typing import List, Optional
 from matplotlib.pyplot import isinteractive
 from numpy import shape
 import shapely
-from entities.entity import ClosedShape, VisibleShape
+from entities.entity import ClosedShape, Relationship, VisibleShape
 import img_params
 from tikz_converters import ComplexShapeConverter
 from shapely.affinity import scale
 
 
-class ComplexShape(ClosedShape):
+class ComplexShape(ClosedShape,Relationship):
     dataset_annotation_categories = [
         "pattern",
         "color",
