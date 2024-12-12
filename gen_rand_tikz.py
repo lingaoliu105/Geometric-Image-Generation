@@ -5,7 +5,7 @@ import random
 from typing import List, Literal
 from jinja2 import Environment, FileSystemLoader
 
-import generation_config
+from generation_config import GenerationConfig
 from entities.line_segment import LineSegment
 from image_generators.random_image_generator import RandomImageGenerator
 from panel import Panel
@@ -189,6 +189,57 @@ def main(n):
             default=lambda x: x.to_dict(),
         )
 
+def initialize_config():
+    with open("input.json", "r") as input_file:
+        data = json.load(input_file)
+
+    # Set color_mode
+    if "color_mode" in data:
+        GenerationConfig.color_mode = data["color_mode"]
+
+    # Set canvas_width
+    if "canvas_width" in data:
+        GenerationConfig.canvas_width = data["canvas_width"]
+
+    # Set canvas_height
+    if "canvas_height" in data:
+        GenerationConfig.canvas_height = data["canvas_height"]
+
+    # Set generate_num
+    if "generate_num" in data:
+        GenerationConfig.generate_num = data["generate_num"]
+
+    # Set generated_file_prefix
+    if "generated_file_prefix" in data:
+        GenerationConfig.generated_file_prefix = data["generated_file_prefix"]
+
+    # Set search_threshold
+    if "search_threshold" in data:
+        GenerationConfig.search_threshold = data["search_threshold"]
+
+    # Set color_distribution
+    if "color_distribution" in data:
+        if (
+            isinstance(data["color_distribution"], list)
+            and sum(data["color_distribution"]) == 1
+        ):
+            GenerationConfig.color_distribution = data["color_distribution"]
+        else:
+            raise ValueError(
+                "color_distribution must be a list of probabilities summing to 1."
+            )
+
+    # Set chaining_image_config
+    if "chaining_image_config" in data:
+        GenerationConfig.chaining_image_config = data["chaining_image_config"]
+
+    # Set random_image_config
+    if "random_image_config" in data:
+        GenerationConfig.random_image_config = data["random_image_config"]
+
+    # Set radial_image_config
+    if "radial_image_config" in data:
+        GenerationConfig.radial_image_config = data["radial_image_config"]
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1]:
@@ -197,5 +248,6 @@ if __name__ == "__main__":
         generation_config.GenerationConfig.color_mode = sys.argv[2]
     if len(sys.argv) >= 4 and sys.argv[3]:
         generation_config.GenerationConfig.generated_file_prefix = sys.argv[3]
+    initialize_config()
     for i in range(generation_config.GenerationConfig.generate_num):
         main(i)

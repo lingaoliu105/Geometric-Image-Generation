@@ -289,3 +289,11 @@ def rotate_point(original_point,pivot_point, theta):
     y_final = y_rotated + y0
 
     return x_final, y_final
+
+def choose_color(color_distribution:List[float])->img_params.Color:
+    if len(color_distribution) != len(list(img_params.Color)):
+        raise ValueError("Color distribution must have correct number of probabilities.")
+    if not abs(sum(color_distribution) - 1.0) < 1e-6:
+        raise ValueError("Color distribution probabilities must sum to 1.")
+    selected_color = random.choices(list(img_params.Color), weights=color_distribution, k=1)[0]
+    return selected_color

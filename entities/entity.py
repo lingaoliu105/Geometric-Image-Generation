@@ -11,6 +11,7 @@ import numpy as np
 import shapely
 from shapely.geometry.base import BaseGeometry
 
+from generation_config import GenerationConfig
 import img_params
 import uid_service
 
@@ -18,6 +19,7 @@ from abc import ABC, abstractmethod
 from shapely.affinity import translate
 
 from util import *
+import util
 
 
 class Entity(ABC):
@@ -70,7 +72,7 @@ class VisibleShape(Entity,ABC):
         assert tikz_converter is not None
         self.tikz_converter  = tikz_converter
         self.color = (
-            color if color is not None else random.choice(list(img_params.Color))
+            color if color is not None else util.choose_color(GenerationConfig.color_distribution)
         )
         
         self.lightness = (

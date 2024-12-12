@@ -25,7 +25,7 @@ class RandomImageGenerator(ImageGenerator):
             new_overlaps = [shape]
             for layer,union_geometry in enumerate(self.union_geometries):
                 if shape.base_geometry.overlaps(union_geometry):
-                    if len(self.shapes)<=layer+1:
+                    while len(self.shapes)<=layer+1:
                         self.shapes.append([])
                     new_overlaps = ComplexShape.from_overlapping_geometries(shape.base_geometry,union_geometry)
                     self.shapes[layer+1]+=new_overlaps

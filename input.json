@@ -1,0 +1,36 @@
+{
+    "color_mode": "colored",
+    "canvas_width": 20.0,
+    "canvas_height": 20.0,
+    "layout": [
+        2,
+        2
+    ],
+    "composition_type": "chain",
+    "color_distribution": [
+        0.2,
+        0.05,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.05,
+        0.05,
+        0.05
+    ],
+    "chaining_image_config": {
+        "draw_chain": true,
+        "chain_shape": "line",
+        "interval": 0.5,
+        "element_num": 5
+    },
+    "random_image_config": {
+        "centralization": 0.5,
+        "element_num": 10
+    },
+    "radial_image_config": {
+        "TBD": "value"
+    }
+}
