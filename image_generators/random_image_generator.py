@@ -6,6 +6,7 @@ from entities.complex_shape import ComplexShape
 from entities.simple_shape import SimpleShape
 from image_generators.image_generator import ImageGenerator
 from panel import Panel
+from shape_group import ShapeGroup
 from util import *
 
 
@@ -17,7 +18,7 @@ class RandomImageGenerator(ImageGenerator):
         self.centralization = 0.3
         
 
-    def generate(self):
+    def generate(self)->ShapeGroup:
         for _ in range (self.element_num):
             pos = get_rand_point()
             shape = SimpleShape(position=pos + (np.array([0,0])-pos) * generate_beta_random_with_mode(self.centralization,2) )
@@ -35,4 +36,4 @@ class RandomImageGenerator(ImageGenerator):
                 if layer > len(self.union_geometries)-1:
                     self.union_geometries.append(overlap.base_geometry)
                 self.union_geometries[layer] = unary_union([self.union_geometries[layer],overlap.base_geometry])
-        return Panel(top_left=self.panel_top_left,bottom_right=self.panel_bottom_right,shapes = reduce(lambda x,y:x+y,self.shapes),joints=[])
+        return ShapeGroup(shapes = reduce(lambda x,y:x+y,self.shapes))

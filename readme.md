@@ -80,3 +80,13 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
     | Field Name | Accepted Values | Meaning |
     | ---------- | --------------- | ------- |
     | TBD        | TBD             | TBD     |
+
+
+
+
+
+### Output Format
+
+The generated images will be stored in `/my_dataset`, together with `label.json` which contains data annotations to the images, following COCO format.
+
+The images and corresponding

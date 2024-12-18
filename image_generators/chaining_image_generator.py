@@ -10,6 +10,7 @@ from entities.simple_shape import SimpleShape
 from entities.touching_point import TouchingPoint
 from image_generators.image_generator import ImageGenerator
 from panel import Panel
+from shape_group import ShapeGroup
 from util import *
 
 
@@ -17,7 +18,7 @@ class ChainingImageGenerator(ImageGenerator):
     def __init__(self) -> None:
         super().__init__()
         self.position: Coordinate = (0, 0)
-        #TODO: combine the chain linesegments into one entity for json labelling
+        # TODO: combine the chain linesegments into one entity for json labelling
         self.draw_chain = False
         self.chain_shape = "line"
         self.shapes_layer_2 = []
@@ -25,7 +26,6 @@ class ChainingImageGenerator(ImageGenerator):
         self.element_num = ceil(generate_beta_random_with_mode(0.3, 2) * 19) +1
         self.interval = -0.4
         self.chain = []
-        
 
     def generate_chain(self):
         assert self.element_num >= 2 and self.element_num <= 20
@@ -142,7 +142,7 @@ class ChainingImageGenerator(ImageGenerator):
 
             self.shapes.append(element)
 
-    def generate(self) -> Panel:
+    def generate(self) -> ShapeGroup:
         """generate a composite geometry entity by chaining simple shapes
 
         Args:
@@ -157,9 +157,6 @@ class ChainingImageGenerator(ImageGenerator):
             shape.shift(self.position)
             # if i > 0:
             #     touching_points.append(TouchingPoint(self.shapes[i - 1], shape))
-        return Panel(
-            top_left=self.panel_top_left,
-            bottom_right=self.panel_bottom_right,
-            shapes=reduce(lambda x,y:x+y,self.shapes),
-            joints=touching_points,
-        )
+
+        shapes = reduce(lambda x, y: x + y, self.shapes)
+        return ShapeGroup(shapes=shapes)
