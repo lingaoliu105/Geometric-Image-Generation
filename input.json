@@ -6,7 +6,8 @@
         2,
         2
     ],
-    "composition_type": "chain",
+    "composition_type": "random",
+    "sub_composition_distribution":{"simple":0.5,"chain":0.5},
     "color_distribution": [
         0.2,
         0.05,
@@ -24,11 +25,11 @@
         "draw_chain": true,
         "chain_shape": "line",
         "interval": 0.5,
-        "element_num": 5
+        "element_num": 3
     },
     "random_image_config": {
         "centralization": 0.5,
-        "element_num": 10
+        "element_num": 3
     },
     "radial_image_config": {
         "TBD": "value"

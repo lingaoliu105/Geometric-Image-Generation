@@ -57,8 +57,8 @@ class ComplexShape(ClosedShape,Relationship):
             self._base_geometry = geometry
 
     @staticmethod
-    def from_overlapping_geometries(shape1: shapely.geometry.base.BaseGeometry, shape2: shapely.geometry.base.BaseGeometry)->List[shapely.geometry.base.BaseGeometry]:
-        overlaping_base_geometry = shape1.intersection(shape2)
+    def from_overlapping_geometries(geom1: shapely.geometry.base.BaseGeometry, geom2: shapely.geometry.base.BaseGeometry)->List[shapely.geometry.base.BaseGeometry]:
+        overlaping_base_geometry = geom1.intersection(geom2)
         if isinstance(overlaping_base_geometry,shapely.MultiPolygon):
             overlapping_geoms = list(overlaping_base_geometry.geoms)
         else:

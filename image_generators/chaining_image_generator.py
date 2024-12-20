@@ -8,6 +8,7 @@ from entities.entity import ClosedShape, VisibleShape
 from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
 from entities.touching_point import TouchingPoint
+from generation_config import GenerationConfig
 from image_generators.image_generator import ImageGenerator
 from panel import Panel
 from shape_group import ShapeGroup
@@ -19,12 +20,12 @@ class ChainingImageGenerator(ImageGenerator):
         super().__init__()
         self.position: Coordinate = (0, 0)
         # TODO: combine the chain linesegments into one entity for json labelling
-        self.draw_chain = False
-        self.chain_shape = "line"
-        self.shapes_layer_2 = []
-        self.shapes.append(self.shapes_layer_2)
-        self.element_num = ceil(generate_beta_random_with_mode(0.3, 2) * 19) +1
-        self.interval = -0.4
+        
+        # TODO: add default value when some configs are not given by user
+        self.draw_chain = generation_config.GenerationConfig.chaining_image_config['draw_chain']
+        self.chain_shape = generation_config.GenerationConfig.chaining_image_config['chain_shape']
+        self.element_num = GenerationConfig.chaining_image_config["element_num"]
+        self.interval = GenerationConfig.chaining_image_config['interval']
         self.chain = []
 
     def generate_chain(self):
@@ -61,12 +62,12 @@ class ChainingImageGenerator(ImageGenerator):
     def generate_shapes_on_chain(self):
         for i in range(self.element_num):
             # skip if current center is already covered by the previous shape
-            if len(self.shapes) > 0 and shapely.Point(self.chain[i]).within(
-                self.shapes[-1].expand_fixed(max(self.interval,0.0)).base_geometry
+            if len(self.shapes[0]) > 0 and shapely.Point(self.chain[i]).within(
+                self.shapes[0][-1].expand_fixed(max(self.interval,0.0)).base_geometry
             ):
                 continue
             if i>0:
-                prev_shape = self.shapes[-1]
+                prev_shape = self.shapes[0][-1]
             use_closed_shape = random.random() < 0.6
             if use_closed_shape:
                 element_rotation = random.choice(list(img_params.Angle))
@@ -86,7 +87,7 @@ class ChainingImageGenerator(ImageGenerator):
                 if i != 0:
                     element.search_size_by_interval(prev_shape, self.interval)
                     if isinstance(prev_shape,SimpleShape) and prev_shape.overlaps(element):
-                        self.shapes_layer_2+=(ComplexShape.from_overlapping_geometries(element.base_geometry,prev_shape.base_geometry))
+                        self.shapes.add_shape_on_layer(ComplexShape.from_overlapping_geometries(element.base_geometry,prev_shape.base_geometry),1)
             else:
                 if i == 0:
                     # for the line segment as the head, randomly choose endpoints
@@ -140,7 +141,7 @@ class ChainingImageGenerator(ImageGenerator):
                 #         prev_shape, self.interval, prior_method="rotate"
                 #     )
 
-            self.shapes.append(element)
+            self.shapes.add_shape(element)
 
     def generate(self) -> ShapeGroup:
         """generate a composite geometry entity by chaining simple shapes
@@ -151,12 +152,4 @@ class ChainingImageGenerator(ImageGenerator):
         """
         self.generate_chain()
         self.generate_shapes_on_chain()
-
-        touching_points = []
-        for i, shape in enumerate(self.shapes):
-            shape.shift(self.position)
-            # if i > 0:
-            #     touching_points.append(TouchingPoint(self.shapes[i - 1], shape))
-
-        shapes = reduce(lambda x, y: x + y, self.shapes)
-        return ShapeGroup(shapes=shapes)
+        return self.shapes
