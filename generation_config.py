@@ -5,7 +5,9 @@ import img_params
 
 
 class GenerationConfig:
+    # Those are default values. Will be covered by the input given in input.json
     color_mode: Literal["colored", "mono"] = "colored"
+    layout = [1,1]
     canvas_width: float = 20.0
     canvas_height: float = 20.0
     generate_num: int = 1
@@ -15,7 +17,10 @@ class GenerationConfig:
     chaining_image_config = None
     radial_image_config = None
     random_image_config = None
-
+    shape_distribution = [1/len(list(img_params.Shape))] * len(list(img_params.Shape))
+    highlight_overlap = True
+    composition_type = "chain"
+    sub_composition_distribution = {}
     @classmethod
     @property
     def left_canvas_bound(self):

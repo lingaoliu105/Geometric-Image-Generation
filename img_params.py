@@ -13,17 +13,11 @@ class Shape(
     pentagon = 5
     hexagon = 6
     # dot = 
-    # linesegment =
-    # triangle =
-    # square =
     # rectangle =
-    # pentagon =
-    # hexagon =
     # heptagon =
     # octagon =
     # nonagon =
     # decagon =
-    # circle =
     # ellipse =
     # star =
     # diamond =
@@ -87,12 +81,6 @@ class Pattern(Enum):  # the pattern (dots, lines, etc) that fills up the shape
     bricks = 11
     checkerboard = 12
 
-
-class Composition(Enum):
-    SIMPLE = 0
-    CHAIN = 1
-    NESTING = 2
-    RANDOM = 3
 
 
 class TouchingPosition(Enum):

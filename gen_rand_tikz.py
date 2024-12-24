@@ -20,37 +20,38 @@ from util import *
 from image_generators import ChainingImageGenerator
 
 
-def generate_panels(
-    composition_type: img_params.Composition, layout: tuple[int, int]
-) -> list[Panel]:
+def generate_panels() -> list[Panel]:
     """combine images of each sub-panel"""
+    layout = GenerationConfig.layout
     row_num = layout[0]
     col_num = layout[1]
+    composition_type = GenerationConfig.composition_type
     panel_num = (
-        row_num * col_num if composition_type != img_params.Composition.NESTING else 1
+        row_num * col_num if composition_type != "enclosing" else 1
     )
     panels = []
     # for each panel, draw simple shapes
     for i in range(panel_num):
         center, top_left, bottom_right = compute_panel_position(layout, i)
         rot = random.choice(list(img_params.Angle))
-        if composition_type == img_params.Composition.SIMPLE:
+        if composition_type == "simple":
             panel = Panel(
                 top_left=top_left,
                 bottom_right=bottom_right,
                 shapes=[SimpleShape(position=center, rotation=rot)],
                 joints=[],
             )
-        elif composition_type == img_params.Composition.CHAIN:
+        elif composition_type == "chain":
             # random number of base elements, selected by beta distribution, ranged from 0 to 20
             generator = ChainingImageGenerator()
             generator.panel_top_left=top_left
             generator.panel_bottom_right=bottom_right
             panel = generator.generate()
-        elif composition_type == img_params.Composition.NESTING:
+        elif composition_type == "enclosing":
             panel = generate_composite_image_nested()
-        elif composition_type == img_params.Composition.RANDOM:
+        elif composition_type == "random":
             generator = RandomImageGenerator()
+            generator.set_sub_generators()
             generator.panel_top_left=top_left
             generator.panel_bottom_right=bottom_right
             panel = generator.generate()
@@ -159,9 +160,7 @@ def generate_comb_line_segments(position,num_teeth = 8) -> List[LineSegment]:
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
-    panels = generate_panels(
-        composition_type=img_params.Composition.RANDOM, layout=(1, 1)
-    )
+    panels = generate_panels()
     tikz_instructions = convert_panels(panels)
     # tikz_instructions = [line.to_tikz() for line in generate_consecutive_line_segments(position=(0,0))]
     context = {
@@ -192,54 +191,11 @@ def main(n):
 def initialize_config():
     with open("input.json", "r") as input_file:
         data = json.load(input_file)
+        
+    for key in data:
+        if hasattr(GenerationConfig,key):
+            setattr(GenerationConfig,key,data[key])
 
-    # Set color_mode
-    if "color_mode" in data:
-        GenerationConfig.color_mode = data["color_mode"]
-
-    # Set canvas_width
-    if "canvas_width" in data:
-        GenerationConfig.canvas_width = data["canvas_width"]
-
-    # Set canvas_height
-    if "canvas_height" in data:
-        GenerationConfig.canvas_height = data["canvas_height"]
-
-    # Set generate_num
-    if "generate_num" in data:
-        GenerationConfig.generate_num = data["generate_num"]
-
-    # Set generated_file_prefix
-    if "generated_file_prefix" in data:
-        GenerationConfig.generated_file_prefix = data["generated_file_prefix"]
-
-    # Set search_threshold
-    if "search_threshold" in data:
-        GenerationConfig.search_threshold = data["search_threshold"]
-
-    # Set color_distribution
-    if "color_distribution" in data:
-        if (
-            isinstance(data["color_distribution"], list)
-            and sum(data["color_distribution"]) == 1
-        ):
-            GenerationConfig.color_distribution = data["color_distribution"]
-        else:
-            raise ValueError(
-                "color_distribution must be a list of probabilities summing to 1."
-            )
-
-    # Set chaining_image_config
-    if "chaining_image_config" in data:
-        GenerationConfig.chaining_image_config = data["chaining_image_config"]
-
-    # Set random_image_config
-    if "random_image_config" in data:
-        GenerationConfig.random_image_config = data["random_image_config"]
-
-    # Set radial_image_config
-    if "radial_image_config" in data:
-        GenerationConfig.radial_image_config = data["radial_image_config"]
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2 and sys.argv[1]:
