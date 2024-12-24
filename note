@@ -14,3 +14,12 @@
 check 8-9 age questions, try to group the questions
 relationship: category based on relative interior overlap-touching-enclosed
 read paper, reach out to ts
+
+
+12.5:
+documented, structured input (json file)
+
+12.13
+documentation of output data labels (sample image + sample annotation)
+combined processes: strings(touching) in random (enclosure > random > string > enclosure) (hierachy)
+controlled probability on other attributes (shapes, outline, etc.)
