@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Union
 import numpy as np
 from shapely import unary_union
 
@@ -26,7 +26,7 @@ class ShapeGroup:
         while layer > len(self.union_geometries):
             self.union_geometries.append([])
 
-    def add_group(self,new_shapes:List[List[VisibleShape]]):
+    def add_group(self,new_shapes:Union[List[List[VisibleShape]],"ShapeGroup"]):
         if isinstance(new_shapes,ShapeGroup):
             new_shapes = new_shapes.shapes
             

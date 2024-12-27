@@ -60,16 +60,15 @@ class ChainingImageGenerator(ImageGenerator):
                 self.shapes[0][-1].expand_fixed(max(self.interval,0.0)).base_geometry
             ):
                 continue
-            if i>0:
-                prev_shape = self.shapes[0][-1]
             sub_generator = self.choose_sub_generator()
             element_grp = sub_generator.generate()
-            assert element_grp.size()==1
             element_grp.shift(self.chain[i]-element_grp.center)
             element_grp.rotate(angle=random.choice(list(img_params.Angle)))
 
             if i != 0 and element_grp.size()==1 and isinstance(element_grp[0][0],SimpleShape):
+                prev_shape = self.shapes[0][-1]
                 simple_shape_element = element_grp[0][0]
+                simple_shape_element.scale(2*get_point_distance(prev_shape.center, self.chain[i]) / simple_shape_element.size) # expand new shape to make sure it overlaps prev to guarantee size search result
                 simple_shape_element.search_size_by_interval(prev_shape, self.interval)
 
             self.shapes.add_group(element_grp)

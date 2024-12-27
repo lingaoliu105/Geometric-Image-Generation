@@ -60,6 +60,8 @@ class ComplexShape(ClosedShape,Relationship):
 
     @staticmethod
     def from_overlapping_geometries(geom1: shapely.geometry.base.BaseGeometry, geom2: shapely.geometry.base.BaseGeometry)->List[shapely.geometry.base.BaseGeometry]:
+        if isinstance(geom1,shapely.LineString) or isinstance(geom2,shapely.LineString) or isinstance(geom1,shapely.MultiLineString) or isinstance(geom2,shapely.MultiLineString):
+            return []
         overlaping_base_geometry = geom1.intersection(geom2)
         if isinstance(overlaping_base_geometry,BaseMultipartGeometry):
             overlapping_geoms = list(overlaping_base_geometry.geoms)
