@@ -1,4 +1,4 @@
-GEN_NUM = 10
+GEN_NUM = 5
 
 GEN_FILE_PREFIX = new-
 
@@ -47,18 +47,18 @@ $(DATASET_DIR):
 	@mkdir -p $(DATASET_DIR)
 
 tex: | $(TEX_DIR) $(JSON_DIR)
-	python gen_rand_tikz.py $(GEN_NUM) $(COLOR_MODE) $(GEN_FILE_PREFIX)
+	python -W ignore gen_rand_tikz.py $(GEN_NUM) $(COLOR_MODE) $(GEN_FILE_PREFIX)
 
 $(PDF_DIR)%.pdf : $(TEX_DIR)%.tex | $(PDF_DIR)
-	@if [ "$(IS_CONTAINER)" = "true" ]; then pdflatex -interaction=batchmode -output-directory=$(PDF_DIR) $< ; fi
+	pdflatex -interaction=batchmode -output-directory=$(PDF_DIR) $<
 	
 pdf: $(PDF_FILES)
-	@if [ "$(IS_CONTAINER)" = "false" ]; then \
-		echo "Running in WSL environment."; \
-		docker-compose up; \
-	else \
-		echo "Not running in WSL environment."; \
-	fi
+	@# @if [ "$(IS_CONTAINER)" = "false" ]; then \
+	# 	echo "Running in WSL environment."; \
+	# 	docker-compose up; \
+	# else \
+	# 	echo "Not running in WSL environment."; \
+	# fi
 
 
 $(PNG_DIR)%.png : $(PDF_DIR)%.pdf | $(PNG_DIR)

@@ -1,16 +1,10 @@
-from functools import reduce
-from math import ceil
 
-from shapely import LineString, Point, Polygon, within
 from common_types import *
-from entities.complex_shape import ComplexShape
-from entities.entity import ClosedShape, VisibleShape
 from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
-from entities.touching_point import TouchingPoint
 from generation_config import GenerationConfig
 from image_generators.image_generator import ImageGenerator
-from panel import Panel
+from image_generators.simple_image_generator import SimpleImageGenerator
 from shape_group import ShapeGroup
 from util import *
 
@@ -68,80 +62,17 @@ class ChainingImageGenerator(ImageGenerator):
                 continue
             if i>0:
                 prev_shape = self.shapes[0][-1]
-            use_closed_shape = random.random() < 0.6
-            if use_closed_shape:
-                element_rotation = random.choice(list(img_params.Angle))
-                if i == 0:
-                    element_size = get_point_distance(self.chain[0], self.chain[1]) * (
-                        random.random() / 2 + 0.25
-                    )
-                else:
-                    element_size = (
-                        get_point_distance(self.chain[i], prev_shape.position) * 2
-                    )
-                element = SimpleShape(
-                    position=self.chain[i],
-                    rotation=element_rotation,
-                    size=element_size,
-                )  
-                if i != 0:
-                    element.search_size_by_interval(prev_shape, self.interval)
-                    if isinstance(prev_shape,SimpleShape) and prev_shape.overlaps(element):
-                        self.shapes.add_shape_on_layer(ComplexShape.from_overlapping_geometries(element.base_geometry,prev_shape.base_geometry),1)
-            else:
-                if i == 0:
-                    # for the line segment as the head, randomly choose endpoints
-                    element = LineSegment.within_distance(self.chain[i], self.interval)
-                else:
-                    next_endpoint = self.chain[i]
-                    def choose_endpoint_around_shape():
-                        def sample_geometry_boundary(geometry, num_points=30):
-                            if isinstance(geometry, Polygon):
-                                # 获取多边形的外环
-                                exterior_coords = geometry.exterior.coords
-                                if (
-                                    len(exterior_coords) >= num_points
-                                ):  # most likely a circle
-                                    return exterior_coords
-                                geometry = LineString(exterior_coords)
+            sub_generator = self.choose_sub_generator()
+            element_grp = sub_generator.generate()
+            assert element_grp.size()==1
+            element_grp.shift(self.chain[i]-element_grp.center)
+            element_grp.rotate(angle=random.choice(list(img_params.Angle)))
 
-                            # 根据周长进行等距采样
-                            sampled_points = []
-                            for i in np.linspace(0, geometry.length, num_points):
-                                sampled_points.append(geometry.interpolate(i).coords[0])
-                            return sampled_points
+            if i != 0 and element_grp.size()==1 and isinstance(element_grp[0][0],SimpleShape):
+                simple_shape_element = element_grp[0][0]
+                simple_shape_element.search_size_by_interval(prev_shape, self.interval)
 
-                        expanded_prev: VisibleShape = prev_shape if isinstance(prev_shape,LineSegment) and prev_shape.is_expanded else prev_shape.expand_fixed(self.interval)
-                        # pick a point on the expanded shape, which faces the next endpoint
-                        bound_points: list = sample_geometry_boundary(
-                            expanded_prev.base_geometry
-                        )
-                        filtered_bound_points = list(
-                            filter(
-                                lambda point: not LineString(
-                                    [point, next_endpoint]
-                                ).intersects(expanded_prev.base_geometry)
-                                or LineString([point, next_endpoint]).touches(
-                                    expanded_prev.base_geometry
-                                ),
-                                bound_points,
-                            )
-                        )
-                        if len(filtered_bound_points) == 0: # don't know why no point passed the filter. if so, simply choose the point directly facing the next endpoint
-                            return LineString([next_endpoint,expanded_prev.position]).intersection(expanded_prev.base_geometry.buffer(0.01)).coords[0]
-                        return random.choice(filtered_bound_points)
-
-                    start_point = choose_endpoint_around_shape()
-                    element = LineSegment(start_point, next_endpoint)
-                    element.scale_with_pivot(random.uniform(1, 2), start_point)
-                    element.expand_fixed(self.interval)
-
-                # if i != 0:
-                #     element.adjust_by_interval(
-                #         prev_shape, self.interval, prior_method="rotate"
-                #     )
-
-            self.shapes.add_shape(element)
+            self.shapes.add_group(element_grp)
 
     def generate(self) -> ShapeGroup:
         """generate a composite geometry entity by chaining simple shapes

@@ -10,6 +10,7 @@ from entities.line_segment import LineSegment
 from image_generators.random_image_generator import RandomImageGenerator
 from panel import Panel
 from entities.touching_point import TouchingPoint
+from shape_group import ShapeGroup
 from tikz_converters import *
 import img_params
 import sys
@@ -44,17 +45,15 @@ def generate_panels() -> list[Panel]:
         elif composition_type == "chain":
             # random number of base elements, selected by beta distribution, ranged from 0 to 20
             generator = ChainingImageGenerator()
-            generator.panel_top_left=top_left
-            generator.panel_bottom_right=bottom_right
-            panel = generator.generate()
+            generator.set_sub_generators()
+            elements_on_panel:ShapeGroup = generator.generate()
         elif composition_type == "enclosing":
-            panel = generate_composite_image_nested()
+            elements_on_panel:ShapeGroup = generate_composite_image_nested()
         elif composition_type == "random":
             generator = RandomImageGenerator()
             generator.set_sub_generators()
-            generator.panel_top_left=top_left
-            generator.panel_bottom_right=bottom_right
-            panel = generator.generate()
+            elements_on_panel:ShapeGroup = generator.generate()
+        panel = elements_on_panel.to_panel(top_left=top_left,bottom_right=bottom_right)
         panels.append(panel)
     return panels
 

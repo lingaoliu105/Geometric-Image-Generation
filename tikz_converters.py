@@ -1,6 +1,9 @@
 from typing import List
 import re
+
+from shapely import LineString
 import entities.entity as entity
+from entities.visible_shape import VisibleShape
 from img_params import *
 from abc import ABC, abstractmethod
 
@@ -27,7 +30,7 @@ class SimpleShapeConverter(BaseConverter):
         self.outline_thickness_str = ""
         self.outline_lightness_str = ""
 
-    def convert(self, shape:entity.VisibleShape):
+    def convert(self, shape):
 
         func_router = {
             "pattern": self.get_pattern_tikz_string,
@@ -128,14 +131,18 @@ class ComplexShapeConverter(BaseConverter):
         super().__init__()
         
     def convert(self,target):
-        trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
-        tikz = f"\\fill [{target.color.name.lower()}] {trace};\n"
+        if isinstance(target.base_geometry,LineString):
+            tikz = f"\\draw [{target.color.name.lower()}] {target.base_geometry.coords[0]} -- {target.base_geometry.coords[1]};\n"
+        else:
+            trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
+            tikz = f"\\fill [{target.color.name.lower()}] {trace};\n"
         return tikz
     
-def convert_shapes(input_shapes:List[entity.VisibleShape]) -> list[str]:
+def convert_shapes(input_shapes:List[List[VisibleShape]]) -> list[str]:
     instructions = []
-    for shape in input_shapes:
-        instructions.append(shape.tikz_converter.convert(shape))
+    for layer in input_shapes:
+        for shape in layer:
+            instructions.append(shape.tikz_converter.convert(shape))
 
     return instructions
 

@@ -5,9 +5,9 @@ from networkx import center
 import numpy as np
 from shapely import LineString, Point
 from common_types import *
-from entities.entity import Entity, OpenShape, VisibleShape
 from typing import Literal, Optional, Union
 
+from entities.visible_shape import OpenShape, VisibleShape
 import generation_config
 import img_params
 from tikz_converters import LineSegmentConverter
@@ -135,9 +135,6 @@ class LineSegment(OpenShape):
     def rotation(self):
         return get_line_rotation(self.endpt_left, self.endpt_right)
 
-    def shift(self, offset: np.ndarray):
-        self._base_geometry = translate(self._base_geometry, offset[0], offset[1])
-
     def set_endpoints(self, pt1: Coordinate, pt2: Coordinate):
         self._base_geometry = LineString([pt1, pt2])
 
@@ -149,11 +146,11 @@ class LineSegment(OpenShape):
         cpy.rotate(pivot, angle)
         return cpy
 
-    def rotate(self, pivot, angle):
-        """rotate the linesegment counter-clockwise"""
-        new_pt1 = rotate_point(self.endpt_left, pivot_point=pivot, theta=angle)
-        new_pt2 = rotate_point(self.endpt_right, pivot, angle)
-        self.set_endpoints(new_pt1, new_pt2)
+    # def rotate(self, pivot, angle):
+    #     """rotate the linesegment counter-clockwise"""
+    #     new_pt1 = rotate_point(self.endpt_left, pivot_point=pivot, theta=angle)
+    #     new_pt2 = rotate_point(self.endpt_right, pivot, angle)
+    #     self.set_endpoints(new_pt1, new_pt2)
 
     def overlaps(self, other: VisibleShape):
         return self._base_geometry.intersects(other.base_geometry)

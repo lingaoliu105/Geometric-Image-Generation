@@ -1,8 +1,11 @@
 from typing import List
+import numpy as np
 from shapely import unary_union
 
 from entities.complex_shape import ComplexShape
-from entities.entity import VisibleShape
+from entities.visible_shape import VisibleShape
+from generation_config import GenerationConfig
+from panel import Panel
 
 
 class ShapeGroup:
@@ -17,10 +20,10 @@ class ShapeGroup:
         return self.union_geometries[layer]
 
     def pad_layer(self,layer):
-        '''make the shape group contain up to the given layer (starting from 0)'''
-        while layer >= len(self.shapes):
+        '''make the shape group contain up to the given layer (starting from 1) (index = layer - 1)'''
+        while layer > len(self.shapes):
             self.shapes.append([])
-        while layer >= len(self.union_geometries):
+        while layer > len(self.union_geometries):
             self.union_geometries.append([])
 
     def add_group(self,new_shapes:List[List[VisibleShape]]):
@@ -51,7 +54,7 @@ class ShapeGroup:
     def add_shape_on_layer(self,shape:VisibleShape,layer:int):
         '''layer starts from 0'''
         self.pad_layer(self.layer_num + layer)
-        overlapping_group = [[]] * len(self.shapes)
+        overlapping_group = [[] for _ in range(len(self.shapes))]        
         for layer_cnt in range(len(self.shapes)):
             if shape.base_geometry.overlaps(self.geometry(layer_cnt)):
                 overlapping_group[layer_cnt+layer]+=(ComplexShape.from_overlapping_geometries(shape.base_geometry,self.union_geometries[layer_cnt]))
@@ -78,3 +81,48 @@ class ShapeGroup:
 
     def __getitem__(self,key):
         return self.shapes[key]
+    
+    def shift(self,offset):
+        if not isinstance(offset,np.ndarray):
+            offset = np.array(offset)
+        for layer in self.shapes:
+            for shape in layer:
+                shape.shift(offset)
+                
+    @property
+    def center(self):
+        coordinates = [shape.center for shape in self.shapes[0]]
+        # 将坐标转换为 numpy 数组
+        coords_array = np.array(coordinates)
+        
+        # 计算平均值
+        avg_x = np.mean(coords_array[:, 0])
+        avg_y = np.mean(coords_array[:, 1])
+    
+        return np.array([avg_x, avg_y])
+
+                
+    def rotate(self, angle, origin="center"):
+        if origin == "center":
+            origin = self.center
+        
+        for layer in self.shapes:
+            for shape in layer:
+                shape.rotate(angle, origin)
+                
+    def size(self):
+        return sum([len(layer) for layer in self.shapes])
+    
+    def to_panel(self,top_left,bottom_right):
+        '''place the shape group in a panel. shape group is by default placed on the entire canvas, and will be shifted and shrinked to fit in the panel'''
+        panel_center = ((top_left[0]+bottom_right[0])/2,(top_left[1]+bottom_right[1])/2)
+        self.shift(panel_center)
+        scale_ratio = (bottom_right[0]-top_left[0]) / (GenerationConfig.right_canvas_bound - GenerationConfig.left_canvas_bound)
+        assert scale_ratio == (top_left[1]-bottom_right[1]) / (GenerationConfig.upper_canvas_bound - GenerationConfig.lower_canvas_bound)
+        for layer in self.shapes:
+            for shape in layer:
+                shape.scale(scale_ratio)
+        return Panel(top_left=top_left,bottom_right=bottom_right,shapes=self.shapes,joints=[])
+
+        
+        

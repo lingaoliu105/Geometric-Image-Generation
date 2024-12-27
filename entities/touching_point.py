@@ -4,14 +4,15 @@ import math
 
 import numpy as np
 
+from entities.entity import Relationship
 from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
 
+from entities.visible_shape import VisibleShape
 from shapely_helpers import *
 
 import img_params
 from typing import Tuple
-from entities.entity import Entity, Relationship, VisibleShape
 
 
 class TouchingPoint(Relationship):

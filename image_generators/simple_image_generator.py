@@ -18,10 +18,10 @@ class SimpleImageGenerator(ImageGenerator):
     def generate(self) -> ShapeGroup:
         '''generate a single element at random position'''
         shape = random.choices(list(img_params.Shape),weights=self.shape_distribution,k=1)[0]
-        grp = ShapeGroup([[]])
         if shape==img_params.Shape.linesegment:
+            print('chosen line segment')
             element = LineSegment()
         else:
             element = SimpleShape(position=get_rand_point(),shape=shape)
-        grp.add_shape(element)
-        return grp
+        self.shapes.add_shape(element)
+        return self.shapes

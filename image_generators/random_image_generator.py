@@ -23,4 +23,6 @@ class RandomImageGenerator(ImageGenerator):
             generator = self.choose_sub_generator()
             shape_grp = generator.generate()
             self.shapes.add_group(shape_grp)
-        return ShapeGroup(shapes = reduce(lambda x,y:x+y,self.shapes))
+            
+        # TODO: add centralization
+        return self.shapes

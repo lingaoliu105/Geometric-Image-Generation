@@ -3,10 +3,12 @@ from typing import List, Optional
 from matplotlib.pyplot import isinteractive
 from numpy import shape
 import shapely
-from entities.entity import ClosedShape, Relationship, VisibleShape
+from entities.closed_shape import ClosedShape
+from entities.entity import Relationship
 import img_params
 from tikz_converters import ComplexShapeConverter
 from shapely.affinity import scale
+from shapely.geometry.base import BaseMultipartGeometry
 
 
 class ComplexShape(ClosedShape,Relationship):
@@ -59,7 +61,7 @@ class ComplexShape(ClosedShape,Relationship):
     @staticmethod
     def from_overlapping_geometries(geom1: shapely.geometry.base.BaseGeometry, geom2: shapely.geometry.base.BaseGeometry)->List[shapely.geometry.base.BaseGeometry]:
         overlaping_base_geometry = geom1.intersection(geom2)
-        if isinstance(overlaping_base_geometry,shapely.MultiPolygon):
+        if isinstance(overlaping_base_geometry,BaseMultipartGeometry):
             overlapping_geoms = list(overlaping_base_geometry.geoms)
         else:
             overlapping_geoms = [overlaping_base_geometry]
@@ -82,3 +84,6 @@ class ComplexShape(ClosedShape,Relationship):
     def expand_fixed(self, length):
         self._base_geometry = self._base_geometry.buffer(length)
         return self
+
+    def scale(self,ratio):
+        self.expand(ratio)

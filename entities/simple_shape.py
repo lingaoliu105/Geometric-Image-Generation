@@ -2,7 +2,9 @@ import copy
 from token import OP
 from typing import Optional
 import common_types
+from entities.closed_shape import ClosedShape
 from entities.line_segment import LineSegment
+from entities.visible_shape import VisibleShape
 import generation_config
 from img_params import *
 import math
@@ -15,7 +17,6 @@ from shapely.geometry.base import BaseGeometry
 import json
 from tikz_converters import SimpleShapeConverter
 import uid_service
-from entities.entity import ClosedShape, Entity, VisibleShape
 from util import almost_equal, choose_param_with_beta
 from generation_config import GenerationConfig
 
@@ -165,6 +166,10 @@ class SimpleShape(ClosedShape):
     def set_size(self, new_size: float):
         self.size = new_size
         self.compute_base_geometry()
+        
+    def scale(self,ratio):
+        new_size = self.size * ratio
+        self.set_size(new_size)
 
     def search_touching_size(self, other: VisibleShape):
         """with a initial size that guarantees to overlap, search the appropriate size that touches the other shape (with tolerance defined in the class), and set the own size to it
@@ -198,7 +203,7 @@ class SimpleShape(ClosedShape):
     def shift(self, offset: common_types.Coordinate):
         offset = np.array(offset)
         self.position += offset
-        self.compute_base_geometry()
+        super().shift(offset=offset)
 
     def expand_fixed(self, length):
         cpy = self.copy
@@ -215,3 +220,9 @@ class SimpleShape(ClosedShape):
 
     def overlaps(self, other: VisibleShape):
         return super().overlaps(other)
+
+    def rotate(self,angle,origin="center"):
+        super().rotate(angle,origin)
+        # TODO: make better representation of rotation
+        self.rotation = angle
+        
