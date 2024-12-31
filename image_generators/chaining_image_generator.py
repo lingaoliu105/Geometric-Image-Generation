@@ -20,7 +20,8 @@ class ChainingImageGenerator(ImageGenerator):
         self.chain_shape = generation_config.GenerationConfig.chaining_image_config['chain_shape']
         self.element_num = GenerationConfig.chaining_image_config["element_num"]
         self.interval = GenerationConfig.chaining_image_config['interval']
-        self.chain = []
+        self.chain = [] # initial positions of each element
+        self.sub_generators = {SimpleImageGenerator:1.0} # default value
 
     def generate_chain(self):
         assert self.element_num >= 2 and self.element_num <= 20
@@ -37,11 +38,11 @@ class ChainingImageGenerator(ImageGenerator):
         curve_point_set = curve_function()
 
         def get_chain():
-            step_length = len(curve_point_set) // self.element_num
+            step_length = max(1,len(curve_point_set) // (self.element_num-1))
             chain = [
-                curve_point_set[step_length * index]
+                curve_point_set[min(step_length * index, len(curve_point_set) - 1)]
                 for index in range(self.element_num)
-            ]  # the set of all centers of the element shapes
+            ] # the set of all centers of the element shapes
             return chain
 
         self.chain = get_chain()
@@ -62,6 +63,7 @@ class ChainingImageGenerator(ImageGenerator):
                 continue
             sub_generator = self.choose_sub_generator()
             element_grp = sub_generator.generate()
+            element_grp.scale(random.uniform(0.2,0.4))
             element_grp.shift(self.chain[i]-element_grp.center)
             element_grp.rotate(angle=random.choice(list(img_params.Angle)))
 

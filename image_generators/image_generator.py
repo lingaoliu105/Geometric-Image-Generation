@@ -42,6 +42,7 @@ class ImageGenerator(ABC):
 
     def set_sub_generators(self):
         '''only be called when the generator is top-level generator'''
+        self.sub_generators.clear() # clear default value
         distribution_dict = GenerationConfig.sub_composition_distribution
 
         for generator_type in distribution_dict: 

@@ -167,7 +167,9 @@ class SimpleShape(ClosedShape):
         self.size = new_size
         self.compute_base_geometry()
         
-    def scale(self,ratio):
+    def scale(self,ratio,origin="center"):
+        super().scale(ratio,origin)
+        self.position = self._base_geometry.centroid.coords[0]
         new_size = self.size * ratio
         self.set_size(new_size)
 
@@ -224,5 +226,36 @@ class SimpleShape(ClosedShape):
     def rotate(self,angle,origin="center"):
         super().rotate(angle,origin)
         # TODO: make better representation of rotation
-        self.rotation = angle
+        def get_relative_rotation(polygon: Polygon) -> float:
+            """
+            Calculate the relative rotation of a polygon compared to its horizontal placement.
+            
+            :param polygon: A Shapely Polygon object.
+            :return: Rotation angle in degrees, counterclockwise relative to the horizontal axis.
+            """
+            # Get the minimum rotated rectangle
+            rotated_rect = polygon.minimum_rotated_rectangle
+            
+            # Extract the rectangle's coordinates (it will be a closed loop)
+            rect_coords = list(rotated_rect.exterior.coords)[:4]  # Get the 4 corners
+            
+            # Compute the vector along one of the longer sides
+            vec1 = (rect_coords[1][0] - rect_coords[0][0], rect_coords[1][1] - rect_coords[0][1])
+            vec2 = (rect_coords[2][0] - rect_coords[1][0], rect_coords[2][1] - rect_coords[1][1])
+            
+            # Choose the longer vector as the main axis
+            if (vec1[0]**2 + vec1[1]**2) >= (vec2[0]**2 + vec2[1]**2):
+                main_axis = vec1
+            else:
+                main_axis = vec2
+            
+            # Calculate the angle with the horizontal axis
+            angle = math.degrees(math.atan2(main_axis[1], main_axis[0]))
+            
+            # Normalize angle to [0, 180) or [0, 360) as needed
+            angle = angle % 180  # Keep in [0, 180) for bidirectional comparison
+            return angle
+        actual_rotation_angle = get_relative_rotation(self._base_geometry)
+        self.rotation = min(list(img_params.Angle),key=lambda x:abs(actual_rotation_angle - x.value))
+        self.position = self._base_geometry.centroid.coords[0]
         

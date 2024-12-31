@@ -262,7 +262,7 @@ def choose_param_with_beta(mode, param_class, alpha = 2):
     nearest_index = min([i for i in range(param_num)],key=lambda x: abs(params_float_list[x] - rand_num))
     return list(param_class)[nearest_index]
 
-def get_rand_point():
+def get_rand_point()->np.ndarray:
     """get a random point in the range of the canvas"""
     x = random.uniform(generation_config.GenerationConfig.left_canvas_bound,generation_config.GenerationConfig.right_canvas_bound)
     y = random.uniform(generation_config.GenerationConfig.lower_canvas_bound,generation_config.GenerationConfig.upper_canvas_bound)

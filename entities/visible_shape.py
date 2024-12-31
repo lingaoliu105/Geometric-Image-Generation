@@ -13,7 +13,7 @@ import img_params
 import uid_service
 
 from abc import ABC, abstractmethod
-from shapely.affinity import translate, rotate
+from shapely.affinity import translate, rotate, scale
 
 from util import *
 import util
@@ -79,11 +79,14 @@ class VisibleShape(Entity, ABC):
         origin (str or tuple): The point around which to rotate.
                              Options are 'center', 'centroid', or a tuple (x, y).
         """
-        self._base_geometry = rotate(self._base_geometry, angle.value, origin=tuple(origin))
+        if not isinstance(origin,str):
+            origin = tuple(origin)
+        self._base_geometry = rotate(self._base_geometry, angle.value, origin)
         
-    @abstractmethod
-    def scale(self,ratio):
-        pass
+    def scale(self,ratio,origin="center"):
+        if not isinstance(origin,str):
+            origin = tuple(origin)
+        self._base_geometry = scale(self._base_geometry,xfact=ratio,yfact=ratio,origin=origin)
 
 class OpenShape(VisibleShape):
     pass

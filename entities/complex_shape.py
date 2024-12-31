@@ -67,7 +67,7 @@ class ComplexShape(ClosedShape,Relationship):
             overlapping_geoms = list(overlaping_base_geometry.geoms)
         else:
             overlapping_geoms = [overlaping_base_geometry]
-        overlaps = [ComplexShape(geometry=geom) for geom in overlapping_geoms]
+        overlaps = [ComplexShape(geometry=geom) for geom in overlapping_geoms if isinstance(geom,shapely.Polygon)]
         
         return overlaps
 
@@ -86,6 +86,3 @@ class ComplexShape(ClosedShape,Relationship):
     def expand_fixed(self, length):
         self._base_geometry = self._base_geometry.buffer(length)
         return self
-
-    def scale(self,ratio):
-        self.expand(ratio)

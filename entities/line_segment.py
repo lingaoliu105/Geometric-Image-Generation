@@ -146,12 +146,6 @@ class LineSegment(OpenShape):
         cpy.rotate(pivot, angle)
         return cpy
 
-    # def rotate(self, pivot, angle):
-    #     """rotate the linesegment counter-clockwise"""
-    #     new_pt1 = rotate_point(self.endpt_left, pivot_point=pivot, theta=angle)
-    #     new_pt2 = rotate_point(self.endpt_right, pivot, angle)
-    #     self.set_endpoints(new_pt1, new_pt2)
-
     def overlaps(self, other: VisibleShape):
         return self._base_geometry.intersects(other.base_geometry)
 
@@ -167,13 +161,6 @@ class LineSegment(OpenShape):
             self.scale(1 - 2 * abs(length) / self.length)
         return self
 
-    def scale(self, ratio):
-        """scale the line segment with the center as pivot
-
-        Args:
-            ratio (_type_): _description_
-        """
-        self.scale_with_pivot(ratio, self.center)
 
     def scale_with_pivot(self, ratio, pivot: Coordinate):
         assert self._base_geometry.buffer(0.01).contains(Point(pivot))

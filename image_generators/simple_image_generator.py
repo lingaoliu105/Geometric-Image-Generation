@@ -3,6 +3,7 @@ import random
 from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
 from generation_config import GenerationConfig
+import generation_config
 from image_generators.image_generator import ImageGenerator
 import img_params
 from shape_group import ShapeGroup
@@ -19,9 +20,8 @@ class SimpleImageGenerator(ImageGenerator):
         '''generate a single element at random position'''
         shape = random.choices(list(img_params.Shape),weights=self.shape_distribution,k=1)[0]
         if shape==img_params.Shape.linesegment:
-            print('chosen line segment')
-            element = LineSegment()
+            element = LineSegment(pt1=(GenerationConfig.left_canvas_bound,0),pt2=(GenerationConfig.right_canvas_bound,0))
         else:
-            element = SimpleShape(position=get_rand_point(),shape=shape)
+            element = SimpleShape(position=(0,0),shape=shape,size=GenerationConfig.canvas_width/2)
         self.shapes.add_shape(element)
         return self.shapes
