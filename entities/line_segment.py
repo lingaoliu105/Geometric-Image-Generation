@@ -43,8 +43,6 @@ class LineSegment(OpenShape):
         self,
         pt1: Optional[Union[np.ndarray, tuple, list]] = None,
         pt2: Optional[Union[np.ndarray, tuple, list]] = None,
-        color: Optional[img_params.Color] = None,
-        lightness: Optional[img_params.Lightness] = None,
     ) -> None:
         super().__init__(tikz_converter=LineSegmentConverter())
         self.shape = img_params.Shape.linesegment
@@ -58,14 +56,6 @@ class LineSegment(OpenShape):
         else:
             self._base_geometry = LineString([pt1, pt2])
 
-        self.color = (
-            color if color is not None else random.choice(list(img_params.Color))
-        )
-        self.lightness = (
-            lightness
-            if lightness is not None
-            else random.choice(list(img_params.Lightness))
-        )
         self.is_expanded = False
         
     @property

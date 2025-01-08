@@ -23,7 +23,8 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
       > }
       > ```
       >
-      > 
+
+5. `opacity`: the fill opacity of shapes, ranges from 0 to 1.
 
 5. `generated_file_prefix`: the prefix of the generated files' names.
 

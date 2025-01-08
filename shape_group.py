@@ -21,10 +21,10 @@ class ShapeGroup:
         return self.union_geometries[layer]
 
     def pad_layer(self,layer):
-        '''make the shape group contain up to the given layer (starting from 1) (index = layer - 1)'''
-        while layer > len(self.shapes):
+        '''make the shape group contain up to the given layer (starting from 0)'''
+        while layer >= len(self.shapes):
             self.shapes.append([])
-        while layer > len(self.union_geometries):
+        while layer >= len(self.union_geometries):
             self.union_geometries.append([])
 
     def add_group(self,new_shapes:Union[List[List[VisibleShape]],"ShapeGroup"]):
@@ -41,7 +41,6 @@ class ShapeGroup:
                         if isinstance(sub_item, list):
                             raise ValueError("The list cannot be nested more than two levels.")
         validate_two_level_list(new_shapes)
-        self.pad_layer(len(self.shapes)+len(new_shapes)) # total layer depends on the sum of max layer of 2 groups
         for new_layer,shapes_on_layer in enumerate(new_shapes):
             for shape in shapes_on_layer:
                 self.add_shape_on_layer(shape,new_layer)                
@@ -54,14 +53,14 @@ class ShapeGroup:
 
     def add_shape_on_layer(self,shape:VisibleShape,layer:int):
         '''layer starts from 0'''
-        self.pad_layer(self.layer_num + layer)
+        self.pad_layer(self.layer_num + layer + 1) 
         overlapping_group = [[] for _ in range(len(self.shapes))]        
         for layer_cnt in range(len(self.shapes)):
             if shape.base_geometry.overlaps(self.geometry(layer_cnt)):
-                overlapping_group[layer_cnt+layer]+=(ComplexShape.from_overlapping_geometries(shape.base_geometry,self.union_geometries[layer_cnt]))
+                overlapping_group[layer_cnt+layer+1].extend(ComplexShape.from_overlapping_geometries(shape.base_geometry,self.geometry(layer_cnt)))
 
         for layer_cnt,shapes in enumerate(overlapping_group):
-            self.shapes[layer_cnt] += shapes
+            self.shapes[layer_cnt].extend(shapes)
         self.shapes[layer].append(shape)
 
     def __add__(self,other):
@@ -127,4 +126,9 @@ class ShapeGroup:
         scale_ratio = (bottom_right[0]-top_left[0]) / (GenerationConfig.right_canvas_bound - GenerationConfig.left_canvas_bound)
         assert scale_ratio == (top_left[1]-bottom_right[1]) / (GenerationConfig.upper_canvas_bound - GenerationConfig.lower_canvas_bound)
         self.scale(scale_ratio=scale_ratio)
-        return Panel(top_left=top_left,bottom_right=bottom_right,shapes=self.shapes,joints=[])
+        flattened_list = [item for sublist in self.shapes for item in sublist]
+        return Panel(top_left=top_left,bottom_right=bottom_right,shapes=flattened_list,joints=[])
+
+    def show(self):
+        for layer in self.shapes:
+            print([f"{shape.__class__.__name__}, uid: {shape.uid}" for shape in layer])

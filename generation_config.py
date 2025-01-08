@@ -21,6 +21,7 @@ class GenerationConfig:
     highlight_overlap = True
     composition_type = "chain"
     sub_composition_distribution = {}
+    opacity=0.0
     @classmethod
     @property
     def left_canvas_bound(self):

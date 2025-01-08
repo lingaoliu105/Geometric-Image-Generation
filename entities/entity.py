@@ -26,6 +26,7 @@ class Entity(ABC):
 
     def __init__(self) -> None:
         self.uid = uid_service.get_new_entity_uid()
+        self.type:img_params.Type
     def to_dict(self):
         dict = {attr_name: getattr(self, attr_name) for attr_name in self.serialized_fields}
         for key in dict:

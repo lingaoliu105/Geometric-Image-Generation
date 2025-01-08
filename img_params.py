@@ -12,7 +12,7 @@ class Shape(
     square = 4
     pentagon = 5
     hexagon = 6
-    # dot = 
+    # dot =
     # rectangle =
     # heptagon =
     # octagon =
@@ -21,6 +21,31 @@ class Shape(
     # ellipse =
     # star =
     # diamond =
+
+
+class Type(Enum):
+    DOT = "dot"
+    LINESEGMENT = "linesegment"
+    TRIANGLE = "triangle"
+    SQUARE = "square"
+    RECTANGLE = "rectangle"
+    PENTAGON = "pentagon"
+    HEXAGON = "hexagon"
+    HEPTAGON = "heptagon"
+    OCTAGON = "octagon"
+    NONAGON = "nonagon"
+    DECAGON = "decagon"
+    CIRCLE = "circle"
+    ELLIPSE = "ellipse"
+    STAR = "star"
+    DIAMOND = "diamond"
+    ARROW = "arrow"
+    DOUBLEARROW = "doublearrow"
+    ARC = "arc"
+    INTERSECTIONDOT = "intersectionDot"
+    INTERSECTIONLINESEGMENT = "intersectionLineSegment"
+    INTERSECTIONARC = "intersectionArc"
+    INTERSECTIONREGION = "intersectionRegion"
 
 
 class Color(Enum): 
@@ -80,7 +105,6 @@ class Pattern(Enum):  # the pattern (dots, lines, etc) that fills up the shape
     sixpointedStars = 10
     bricks = 11
     checkerboard = 12
-
 
 
 class TouchingPosition(Enum):

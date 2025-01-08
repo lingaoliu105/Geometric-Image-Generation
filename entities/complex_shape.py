@@ -59,7 +59,7 @@ class ComplexShape(ClosedShape,Relationship):
             self._base_geometry = geometry
 
     @staticmethod
-    def from_overlapping_geometries(geom1: shapely.geometry.base.BaseGeometry, geom2: shapely.geometry.base.BaseGeometry)->List[shapely.geometry.base.BaseGeometry]:
+    def from_overlapping_geometries(geom1: shapely.geometry.base.BaseGeometry, geom2: shapely.geometry.base.BaseGeometry)->List["ComplexShape"]:
         if isinstance(geom1,shapely.LineString) or isinstance(geom2,shapely.LineString) or isinstance(geom1,shapely.MultiLineString) or isinstance(geom2,shapely.MultiLineString):
             return []
         overlaping_base_geometry = geom1.intersection(geom2)
@@ -67,13 +67,18 @@ class ComplexShape(ClosedShape,Relationship):
             overlapping_geoms = list(overlaping_base_geometry.geoms)
         else:
             overlapping_geoms = [overlaping_base_geometry]
-        overlaps = [ComplexShape(geometry=geom) for geom in overlapping_geoms if isinstance(geom,shapely.Polygon)]
-        
+        overlaps = [ComplexShape(geometry=geom) for geom in overlapping_geoms if isinstance(geom,shapely.Polygon) and not geom.is_empty]
+        for i in range(len(overlaps)):
+            overlaps[i].shape = img_params.Type.INTERSECTIONREGION         
         return overlaps
 
     @property
     def center(self):
-        return self._base_geometry.centroid.coords[0]
+        try:
+            return self._base_geometry.centroid.coords[0]
+        except IndexError:
+            print(self,self.base_geometry)
+            return (self._base_geometry.boundary.coords[0])
 
     @property
     def position(self):

@@ -89,6 +89,7 @@ class SimpleShape(ClosedShape):
                 ]
             )
         )
+        # self.type = filter(list(img_params.Type))
         self.size = (
             min(
                 size,
@@ -100,7 +101,7 @@ class SimpleShape(ClosedShape):
             if size is not None
             else (random.random() + 0.25) * 2
         )
-
+   
         if generation_config.GenerationConfig.color_mode == "mono":
             self.color = img_params.Color.black
             self.pattern_color = img_params.PattenColor.patternBlack

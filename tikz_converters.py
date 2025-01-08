@@ -4,8 +4,10 @@ import re
 from shapely import LineString
 import entities.entity as entity
 from entities.visible_shape import VisibleShape
+from generation_config import GenerationConfig
 from img_params import *
 from abc import ABC, abstractmethod
+
 
 class BaseConverter: # enclose in classes to store temporary strings that makes the tikz strings, held by each individual VisibleShape instance to avoid data miswrite
     def __init__(self) -> None:
@@ -18,7 +20,7 @@ class BaseConverter: # enclose in classes to store temporary strings that makes 
     @abstractmethod
     def convert(self,target:entity.Entity):
         pass
-        
+
 class SimpleShapeConverter(BaseConverter):
     def __init__(self) -> None:
         super().__init__()
@@ -57,7 +59,7 @@ class SimpleShapeConverter(BaseConverter):
             sides = shape.shape.value
             tikz_instruction = (
                 # draw the background color in seperate instruction, otherwise will be covered by pattern
-                f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,fill opacity=0.5,"
+                f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,fill opacity={GenerationConfig.opacity},"
                 f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={shape.rotation.value}]"
                 f"at ({shape.position[0]},{shape.position[1]}) {{}};\n"
                 
@@ -67,7 +69,7 @@ class SimpleShapeConverter(BaseConverter):
             )
         elif shape.shape == Shape.circle:
             tikz_instruction = (
-                f"\draw [{self.color_str+self.lightness_str}]"
+                f"\draw [{self.color_str+self.lightness_str},fill opacity={GenerationConfig.opacity}]"
                 f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
 
                 f"\draw [{self.outline_thickness_str},{self.outline_color_str},{self.outline_str},"
@@ -125,24 +127,24 @@ class LineSegmentConverter(BaseConverter):
     def convert(self, target):
         tikz = f"\draw[color={target.color.name.lower()},ultra thick] ({target.endpt_up[0]},{target.endpt_up[1]}) -- ({target.endpt_down[0]},{target.endpt_down[1]});"
         return tikz
-        
+
 class ComplexShapeConverter(BaseConverter):
     def __init__(self) -> None:
         super().__init__()
-        
+
     def convert(self,target):
         if isinstance(target.base_geometry,LineString):
             tikz = f"\\draw [{target.color.name.lower()}] {target.base_geometry.coords[0]} -- {target.base_geometry.coords[1]};\n"
         else:
             trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
-            tikz = f"\\fill [{target.color.name.lower()}] {trace};\n"
+            tikz = f"\\fill [{target.color.name.lower()},fill opacity={GenerationConfig.opacity}] {trace};\n"
+            tikz += f"\\fill [{target.color.name.lower()},fill opacity={GenerationConfig.opacity},pattern=horizontal lines] {trace};\n"
         return tikz
-    
-def convert_shapes(input_shapes:List[List[VisibleShape]]) -> list[str]:
+
+def convert_panel(input_panel) -> list[str]:
     instructions = []
-    for layer in input_shapes:
-        for shape in layer:
-            instructions.append(shape.tikz_converter.convert(shape))
+    for shape in input_panel.shapes:
+        instructions.append(shape.tikz_converter.convert(shape))
 
     return instructions
 
@@ -150,5 +152,7 @@ def convert_shapes(input_shapes:List[List[VisibleShape]]) -> list[str]:
 def convert_panels(panels) -> list[str]:
     instructions = []
     for panel in panels:
-        instructions += convert_shapes(panel.shapes)
+        instructions += convert_panel(panel)
     return instructions
+
+
