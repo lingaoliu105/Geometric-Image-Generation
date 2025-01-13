@@ -56,7 +56,7 @@ class ShapeGroup:
         self.pad_layer(self.layer_num + layer + 1) 
         overlapping_group = [[] for _ in range(len(self.shapes))]        
         for layer_cnt in range(len(self.shapes)):
-            if shape.base_geometry.overlaps(self.geometry(layer_cnt)):
+            if shape.base_geometry.overlaps(self.geometry(layer_cnt)) and not (shape.base_geometry.contains(self.geometry(layer_cnt)) or self.geometry(layer_cnt).contains(shape.base_geometry)):
                 overlapping_group[layer_cnt+layer+1].extend(ComplexShape.from_overlapping_geometries(shape.base_geometry,self.geometry(layer_cnt)))
 
         for layer_cnt,shapes in enumerate(overlapping_group):

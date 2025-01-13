@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 import random
-from types import GeneratorType
 from typing import Dict, List
 
-from networkx import generate_adjlist
 import numpy as np
 
 from generation_config import GenerationConfig
@@ -15,7 +13,8 @@ class ImageGenerator(ABC):
 
     def __init__(self) -> None:
         self.shapes:ShapeGroup = ShapeGroup([[]])
-        self.sub_generators:Dict[ImageGenerator,float] = {}
+        from image_generators.simple_image_generator import SimpleImageGenerator
+        self.sub_generators:Dict[ImageGenerator,float] = {SimpleImageGenerator:1.0}
     @abstractmethod
     def generate(self)->ShapeGroup:
         pass
@@ -28,7 +27,7 @@ class ImageGenerator(ABC):
     def panel_radius(self):
         return np.linalg.norm(self.panel_bottom_right - self.panel_top_left) / 2
 
-    def choose_sub_generator(self):
+    def choose_sub_generator(self)->"ImageGenerator":
         keys = list(self.sub_generators.keys())
         probabilities = list(self.sub_generators.values())
 
@@ -52,7 +51,11 @@ class ImageGenerator(ABC):
             elif generator_type == "enclosing":
                 from image_generators.enclosing_image_generator import EnclosingImageGenerator
                 generator = EnclosingImageGenerator
-            elif generator_type =="simple":
+            elif generator_type=="random":
+                from image_generators.random_image_generator import RandomImageGenerator
+                generator = RandomImageGenerator
+            else: # simple generator as default
                 from image_generators.simple_image_generator import SimpleImageGenerator
                 generator = SimpleImageGenerator
+                
             self.sub_generators[generator] = distribution_dict[generator_type]

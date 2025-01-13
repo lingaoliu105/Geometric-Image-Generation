@@ -7,7 +7,9 @@ from jinja2 import Environment, FileSystemLoader
 
 from generation_config import GenerationConfig
 from entities.line_segment import LineSegment
+from image_generators.enclosing_image_generator import EnclosingImageGenerator
 from image_generators.random_image_generator import RandomImageGenerator
+from image_generators.simple_image_generator import SimpleImageGenerator
 from panel import Panel
 from entities.touching_point import TouchingPoint
 from shape_group import ShapeGroup
@@ -36,23 +38,18 @@ def generate_panels() -> list[Panel]:
         center, top_left, bottom_right = compute_panel_position(layout, i)
         rot = random.choice(list(img_params.Angle))
         if composition_type == "simple":
-            panel = Panel(
-                top_left=top_left,
-                bottom_right=bottom_right,
-                shapes=[SimpleShape(position=center, rotation=rot)],
-                joints=[],
-            )
+            generator = SimpleImageGenerator()
         elif composition_type == "chain":
             # random number of base elements, selected by beta distribution, ranged from 0 to 20
             generator = ChainingImageGenerator()
             generator.set_sub_generators()
-            elements_on_panel:ShapeGroup = generator.generate()
         elif composition_type == "enclosing":
-            elements_on_panel:ShapeGroup = generate_composite_image_nested()
+            generator = EnclosingImageGenerator()
+            generator.set_sub_generators()
         elif composition_type == "random":
             generator = RandomImageGenerator()
             generator.set_sub_generators()
-            elements_on_panel:ShapeGroup = generator.generate()
+        elements_on_panel:ShapeGroup = generator.generate()
         panel = elements_on_panel.to_panel(top_left=top_left,bottom_right=bottom_right)
         panels.append(panel)
     return panels
@@ -80,34 +77,7 @@ def compute_panel_position(layout: tuple[int, int], index: int):
     return center_coord, top_left_coord, bottom_right_coord
 
 
-def generate_composite_image_nested(
-    outer_size=20.0, recur_depth=2
-) -> list[SimpleShape]:
-    """generate a nested image, centered at 0,0, and within a square area of outer_size * outer_size
 
-    Args:
-        outer_size (int, optional): the length of edge of the square frame. Defaults to 20.
-    """
-    if recur_depth == 0:
-        panel_images = generate_panels(img_params.Composition.SIMPLE)
-        for image in panel_images:
-            shrink_ratio = outer_size / 20
-            image.shift(-shrink_ratio * image.position)
-            image.set_size(image.size * shrink_ratio)
-        return panel_images
-    else:
-        rotation = 0  # TODO: may change to random rotation in the future
-        shape_list = []
-        outer_shape = SimpleShape(np.array([0.0, 0.0]), rotation, size=outer_size / 2.0)
-        shape_list.append(outer_shape)
-        if outer_shape.shape == img_params.Shape.triangle:
-            shrink_ratio = 0.6
-        else:
-            shrink_ratio = 0.8
-        shape_list += generate_composite_image_nested(
-            outer_size=outer_size * shrink_ratio, recur_depth=recur_depth - 1
-        )
-        return shape_list
 
 def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal["orthogonal","random"] = "random") -> List[LineSegment]:
     init = np.array([0.0,0.0])
