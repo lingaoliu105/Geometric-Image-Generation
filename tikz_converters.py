@@ -32,7 +32,7 @@ class SimpleShapeConverter(BaseConverter):
         self.outline_thickness_str = ""
         self.outline_lightness_str = ""
 
-    def convert(self, shape):
+    def convert(self, target):
 
         func_router = {
             "pattern": self.get_pattern_tikz_string,
@@ -46,35 +46,41 @@ class SimpleShapeConverter(BaseConverter):
             "outline_lightness": self.get_outline_lightness_tikz_string,
         }
 
-        for attr in shape.dataset_annotation_categories:
+        for attr in target.dataset_annotation_categories:
             if attr in func_router:
-                func_router[attr](getattr(shape, attr))
+                func_router[attr](getattr(target, attr))
 
-        if shape.shape in [
+        if target.shape in [
             Shape.triangle,
             Shape.square,
             Shape.pentagon,
             Shape.hexagon,
         ]:
-            sides = shape.shape.value
+            trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
+
+            sides = target.shape.value
             tikz_instruction = (
                 # draw the background color in seperate instruction, otherwise will be covered by pattern
-                f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,fill opacity={GenerationConfig.opacity},"
-                f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={shape.rotation.value}]"
-                f"at ({shape.position[0]},{shape.position[1]}) {{}};\n"
                 
-                f"\\node[{self.outline_thickness_str},regular polygon, regular polygon sides={sides}, minimum size={round(shape.size,3)}cm,"
-                f"inner sep=0pt,{self.outline_color_str+self.outline_lightness_str},rotate={shape.rotation.value},{self.pattern_str},"
-                f"{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] at ({shape.position[0]},{shape.position[1]}) {{}};\n"
+                # f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(target.size,3)}cm,fill opacity={GenerationConfig.opacity},"
+                # f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={target.rotation.value}]"
+                # f"at ({target.position[0]},{target.position[1]}) {{}};\n"
+                
+                f"\\fill [{target.color.name.lower()},fill opacity={GenerationConfig.opacity}] {trace};\n"
+                f"\\draw [{self.outline_thickness_str},{self.outline_color_str+self.outline_lightness_str},{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] {trace};\n"
+
+                # f"\\node[{self.outline_thickness_str},regular polygon, regular polygon sides={sides}, minimum size={round(target.size,3)}cm,"
+                # f"inner sep=0pt,{self.outline_color_str+self.outline_lightness_str},rotate={target.rotation.value},{self.pattern_str},"
+                # f"{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] at ({target.position[0]},{target.position[1]}) {{}};\n"
             )
-        elif shape.shape == Shape.circle:
+        elif target.shape == Shape.circle:
             tikz_instruction = (
                 f"\draw [{self.color_str+self.lightness_str},fill opacity={GenerationConfig.opacity}]"
-                f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
+                f"({target.position[0]},{target.position[1]}) circle ({target.size});\n"
 
                 f"\draw [{self.outline_thickness_str},{self.outline_color_str},{self.outline_str},"
                 f"{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str}]"
-                f"({shape.position[0]},{shape.position[1]}) circle ({shape.size});\n"
+                f"({target.position[0]},{target.position[1]}) circle ({target.size});\n"
             )
             
         # tikz_instruction += f"\\fill [black] ({shape.position[0]},{shape.position[1]}) circle (0.1);\n"
