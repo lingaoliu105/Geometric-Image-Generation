@@ -37,7 +37,7 @@ class ClosedShape(VisibleShape):
     ) -> None:
         super().__init__(tikz_converter, color=color, lightness=lightness)
         self.pattern = (
-            pattern if pattern is not None else random.choice(list(img_params.Pattern))
+            pattern if pattern is not None else util.choose_item_by_distribution(img_params.Pattern,GenerationConfig.pattern_distribution)
         )
         self.pattern_lightness = (
             pattern_lightness
@@ -50,7 +50,7 @@ class ClosedShape(VisibleShape):
             else random.choice(list(img_params.PattenColor))
         )
         self.outline = (
-            outline if outline is not None else random.choice(list(img_params.Outline))
+            outline if outline is not None else choose_item_by_distribution(img_params.Outline,GenerationConfig.outline_distribution)
         )
         self.outline_color = (
             outline_color
@@ -67,6 +67,9 @@ class ClosedShape(VisibleShape):
             if outline_lightness is not None
             else choose_param_with_beta(0.8, img_params.OutlineLightness)
         )
+        if generation_config.GenerationConfig.color_mode == "mono":
+            self.pattern_color = img_params.PattenColor.patternBlack
+            self.outline_color = img_params.OutlineColor.outlineBlack
 
     def get_available_outline_color(self):
         """find available color for outline when inner color is determined, such that outline color and inner color differ

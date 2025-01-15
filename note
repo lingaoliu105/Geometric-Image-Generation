@@ -23,3 +23,8 @@ documented, structured input (json file)
 documentation of output data labels (sample image + sample annotation)
 combined processes: strings(touching) in random (enclosure > random > string > enclosure) (hierachy)
 controlled probability on other attributes (shapes, outline, etc.)
+
+1.8
+closer to the style(less shading, b&w, fixed styles of positioning (up&down, left&right etc))
+generate and compare with the examples
+fixed positioning (corner, etc) instrad of random

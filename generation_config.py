@@ -14,6 +14,7 @@ class GenerationConfig:
     generated_file_prefix:str = ""
     search_threshhold = 1e-5 #the threshhold used when finding appropriate size / rotation using binary search
     color_distribution = [1/len(list(img_params.Color))] * len(list(img_params.Color))
+    pattern_distribution = [1/len(list(img_params.Pattern))] * len(list(img_params.Pattern))
     chaining_image_config = None
     radial_image_config = None
     random_image_config = None
@@ -23,6 +24,10 @@ class GenerationConfig:
     composition_type = "chain"
     sub_composition_distribution = {}
     opacity=0.0
+    outline_distribution = [1 / len(list(img_params.Outline))] * len(
+        list(img_params.Outline)
+    )
+    border_image_config = None
     @classmethod
     @property
     def left_canvas_bound(self):
@@ -39,4 +44,3 @@ class GenerationConfig:
     @property
     def lower_canvas_bound(self):
         return -self.canvas_width/2   
-

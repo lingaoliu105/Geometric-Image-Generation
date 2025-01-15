@@ -7,14 +7,14 @@ from entities.visible_shape import VisibleShape
 from generation_config import GenerationConfig
 import img_params
 from panel import Panel
-
+from shapely.geometry.base import BaseGeometry
 
 class ShapeGroup:
     def __init__(self,shapes:List[List[VisibleShape]]) -> None:
         self.shapes = shapes if shapes is not None else [[]]
         self.union_geometries = []
 
-    def geometry(self,layer):
+    def geometry(self,layer)->BaseGeometry:
         # to keep geometries list updated
         self.pad_layer(layer)
         self.union_geometries[layer] = unary_union([shape.base_geometry for shape in self.shapes[layer]])

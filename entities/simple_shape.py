@@ -102,10 +102,7 @@ class SimpleShape(ClosedShape):
             else (random.random() + 0.25) * 2
         )
    
-        if generation_config.GenerationConfig.color_mode == "mono":
-            self.color = img_params.Color.black
-            self.pattern_color = img_params.PattenColor.patternBlack
-            self.outline_color = img_params.OutlineColor.outlineBlack
+
         self.is_expanded = False
         self.compute_base_geometry()
 

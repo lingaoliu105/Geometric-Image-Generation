@@ -41,6 +41,9 @@ class VisibleShape(Entity, ABC):
             if lightness is not None
             else random.choice(list(img_params.Lightness))
         )
+        if generation_config.GenerationConfig.color_mode == "mono":
+            self.color = img_params.Color.black
+
 
     @abstractmethod
     def expand(self, ratio):

@@ -142,9 +142,8 @@ class ComplexShapeConverter(BaseConverter):
         if isinstance(target.base_geometry,LineString):
             tikz = f"\\draw [{target.color.name.lower()}] {target.base_geometry.coords[0]} -- {target.base_geometry.coords[1]};\n"
         else:
-            trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
+            trace =" -- ".join([str(coord) for coord in target.base_geometry.exterior.coords])
             tikz = f"\\fill [{target.color.name.lower()},fill opacity={GenerationConfig.opacity}] {trace};\n"
-            tikz += f"\\fill [{target.color.name.lower()},fill opacity={GenerationConfig.opacity},pattern=horizontal lines] {trace};\n"
         return tikz
 
 def convert_panel(input_panel) -> list[str]:

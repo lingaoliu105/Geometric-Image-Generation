@@ -4,7 +4,7 @@ This module includes pure computation functions used in the code base
 
 from enum import Enum
 import random
-from typing import List
+from typing import List, Type
 import numpy as np
 import shapely
 
@@ -291,9 +291,16 @@ def rotate_point(original_point,pivot_point, theta):
     return x_final, y_final
 
 def choose_color(color_distribution:List[float])->img_params.Color:
-    if len(color_distribution) != len(list(img_params.Color)):
-        raise ValueError("Color distribution must have correct number of probabilities.")
-    if not abs(sum(color_distribution) - 1.0) < 1e-6:
+    return choose_item_by_distribution(img_params.Color,color_distribution)
+
+def choose_item_by_distribution(enum:Type[Enum],distribution:List[float]):
+    if len(distribution) != len(list(enum)):
+        raise ValueError(
+            "Distribution must have correct number of probabilities."
+        )
+    if not abs(sum(distribution) - 1.0) < 1e-6:
         raise ValueError("Color distribution probabilities must sum to 1.")
-    selected_color = random.choices(list(img_params.Color), weights=color_distribution, k=1)[0]
-    return selected_color
+    selected = random.choices(
+        list(enum), weights=distribution, k=1
+    )[0]
+    return selected

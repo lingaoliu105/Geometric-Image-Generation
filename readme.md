@@ -74,53 +74,108 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
       > "color_distribution":[0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1] 
       > // The colors are evenly distributed, each with 0.1 probability
       > }
+      > 
       > ```
 
       
 
-      1. `chaining_image_config`: an individual json object. Only works when `composition_type` is `chain`, or `chain` is assigned as one of possible sub generators. The structure is as follows:
+10. `pattern_distribution`: an array of floats representing the probabilities of filling patterns:
+    
+    | Index | Pattern            |
+    | ----- | ------------------ |
+    | 0     | blank              |
+    | 1     | horizontal Lines   |
+    | 2     | vertical Lines     |
+    | 3     | north East Lines   |
+    | 4     | north West Lines   |
+    | 5     | grid               |
+    | 6     | crosshatch         |
+    | 7     | dots               |
+    | 8     | crosshatch Dots    |
+    | 9     | five pointed Stars |
+    | 10    | six pointed Stars  |
+    | 11    | bricks             |
+    | 12    | checkerboard       |
 
-      | Field Name      | Accepted Values                    | Meaning                                                      |
-      | --------------- | ---------------------------------- | ------------------------------------------------------------ |
-      | `"draw_chain"`  | `True` or `False`                  | whether to draw or hide the chain (string)                   |
-      | `"chain_shape"` | `"line"`, `"bezier"` or `"circle"` | the shape of the internal chain                              |
-      | `"interval"`    | a float around 0                   | The interval between 2 adjacent elements. A positive interval means there's a distance, 0 interval means the shapes touches each other. Negative interval means overlap |
-      | `"element_num"` | a positive integer                 | The number of elements on the chaining string                |
 
-10. `random_image_config`: an individual json object. Only works when `composition_type` is `random`. or `random` is assigned as one of the possible sub generators. The structure is as follows:
+​      
 
-        | Field Name         | Accepted Values         | Meaning                                                      |
-        | ------------------ | ----------------------- | ------------------------------------------------------------ |
-        | `"centralization"` | a float between 0 and 1 | a parameter that allows elements' position closer to the center to produce more overlaps. 0 means no tuning. 1 means all elements will be shifted to the center. |
-        | `"element_num"`    | a positive integer      | The number of elements on the chaining string                |
+11. `chaining_image_config`: an individual json object. Only works when `composition_type` is `chain`, or `chain` is assigned as one of possible sub generators. The structure is as follows:
 
-      1. `radial_image_config`: an individual json object. Only works when `composition_type` is `radial`, or `radial` is specified as one of sub generators. The structure is as follows:
+       | Field Name      | Accepted Values                    | Meaning                                                      |
+       | --------------- | ---------------------------------- | ------------------------------------------------------------ |
+       | `"draw_chain"`  | `True` or `False`                  | whether to draw or hide the chain (string)                   |
+       | `"chain_shape"` | `"line"`, `"bezier"` or `"circle"` | the shape of the internal chain                              |
+       | `"interval"`    | a float around 0                   | The interval between 2 adjacent elements. A positive interval means there's a distance, 0 interval means the shapes touches each other. Negative interval means overlap |
+       | `"element_num"` | a positive integer                 | The number of elements on the chaining string                |
 
+12. `random_image_config`: an individual json object. Only works when `composition_type` is `random`. or `random` is assigned as one of the possible sub generators. The structure is as follows:
 
-         | Field Name | Accepted Values | Meaning |
-         | ---------- | --------------- | ------- |
-         | TBD        | TBD             | TBD     |
+    | Field Name         | Accepted Values         | Meaning                                                      |
+    | ------------------ | ----------------------- | ------------------------------------------------------------ |
+    | `"centralization"` | a float between 0 and 1 | a parameter that allows elements' position closer to the center to produce more overlaps. 0 means no tuning. 1 means all elements will be shifted to the center. |
+    | `"element_num"`    | a positive integer      | The number of elements on the chaining string                |
 
-11. `enclosing_image_config`: an individual json object, specifying relevant configurations of enclosing shape patterns:
+13. `radial_image_config`: an individual json object. Only works when `composition_type` is `radial`, or `radial` is specified as one of sub generators. The structure is as follows:
 
-       | Field Name        | Accepted Values | Meaning                      |
-       | ----------------- | --------------- | ---------------------------- |
-       | `"enclose_level"` | an integer >= 2 | How many levels of enclosure |
+    | Field Name | Accepted Values | Meaning |
+    | ---------- | --------------- | ------- |
+    | TBD        | TBD             | TBD     |
 
-       
+14. `enclosing_image_config`: an individual json object, specifying relevant configurations of enclosing shape patterns:
+       | Field Name        | Accepted Values | Meaning                     |
+       | ----------------- | --------------- | ----------------------------|
+       | `"enclose_level"` | an integer >= 2 | How many levels of enclosure|
 
-12. `shape_distribution`: an array that specifies the probability of shape occurrence. The details are as follows:
+15. `border_image_config`: an individual json object, specifying relevant configurations of shapes being placed at border of canvas (i.e edge midpoints and corners):
 
-          | Index | Shape        |
-          | ----- | ------------ |
-          | 0     | line segment |
-          | 1     | circle       |
-          | 2     | triangle     |
-          | 3     | square       |
-          | 4     | pentagon     |
-          | 5     | hexagon      |
+    | Field Name                 | Accepted Values                                     | Meaning                                                      |
+    | -------------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
+    | `"position_probabilities"` | an array of length 8,each number is between 0 and 1 | The probability for each position (specified below) to hold elements |
 
-          
+    The `position_probabilities` is as specified below:
+
+    | Index | Position <br />(assigned clockwise) |
+    | ----- | ----------------------------------- |
+    | 0     | top-left                            |
+    | 1     | top-middle                          |
+    | 2     | top-right                           |
+    | 3     | middle-right                        |
+    | 4     | bottom-right                        |
+    | 5     | bottom-middle                       |
+    | 6     | bottom-left                         |
+    | 7     | middle-left                         |
+
+    > Example:
+    >
+    > ```json
+    >     "border_image_config":{
+    >         "position_probabilities":[
+    >             0.5,
+    >             0.5,
+    >             0.5,
+    >             0.5,
+    >             0.5,
+    >             0.5,
+    >             0.5,
+    >             0.5
+    >         ] // each position have 0.5 probability to hold something (depending on sub generators)
+    >     }
+    > ```
+    >
+    > 
+
+16. `shape_distribution`: an array that specifies the probability of shape occurrence. The details are as follows:
+
+      | Index | Shape        |
+      | ----- | ------------ |
+      | 0     | line segment |
+      | 1     | circle       |
+      | 2     | triangle     |
+      | 3     | square       |
+      | 4     | pentagon     |
+      | 5     | hexagon      |
+
 
 
 
