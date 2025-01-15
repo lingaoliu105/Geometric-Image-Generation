@@ -288,7 +288,7 @@ def rotate_point(original_point,pivot_point, theta):
     x_final = x_rotated + x0
     y_final = y_rotated + y0
 
-    return x_final, y_final
+    return np.array((x_final, y_final))
 
 def choose_color(color_distribution:List[float])->img_params.Color:
     return choose_item_by_distribution(img_params.Color,color_distribution)

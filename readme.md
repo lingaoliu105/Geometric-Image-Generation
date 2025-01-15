@@ -102,12 +102,13 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
 
 11. `chaining_image_config`: an individual json object. Only works when `composition_type` is `chain`, or `chain` is assigned as one of possible sub generators. The structure is as follows:
 
-       | Field Name      | Accepted Values                    | Meaning                                                      |
-       | --------------- | ---------------------------------- | ------------------------------------------------------------ |
-       | `"draw_chain"`  | `True` or `False`                  | whether to draw or hide the chain (string)                   |
-       | `"chain_shape"` | `"line"`, `"bezier"` or `"circle"` | the shape of the internal chain                              |
-       | `"interval"`    | a float around 0                   | The interval between 2 adjacent elements. A positive interval means there's a distance, 0 interval means the shapes touches each other. Negative interval means overlap |
-       | `"element_num"` | a positive integer                 | The number of elements on the chaining string                |
+    | Field Name      | Accepted Values                     | Meaning                                                      |
+    | --------------- | ----------------------------------- | ------------------------------------------------------------ |
+    | `"draw_chain"`  | `True` or `False`                   | whether to draw or hide the chain (string)                   |
+    | `"chain_shape"` | `"line"`, `"bezier"` or `"circle"`  | the shape of the internal chain                              |
+    | `"interval"`    | a float around 0                    | The interval between 2 adjacent elements. A positive interval means there's a distance, 0 interval means the shapes touches each other. Negative interval means overlap |
+    | `"element_num"` | a positive integer                  | The number of elements on the chaining string                |
+    | `"rotation"`    | a positive number between 0 and 180 | how big is the angle that the chain (axis) should rotate, starting from being aligned horizontally (0 degree) |
 
 12. `random_image_config`: an individual json object. Only works when `composition_type` is `random`. or `random` is assigned as one of the possible sub generators. The structure is as follows:
 

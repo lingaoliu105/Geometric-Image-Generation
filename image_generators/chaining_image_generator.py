@@ -22,7 +22,7 @@ class ChainingImageGenerator(ImageGenerator):
         self.interval = GenerationConfig.chaining_image_config['interval']
         self.chain = [] # initial positions of each element
         self.sub_generators = {SimpleImageGenerator:1.0} # default value
-
+        self.rotation = GenerationConfig.chaining_image_config["rotation"]
     def generate_chain(self):
         assert self.element_num >= 2 and self.element_num <= 20
         # composite the image first, then shift to the center pos
@@ -31,11 +31,12 @@ class ChainingImageGenerator(ImageGenerator):
         elif self.chain_shape == "circle":
             curve_function = lambda: generate_circle_curve(random.randrange(4, 8))
         elif self.chain_shape == "line":
-            curve_function = lambda: get_points_on_line((-5.0, 5.0), (5.0, -5.0))
+            curve_function = lambda: get_points_on_line((-5.0, 0.0), (5.0, 0.0))
         else:
             print("curve type not assigned")
             raise
         curve_point_set = curve_function()
+        curve_point_set = [rotate_point(pt,(0,0),self.rotation) for pt in curve_point_set]
 
         def get_chain():
             step_length = max(1,len(curve_point_set) // (self.element_num-1))
