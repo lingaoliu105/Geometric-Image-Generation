@@ -131,9 +131,12 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
 
 15. `border_image_config`: an individual json object, specifying relevant configurations of shapes being placed at border of canvas (i.e edge midpoints and corners):
 
+    > Edit: border image generator now also takes charge of center positioning
+
     | Field Name                 | Accepted Values                                     | Meaning                                                      |
     | -------------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
-    | `"position_probabilities"` | an array of length 8,each number is between 0 and 1 | The probability for each position (specified below) to hold elements |
+    | `"position_probabilities"` | an array of length 9,each number is between 0 and 1 | The probability for each position (specified below) to hold elements |
+    | `"element_scaling"`        | float between 0 and 1                               | the ratio to scale the element on each entry. (starting from element occupying whole panel) |
 
     The `position_probabilities` is as specified below:
 
@@ -147,6 +150,7 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
     | 5     | bottom-middle                       |
     | 6     | bottom-left                         |
     | 7     | middle-left                         |
+    | 8     | center                              |
 
     > Example:
     >
