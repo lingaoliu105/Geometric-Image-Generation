@@ -137,6 +137,7 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
     | -------------------------- | --------------------------------------------------- | ------------------------------------------------------------ |
     | `"position_probabilities"` | an array of length 9,each number is between 0 and 1 | The probability for each position (specified below) to hold elements |
     | `"element_scaling"`        | float between 0 and 1                               | the ratio to scale the element on each entry. (starting from element occupying whole panel) |
+    | `"approach_factor"`        | float between 0 and 1                               | how much should the elements be pushed to border (0 for staying at center and 1 for touching the border) (not applicable for line segments) |
 
     The `position_probabilities` is as specified below:
 
