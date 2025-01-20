@@ -104,7 +104,7 @@ class ShapeGroup:
 
         return np.array([avg_x, avg_y])
 
-    def rotate(self, angle:img_params.Angle, origin="center"):
+    def rotate(self, angle:Union[img_params.Angle,int], origin="center"):
         if origin == "center":
             origin = self.center
 
@@ -128,7 +128,7 @@ class ShapeGroup:
         self.shift(panel_center)
         scale_ratio = (bottom_right[0]-top_left[0]) / (GenerationConfig.right_canvas_bound - GenerationConfig.left_canvas_bound)
         assert scale_ratio == (top_left[1]-bottom_right[1]) / (GenerationConfig.upper_canvas_bound - GenerationConfig.lower_canvas_bound)
-        self.scale(scale_ratio=scale_ratio)
+        self.scale(scale_ratio=scale_ratio,origin=panel_center)
         flattened_list = [item for sublist in self.shapes for item in sublist]
         return Panel(top_left=top_left,bottom_right=bottom_right,shapes=flattened_list,joints=[])
 

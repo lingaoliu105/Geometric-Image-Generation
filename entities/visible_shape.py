@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import random
-from typing import Optional
+from typing import Optional, Union
 
 import numpy as np
 import shapely
@@ -73,7 +73,7 @@ class VisibleShape(Entity, ABC):
             self._base_geometry, xoff=offset[0], yoff=offset[1]
         )
 
-    def rotate(self, angle:img_params.Angle, origin="center"):
+    def rotate(self, angle:Union[img_params.Angle,int], origin="center"):
         """
         Rotate the geometry by a specified angle around a given origin.
 
@@ -84,7 +84,9 @@ class VisibleShape(Entity, ABC):
         """
         if not isinstance(origin,str):
             origin = tuple(origin)
-        self._base_geometry = rotate(self._base_geometry, angle.value, origin)
+        if isinstance(angle,img_params.Angle):
+            angle = angle.value
+        self._base_geometry = rotate(self._base_geometry, angle, origin)
         
     def scale(self,ratio,origin="center"):
         if not isinstance(origin,str):

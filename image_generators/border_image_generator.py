@@ -2,9 +2,12 @@ import math
 import random
 
 import numpy as np
+from responses import start
 from shapely import LineString
+from entities.line_segment import LineSegment
 from generation_config import GenerationConfig
 from image_generators.image_generator import ImageGenerator
+from shape_group import ShapeGroup
 
 
 class BorderImageGenerator(ImageGenerator):
@@ -45,9 +48,23 @@ class BorderImageGenerator(ImageGenerator):
             )
             if random.random() <= probability:
                 sub_image = self.choose_sub_generator().generate()
-                sub_image.scale(0.3)
-                while not sub_image.geometry(0).intersects(canvas_boundary_geometry):
-                    sub_image.shift(move_direction_vector * 0.1)
+                if sub_image.size() == 1 and isinstance(sub_image[0][0],LineSegment):
+
+                    large_distance = 1000
+                    end_point = np.array((0,0)) + move_direction_vector * large_distance
+                    ray = LineString([np.array((0,0)), end_point])
+                    
+                    # Find the intersection between the ray and the boundary geometry
+                    intersection = ray.intersection(canvas_boundary_geometry)
+                    
+                    pt2 = np.array(intersection.coords[0])
+
+                    sub_image = ShapeGroup([[LineSegment(pt1=np.array((0,0)),pt2 = pt2)]])
+                else:
+                    sub_image.scale(0.3)
+                    while not sub_image.geometry(0).intersects(canvas_boundary_geometry):
+                        sub_image.shift(move_direction_vector * 0.1)
                 self.shapes.add_group(sub_image)
                     
         return self.shapes
+
