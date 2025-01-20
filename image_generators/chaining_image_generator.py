@@ -1,5 +1,6 @@
 
 from common_types import *
+from entities.complex_shape import ComplexShape
 from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
 from generation_config import GenerationConfig
@@ -27,7 +28,7 @@ class ChainingImageGenerator(ImageGenerator):
         assert self.element_num >= 2 and self.element_num <= 20
         # composite the image first, then shift to the center pos
         if self.chain_shape == "bezier":
-            curve_function = lambda: generate_bezier_curve_single_param(1)
+            curve_function = lambda: generate_random_bezier_curve()
         elif self.chain_shape == "circle":
             curve_function = lambda: generate_circle_curve(random.randrange(4, 8))
         elif self.chain_shape == "line":
@@ -35,25 +36,19 @@ class ChainingImageGenerator(ImageGenerator):
         else:
             print("curve type not assigned")
             raise
-        curve_point_set = curve_function()
-        curve_point_set = [rotate_point(pt,(0,0),self.rotation) for pt in curve_point_set]
+        self.curve_point_set = curve_function()
+        self.curve_point_set = [rotate_point(pt,(0,0),self.rotation) for pt in self.curve_point_set]
 
         def get_chain():
-            step_length = max(1,len(curve_point_set) // (self.element_num-1))
+            step_length = max(1,len(self.curve_point_set) // (self.element_num-1))
             chain = [
-                curve_point_set[min(step_length * index, len(curve_point_set) - 1)]
+                self.curve_point_set[min(step_length * index, len(self.curve_point_set) - 1)]
                 for index in range(self.element_num)
             ] # the set of all centers of the element shapes
             return chain
 
         self.chain = get_chain()
-        if self.draw_chain:
-            self.shapes += [
-                LineSegment(
-                    curve_point_set[i], curve_point_set[i + 1], img_params.Color.black
-                )
-                for i in range(len(curve_point_set) - 2)
-            ]
+
 
     def generate_shapes_on_chain(self):
         for i in range(self.element_num):
@@ -64,7 +59,7 @@ class ChainingImageGenerator(ImageGenerator):
                 continue
             sub_generator = self.choose_sub_generator()
             element_grp = sub_generator.generate()
-            element_grp.scale(random.uniform(0.2,0.4))
+            element_grp.scale(1/self.element_num)
             element_grp.shift(self.chain[i]-element_grp.center)
             element_grp.rotate(angle=random.choice(list(img_params.Angle)))
 
@@ -85,4 +80,15 @@ class ChainingImageGenerator(ImageGenerator):
         """
         self.generate_chain()
         self.generate_shapes_on_chain()
+        if self.draw_chain:
+            chain_segments = [
+                LineSegment(
+                    self.curve_point_set[i], self.curve_point_set[i + 1]
+                )
+                for i in range(len(self.curve_point_set) - 2)
+                # for i in range(0,len(self.curve_point_set) - 2,2)
+            ]
+            top_layer = self.shapes.layer_num-1
+            for seg in chain_segments:
+                self.shapes.add_shape_on_layer(seg,top_layer)
         return self.shapes

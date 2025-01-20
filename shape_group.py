@@ -2,6 +2,7 @@ from typing import List, Optional, Union
 import numpy as np
 from shapely import unary_union
 
+from entities.closed_shape import ClosedShape
 from entities.complex_shape import ComplexShape
 from entities.visible_shape import VisibleShape
 from generation_config import GenerationConfig
@@ -17,7 +18,7 @@ class ShapeGroup:
     def geometry(self,layer)->BaseGeometry:
         # to keep geometries list updated
         self.pad_layer(layer)
-        self.union_geometries[layer] = unary_union([shape.base_geometry for shape in self.shapes[layer]])
+        self.union_geometries[layer] = unary_union([shape.base_geometry for shape in self.shapes[layer] if isinstance(shape,ClosedShape)])
         return self.union_geometries[layer]
 
     def pad_layer(self,layer):
@@ -54,13 +55,14 @@ class ShapeGroup:
     def add_shape_on_layer(self,shape:VisibleShape,layer:int):
         '''layer starts from 0'''
         self.pad_layer(self.layer_num + layer + 1) 
-        overlapping_group = [[] for _ in range(len(self.shapes))]        
-        for layer_cnt in range(len(self.shapes)):
-            if shape.base_geometry.overlaps(self.geometry(layer_cnt)) and not (shape.base_geometry.contains(self.geometry(layer_cnt)) or self.geometry(layer_cnt).contains(shape.base_geometry)):
-                overlapping_group[layer_cnt+layer+1].extend(ComplexShape.from_overlapping_geometries(shape.base_geometry,self.geometry(layer_cnt)))
+        if isinstance(shape,ClosedShape):
+            overlapping_group = [[] for _ in range(len(self.shapes))]        
+            for layer_cnt in range(len(self.shapes)):
+                if shape.base_geometry.overlaps(self.geometry(layer_cnt)) and not (shape.base_geometry.contains(self.geometry(layer_cnt)) or self.geometry(layer_cnt).contains(shape.base_geometry)):
+                    overlapping_group[layer_cnt+layer+1].extend(ComplexShape.from_overlapping_geometries(shape.base_geometry,self.geometry(layer_cnt)))
 
-        for layer_cnt,shapes in enumerate(overlapping_group):
-            self.shapes[layer_cnt].extend(shapes)
+            for layer_cnt,shapes in enumerate(overlapping_group):
+                self.shapes[layer_cnt].extend(shapes)
         self.shapes[layer].append(shape)
 
     def __add__(self,other):
@@ -132,3 +134,7 @@ class ShapeGroup:
     def show(self):
         for layer in self.shapes:
             print([f"{shape.__class__.__name__}, uid: {shape.uid}" for shape in layer])
+            
+    def flattened(self):
+        return [item for sublist in self.shapes for item in sublist]
+

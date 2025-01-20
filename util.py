@@ -15,6 +15,7 @@ import img_params
 
 from scipy.stats import beta
 
+
 def compute_angle_between_vectors(
     point_out: np.ndarray,
     point_in: np.ndarray,
@@ -101,24 +102,87 @@ def cubic_bezier(t, P0, P1, P2, P3):
     )
 
 
-def generate_bezier_curve(P0, P1, P2, P3, num_points=100,scale = 1)->np.ndarray:
+def generate_bezier_curve(P0, P1, P2, P3, num_points=100, scale=1) -> np.ndarray:
     """Generate points on a cubic Bezier curve."""
     t_values = np.linspace(0, 1, num_points)
-    curve = np.array([scale*cubic_bezier(t, P0, P1, P2, P3) for t in t_values])
+    curve = np.array([scale * cubic_bezier(t, P0, P1, P2, P3) for t in t_values])
     return curve
 
-def generate_bezier_curve_single_param(curvature:float)->np.ndarray: 
-    """generate points on a cubic Bezier curve, which curvature is controled by the single input, 
+
+def generate_equidistant_bezier_curve(
+    P0, P1, P2, P3, num_points=100, scale=1
+) -> np.ndarray:
+    """Generate approximately equidistant points on a cubic Bezier curve."""
+    t_values = np.linspace(0, 1, num_points * 10)  # 生成更多点
+    curve = np.array([scale * cubic_bezier(t, P0, P1, P2, P3) for t in t_values])
+
+    distances = np.linalg.norm(curve[1:] - curve[:-1], axis=1)
+    cumulative_distances = np.cumsum(distances)
+    total_length = cumulative_distances[-1]
+
+    target_distances = np.linspace(0, total_length, num_points)
+    equidistant_curve = []
+    last_index = 0
+
+    for target_distance in target_distances:
+        while (
+            last_index < len(cumulative_distances)
+            and cumulative_distances[last_index] < target_distance
+        ):
+            last_index += 1
+        if last_index == 0:
+            equidistant_curve.append(curve[0])
+        else:
+            # Interpolate between the two closest points
+            t = (target_distance - cumulative_distances[last_index - 1]) / (
+                cumulative_distances[last_index] - cumulative_distances[last_index - 1]
+            )
+            point = curve[last_index - 1] + t * (
+                curve[last_index] - curve[last_index - 1]
+            )
+            equidistant_curve.append(point)
+
+    return np.array(equidistant_curve)
+
+
+def generate_random_bezier_curve():
+    control_points = [
+        np.array(
+            [
+                random.uniform(
+                    generation_config.GenerationConfig.left_canvas_bound,
+                    generation_config.GenerationConfig.right_canvas_bound,
+                ),
+                random.uniform(
+                    generation_config.GenerationConfig.lower_canvas_bound,
+                    generation_config.GenerationConfig.upper_canvas_bound,
+                ),
+            ]
+        )
+        for _ in range(4)
+    ]
+    return generate_equidistant_bezier_curve(P0=control_points[0],P1=control_points[1],P2=control_points[2],P3=control_points[3])
+
+
+def generate_bezier_curve_single_param(curvature: float) -> np.ndarray:
+    """generate points on a cubic Bezier curve, which curvature is controled by the single input,
         and 2 endpoints at (-1,0) and (1,0). can be scaled up according to usage
 
     Args:
         curvature (float): the curvature that you expect the curve to be. the curve bends more when this number is larger
-    """    
-    
-    return generate_bezier_curve(np.array([-1,0]),np.array([-0.5,curvature]),np.array([0.5,-curvature]),np.array([1,0]),scale=8)
+    """
 
-def generate_circle_curve(radius:float)->np.ndarray:
-    return np.array(shapely.Point(0,0).buffer(radius).exterior.coords)
+    return generate_bezier_curve(
+        np.array([-1, 0]),
+        np.array([-0.5, curvature]),
+        np.array([0.5, -curvature]),
+        np.array([1, 0]),
+        scale=8,
+    )
+
+
+def generate_circle_curve(radius: float) -> np.ndarray:
+    return np.array(shapely.Point(0, 0).buffer(radius).exterior.coords)
 
 
 def get_points_on_line(start, end, n=100):
@@ -137,19 +201,26 @@ def get_points_on_line(start, end, n=100):
     end = np.array(end)
 
     # 生成包含 n 个点的等差数列，并根据比例计算每个点的坐标
-    points = np.array([((1 - t) * start + t * end).tolist() for t in np.linspace(0, 1, n)])
+    points = np.array(
+        [((1 - t) * start + t * end).tolist() for t in np.linspace(0, 1, n)]
+    )
 
     return points
 
-def get_line_rotation(pt1:common_types.Coordinate,pt2:common_types.Coordinate)->float:
-    delta = pt1-pt2
+
+def get_line_rotation(
+    pt1: common_types.Coordinate, pt2: common_types.Coordinate
+) -> float:
+    delta = pt1 - pt2
     # 使用 arctan2 计算角度，并转换为度数
     angle = np.degrees(np.arctan2(delta[1], delta[0]))
     return angle
 
 
-def get_random_rotation()->int:
+def get_random_rotation() -> int:
     return random.choice(list(img_params.Angle)).value * random.randint(0, 23)
+
+
 def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
     # Calculate the difference between the points
     diff = point1 - point2
@@ -254,24 +325,34 @@ def generate_beta_random_with_mode(mode, alpha, min_val=0.0, max_val=1.0):
     return scaled_sample
 
 
-def choose_param_with_beta(mode, param_class, alpha = 2):
-    assert(issubclass(param_class,Enum))
+def choose_param_with_beta(mode, param_class, alpha=2):
+    assert issubclass(param_class, Enum)
     rand_num = generate_beta_random_with_mode(mode=mode, alpha=alpha)
     param_num = len(list(param_class))
-    params_float_list = [i * 1.0/param_num for i in range(param_num)]
-    nearest_index = min([i for i in range(param_num)],key=lambda x: abs(params_float_list[x] - rand_num))
+    params_float_list = [i * 1.0 / param_num for i in range(param_num)]
+    nearest_index = min(
+        [i for i in range(param_num)],
+        key=lambda x: abs(params_float_list[x] - rand_num),
+    )
     return list(param_class)[nearest_index]
 
-def get_rand_point()->np.ndarray:
+
+def get_rand_point() -> np.ndarray:
     """get a random point in the range of the canvas"""
-    x = random.uniform(generation_config.GenerationConfig.left_canvas_bound,generation_config.GenerationConfig.right_canvas_bound)
-    y = random.uniform(generation_config.GenerationConfig.lower_canvas_bound,generation_config.GenerationConfig.upper_canvas_bound)
-    return np.array([x,y])
+    x = random.uniform(
+        generation_config.GenerationConfig.left_canvas_bound,
+        generation_config.GenerationConfig.right_canvas_bound,
+    )
+    y = random.uniform(
+        generation_config.GenerationConfig.lower_canvas_bound,
+        generation_config.GenerationConfig.upper_canvas_bound,
+    )
+    return np.array([x, y])
 
 
-def rotate_point(original_point,pivot_point, theta):
-    
-    x,y,x0,y0 = list(original_point)+list(pivot_point)
+def rotate_point(original_point, pivot_point, theta):
+
+    x, y, x0, y0 = list(original_point) + list(pivot_point)
 
     # 将角度转换为弧度
     theta_rad = np.radians(theta)
@@ -290,17 +371,15 @@ def rotate_point(original_point,pivot_point, theta):
 
     return np.array((x_final, y_final))
 
-def choose_color(color_distribution:List[float])->img_params.Color:
-    return choose_item_by_distribution(img_params.Color,color_distribution)
 
-def choose_item_by_distribution(enum:Type[Enum],distribution:List[float]):
+def choose_color(color_distribution: List[float]) -> img_params.Color:
+    return choose_item_by_distribution(img_params.Color, color_distribution)
+
+
+def choose_item_by_distribution(enum: Type[Enum], distribution: List[float]):
     if len(distribution) != len(list(enum)):
-        raise ValueError(
-            "Distribution must have correct number of probabilities."
-        )
+        raise ValueError("Distribution must have correct number of probabilities.")
     if not abs(sum(distribution) - 1.0) < 1e-6:
         raise ValueError("Color distribution probabilities must sum to 1.")
-    selected = random.choices(
-        list(enum), weights=distribution, k=1
-    )[0]
+    selected = random.choices(list(enum), weights=distribution, k=1)[0]
     return selected
