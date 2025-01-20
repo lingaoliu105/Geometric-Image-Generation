@@ -105,6 +105,7 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
     | Field Name      | Accepted Values                     | Meaning                                                      |
     | --------------- | ----------------------------------- | ------------------------------------------------------------ |
     | `"draw_chain"`  | `True` or `False`                   | whether to draw or hide the chain (string)                   |
+    | `"chain_level"` | `"bottom"` or `"top"`               | on which level should the chain be drawn (below or above shapes) |
     | `"chain_shape"` | `"line"`, `"bezier"` or `"circle"`  | the shape of the internal chain                              |
     | `"interval"`    | a float around 0                    | The interval between 2 adjacent elements. A positive interval means there's a distance, 0 interval means the shapes touches each other. Negative interval means overlap |
     | `"element_num"` | a positive integer                  | The number of elements on the chaining string                |

@@ -24,6 +24,7 @@ class ChainingImageGenerator(ImageGenerator):
         self.chain = [] # initial positions of each element
         self.sub_generators = {SimpleImageGenerator:1.0} # default value
         self.rotation = GenerationConfig.chaining_image_config["rotation"]
+        self.chain_level = GenerationConfig.chaining_image_config["chain_level"]
     def generate_chain(self):
         assert self.element_num >= 2 and self.element_num <= 20
         # composite the image first, then shift to the center pos
@@ -88,7 +89,14 @@ class ChainingImageGenerator(ImageGenerator):
                 for i in range(len(self.curve_point_set) - 2)
                 # for i in range(0,len(self.curve_point_set) - 2,2)
             ]
-            top_layer = self.shapes.layer_num-1
-            for seg in chain_segments:
-                self.shapes.add_shape_on_layer(seg,top_layer)
+            if self.chain_level=="bottom":
+                self.shapes.lift_up_layer()
+                for seg in chain_segments:
+                    self.shapes.add_shape_on_layer(seg,0)
+            elif self.chain_level=="top":
+                top_layer = self.shapes.layer_num-1
+                for seg in chain_segments:
+                    self.shapes.add_shape_on_layer(seg,top_layer)
+            else:
+                raise ValueError()
         return self.shapes

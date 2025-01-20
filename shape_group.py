@@ -44,7 +44,8 @@ class ShapeGroup:
         validate_two_level_list(new_shapes)
         for new_layer,shapes_on_layer in enumerate(new_shapes):
             for shape in shapes_on_layer:
-                self.add_shape_on_layer(shape,new_layer)                
+                self.add_shape_on_layer(shape,new_layer)
+                
     def add_shape(self,shape:VisibleShape):
         self.add_shape_on_layer(shape,0)
 
@@ -137,4 +138,8 @@ class ShapeGroup:
             
     def flattened(self):
         return [item for sublist in self.shapes for item in sublist]
+
+    def lift_up_layer(self,by:int=1):
+        for _ in range(by):
+            self.shapes.insert(0,[])
 
