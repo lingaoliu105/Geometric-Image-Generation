@@ -13,27 +13,51 @@ class BaseConverter: # enclose in classes to store temporary strings that makes 
     def __init__(self) -> None:
         self.color_str = ""
         self.lightness_str = ""
-        
+
     def partition_camel_case(self,string):
         return re.sub(r"([a-z])([A-Z])", r"\1 \2", string).lower()
-    
+
     @abstractmethod
     def convert(self,target:entity.Entity):
         pass
 
-class SimpleShapeConverter(BaseConverter):
-    def __init__(self) -> None:
-        super().__init__()
-        self.pattern_str = ""
-        self.pattern_color_str = ""
-        self.pattern_lightness_str = ""
-        self.outline_str = ""
-        self.outline_color_str = ""
-        self.outline_thickness_str = ""
-        self.outline_lightness_str = ""
+    def get_pattern_tikz_string(self, pattern: Pattern):
+        if pattern == Pattern.blank:
+            return
+        self.pattern_str = f"pattern={self.partition_camel_case(pattern.name)}"
 
-    def convert(self, target):
+    def get_pattern_lightness_string(self, pattern_lightness: PatternLightness):
+        self.pattern_lightness_str = f"!{pattern_lightness.value}"
 
+    def get_pattern_color_tikz_string(self, patttern_color: PattenColor):
+        self.pattern_color_str = (
+            f"pattern color={patttern_color.name.removeprefix('pattern').lower()}"
+        )
+
+    def get_color_tikz_string(self, color: Color):
+        self.color_str = f"fill={color.name}"
+
+    def get_lightness_tikz_string(self, lightness: Lightness):
+        self.lightness_str = f"!{lightness.value}"
+
+    def get_outline_tikz_string(self, outline: Outline):
+        self.outline_str = self.partition_camel_case(outline.name)
+
+    def get_outline_color_tikz_string(self, outline_color: OutlineColor):
+        self.outline_color_str = (
+            f"draw={outline_color.name.removeprefix('outline').lower()}"
+        )
+
+    def get_outline_lightness_tikz_string(self, outline_lightness: OutlineLightness):
+        self.outline_lightness_str = f"!{outline_lightness.value}"
+
+    def get_outline_thickness_tikz_string(self, outline_thickness: OutlineThickness):
+        if outline_thickness == OutlineThickness.noOutline:
+            self.outline_str = "draw=none"
+            return
+        self.outline_thickness_str = f"line width={outline_thickness.value*0.1}mm"
+        
+    def prepare_strings(self,target):
         func_router = {
             "pattern": self.get_pattern_tikz_string,
             "color": self.get_color_tikz_string,
@@ -49,6 +73,23 @@ class SimpleShapeConverter(BaseConverter):
         for attr in target.dataset_annotation_categories:
             if attr in func_router:
                 func_router[attr](getattr(target, attr))
+        
+
+
+class SimpleShapeConverter(BaseConverter):
+    def __init__(self) -> None:
+        super().__init__()
+        self.pattern_str = ""
+        self.pattern_color_str = ""
+        self.pattern_lightness_str = ""
+        self.outline_str = ""
+        self.outline_color_str = ""
+        self.outline_thickness_str = ""
+        self.outline_lightness_str = ""
+
+    def convert(self, target):
+        self.prepare_strings(target)
+
 
         if target.shape in [
             Shape.triangle,
@@ -57,8 +98,6 @@ class SimpleShapeConverter(BaseConverter):
             Shape.hexagon,
         ]:
             trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
-
-            sides = target.shape.value
             tikz_instruction = (
                 # draw the background color in seperate instruction, otherwise will be covered by pattern
                 
@@ -66,7 +105,7 @@ class SimpleShapeConverter(BaseConverter):
                 # f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={target.rotation.value}]"
                 # f"at ({target.position[0]},{target.position[1]}) {{}};\n"
                 
-                f"\\fill [{target.color.name.lower()},fill opacity={GenerationConfig.opacity}] {trace};\n"
+                f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity}] {trace};\n"
                 f"\\draw [{self.outline_thickness_str},{self.outline_color_str+self.outline_lightness_str},{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] {trace};\n"
 
                 # f"\\node[{self.outline_thickness_str},regular polygon, regular polygon sides={sides}, minimum size={round(target.size,3)}cm,"
@@ -86,45 +125,6 @@ class SimpleShapeConverter(BaseConverter):
         # tikz_instruction += f"\\fill [black] ({shape.position[0]},{shape.position[1]}) circle (0.1);\n"
         return tikz_instruction
 
-    def get_pattern_tikz_string(self, pattern: Pattern):
-        if pattern==Pattern.blank:
-            return
-        self.pattern_str = f"pattern={self.partition_camel_case(pattern.name)}"
-
-    def get_pattern_lightness_string(
-        self, pattern_lightness: PatternLightness
-    ):
-        self.pattern_lightness_str = f"!{pattern_lightness.value}"
-
-    def get_pattern_color_tikz_string(self, patttern_color: PattenColor):
-        self.pattern_color_str = f"pattern color={patttern_color.name.removeprefix('pattern').lower()}"
-
-    def get_color_tikz_string(self, color: Color):
-        self.color_str = f"fill={color.name}"
-
-    def get_lightness_tikz_string(self, lightness: Lightness):
-        self.lightness_str = f"!{lightness.value}"
-
-    def get_outline_tikz_string(self, outline: Outline):
-        self.outline_str = self.partition_camel_case(outline.name)
-
-    def get_outline_color_tikz_string(self, outline_color: OutlineColor):
-        self.outline_color_str = (
-            f"draw={outline_color.name.removeprefix('outline').lower()}"
-        )
-
-    def get_outline_lightness_tikz_string(
-        self, outline_lightness: OutlineLightness
-    ):
-        self.outline_lightness_str = f"!{outline_lightness.value}"
-
-    def get_outline_thickness_tikz_string(
-        self, outline_thickness: OutlineThickness
-    ):
-        if outline_thickness == OutlineThickness.noOutline:
-            self.outline_str = "draw=none"
-            return
-        self.outline_thickness_str = f"line width={outline_thickness.value*0.1}mm"
 
 class LineSegmentConverter(BaseConverter):
     def __init__(self) -> None:
@@ -139,11 +139,12 @@ class ComplexShapeConverter(BaseConverter):
         super().__init__()
 
     def convert(self,target):
+        self.prepare_strings(target)
         if isinstance(target.base_geometry,LineString):
             tikz = f"\\draw [{target.color.name.lower()}] {target.base_geometry.coords[0]} -- {target.base_geometry.coords[1]};\n"
         else:
             trace =" -- ".join([str(coord) for coord in target.base_geometry.exterior.coords])
-            tikz = f"\\fill [{target.color.name.lower()},fill opacity={GenerationConfig.opacity}] {trace};\n"
+            tikz = f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity},] {trace};\n"
         return tikz
 
 def convert_panel(input_panel) -> list[str]:
@@ -159,5 +160,3 @@ def convert_panels(panels) -> list[str]:
     for panel in panels:
         instructions += convert_panel(panel)
     return instructions
-
-
