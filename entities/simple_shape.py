@@ -91,18 +91,11 @@ class SimpleShape(ClosedShape):
         )
         # self.type = filter(list(img_params.Type))
         self.size = (
-            min(
-                size,
-                abs(self.position[0] - GenerationConfig.left_canvas_bound),
-                abs(self.position[0] - GenerationConfig.right_canvas_bound),
-                abs(self.position[1] - GenerationConfig.upper_canvas_bound),
-                abs(self.position[1] - GenerationConfig.lower_canvas_bound),
-            )
+            size
             if size is not None
             else (random.random() + 0.25) * 2
         )
    
-
         self.is_expanded = False
         self.compute_base_geometry()
 

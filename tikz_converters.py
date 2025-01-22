@@ -148,7 +148,8 @@ class ComplexShapeConverter(BaseConverter):
         return tikz
 
 def convert_panel(input_panel) -> list[str]:
-    instructions = []
+    instructions = [SimpleShapeConverter().convert(input_panel.background)]
+    
     for shape in input_panel.shapes:
         instructions.append(shape.tikz_converter.convert(shape))
 
