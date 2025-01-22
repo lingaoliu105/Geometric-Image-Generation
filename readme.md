@@ -77,25 +77,40 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
       > 
       > ```
 
+10. `lightness_distribution`: the probability distribution for filling color's lightness:
+
+      | Index | Lightness    |
+      | ----- | ------------ |
+      | 0     | lightness20  |
+      | 1     | lightness25  |
+      | 2     | lightness33  |
+      | 3     | lightness40  |
+      | 4     | lightness50  |
+      | 5     | lightness60  |
+      | 6     | lightness67  |
+      | 7     | lightness75  |
+      | 8     | lightness80  |
+      | 9     | lightness100 |
+
       
 
-10. `pattern_distribution`: an array of floats representing the probabilities of filling patterns:
-    
-    | Index | Pattern            |
-    | ----- | ------------------ |
-    | 0     | blank              |
-    | 1     | horizontal Lines   |
-    | 2     | vertical Lines     |
-    | 3     | north East Lines   |
-    | 4     | north West Lines   |
-    | 5     | grid               |
-    | 6     | crosshatch         |
-    | 7     | dots               |
-    | 8     | crosshatch Dots    |
-    | 9     | five pointed Stars |
-    | 10    | six pointed Stars  |
-    | 11    | bricks             |
-    | 12    | checkerboard       |
+11. `pattern_distribution`: an array of floats representing the probabilities of filling patterns:
+
+       | Index | Pattern            |
+       | ----- | ------------------ |
+       | 0     | blank              |
+       | 1     | horizontal Lines   |
+       | 2     | vertical Lines     |
+       | 3     | north East Lines   |
+       | 4     | north West Lines   |
+       | 5     | grid               |
+       | 6     | crosshatch         |
+       | 7     | dots               |
+       | 8     | crosshatch Dots    |
+       | 9     | five pointed Stars |
+       | 10    | six pointed Stars  |
+       | 11    | bricks             |
+       | 12    | checkerboard       |
 
 
 ​      

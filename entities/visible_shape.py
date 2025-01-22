@@ -39,7 +39,7 @@ class VisibleShape(Entity, ABC):
         self.lightness = (
             lightness
             if lightness is not None
-            else random.choice(list(img_params.Lightness))
+            else util.choose_item_by_distribution(img_params.Lightness,GenerationConfig.lightness_distribution)
         )
         if generation_config.GenerationConfig.color_mode == "mono":
             self.color = img_params.Color.black
