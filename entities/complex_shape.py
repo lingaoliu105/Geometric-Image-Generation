@@ -1,3 +1,4 @@
+import random
 from typing import List, Optional
 
 from matplotlib.pyplot import isinteractive
@@ -5,6 +6,7 @@ from numpy import shape
 import shapely
 from entities.closed_shape import ClosedShape
 from entities.entity import Relationship
+from generation_config import GenerationConfig
 import img_params
 from tikz_converters import ComplexShapeConverter
 from shapely.affinity import scale
@@ -55,6 +57,7 @@ class ComplexShape(ClosedShape,Relationship):
             pattern_color=pattern_color,
             pattern_lightness=pattern_lightness,
         )
+        self.is_expanded = False
         if geometry is not None:
             self._base_geometry = geometry
 
@@ -71,6 +74,25 @@ class ComplexShape(ClosedShape,Relationship):
         for i in range(len(overlaps)):
             overlaps[i].shape = img_params.Type.INTERSECTIONREGION         
         return overlaps
+    
+    @staticmethod
+    def arbitrary_rectangle():
+        """return a rectangle, aspect ratio between 1 to 3, and size occupying canvas"""
+        aspect_ratio = random.uniform(1,3)
+        length = min(GenerationConfig.canvas_height,GenerationConfig.canvas_width)
+        width = length / aspect_ratio
+        shape = ComplexShape(geometry=shapely.Polygon([(length/2,width/2),(-length/2,width/2),(-length/2,-width/2),(length/2,-width/2)]))
+        shape.shape = img_params.Shape.rectangle
+        return shape
+    
+    @staticmethod
+    def arbitrary_right_triangle():
+        aspect_ratio = random.uniform(1,3)
+        length = min(GenerationConfig.canvas_height,GenerationConfig.canvas_width)
+        width = length / aspect_ratio
+        shape = ComplexShape(geometry=shapely.Polygon([(length/2,width/2),(-length/2,width/2),(-length/2,-width/2)]))
+        shape.shape = img_params.Shape.triangle_rt
+        return shape
 
     @property
     def center(self):
@@ -89,5 +111,7 @@ class ComplexShape(ClosedShape,Relationship):
         return self
 
     def expand_fixed(self, length):
-        self._base_geometry = self._base_geometry.buffer(length)
-        return self
+        cpy = self.copy
+        cpy._base_geometry = self._base_geometry.buffer(length)
+        return cpy
+    

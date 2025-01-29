@@ -190,14 +190,16 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
 
 16. `shape_distribution`: an array that specifies the probability of shape occurrence. The details are as follows:
 
-      | Index | Shape        |
-      | ----- | ------------ |
-      | 0     | line segment |
-      | 1     | circle       |
-      | 2     | triangle     |
-      | 3     | square       |
-      | 4     | pentagon     |
-      | 5     | hexagon      |
+    | Index | Shape                                           |
+    | ----- | ----------------------------------------------- |
+    | 0     | line segment                                    |
+    | 1     | circle                                          |
+    | 2     | triangle (eq)                                   |
+    | 3     | square                                          |
+    | 4     | pentagon                                        |
+    | 5     | hexagon                                         |
+    | 6     | rectangle (aspect ratio range from 1 to 3)      |
+    | 7     | right triangle (aspect ratio range from 1 to 3) |
 
 
 

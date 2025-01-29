@@ -84,3 +84,7 @@ class ClosedShape(VisibleShape):
                     available_outline_colors.remove(color_item)
 
         return random.choice(available_outline_colors)
+    
+    def search_size_by_interval(self,other,interval):
+        #TODO: implement for complex shape (rt triangle and rect)
+        pass

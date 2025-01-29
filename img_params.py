@@ -13,7 +13,8 @@ class Shape(
     pentagon = 5
     hexagon = 6
     # dot =
-    # rectangle =
+    rectangle = 7
+    triangle_rt = 8
     # heptagon =
     # octagon =
     # nonagon =
