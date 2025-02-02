@@ -22,6 +22,8 @@ from util import (
 from shapely.affinity import translate
 from shapely.ops import nearest_points
 
+import util
+
 
 class LineSegment(OpenShape):
     dataset_annotation_categories = [
@@ -56,6 +58,7 @@ class LineSegment(OpenShape):
         else:
             self._base_geometry = LineString([pt1, pt2])
 
+        self.line_pattern = util.choose_item_by_distribution(img_params.Outline,generation_config.GenerationConfig.outline_distribution)
         self.is_expanded = False
         
     @property

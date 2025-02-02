@@ -9,6 +9,7 @@ from generation_config import GenerationConfig
 from entities.line_segment import LineSegment
 from image_generators.border_image_generator import BorderImageGenerator
 from image_generators.enclosing_image_generator import EnclosingImageGenerator
+from image_generators.parallel_image_generator import ParallelImageGenerator
 from image_generators.random_image_generator import RandomImageGenerator
 from image_generators.simple_image_generator import SimpleImageGenerator
 from panel import Panel
@@ -48,6 +49,8 @@ def generate_panels() -> list[Panel]:
             generator = RandomImageGenerator()
         elif composition_type =="border":
             generator = BorderImageGenerator()
+        elif composition_type == "parallel":
+            generator = ParallelImageGenerator()
         generator.set_sub_generators()
         elements_on_panel:ShapeGroup = generator.generate()
         panel = elements_on_panel.to_panel(top_left=top_left,bottom_right=bottom_right)
@@ -113,18 +116,6 @@ def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal
         l.shift(offset)
     return output_line_segments
 
-def generate_comb_line_segments(position,num_teeth = 8) -> List[LineSegment]:
-    mid_string = LineSegment([-5,0],[5,0])
-    output_line_segs = []
-    fractions = sorted([random.random() for _ in range(num_teeth)])
-    intersection_points = [mid_string.find_fraction_point(f) for f in fractions]
-    for pt in intersection_points:
-        other_pt = get_rand_point()
-        new_ls = LineSegment(pt,other_pt,color=img_params.Color.black)
-        output_line_segs.append(new_ls)
-    # left_bound,right_bound,lower_bound,upper_bound = 
-    return output_line_segs
-    
 
 def main(n):
     env = Environment(loader=FileSystemLoader("."))

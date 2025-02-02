@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 import img_params
 
 
-class BaseConverter: # enclose in classes to store temporary strings that makes the tikz strings, held by each individual VisibleShape instance to avoid data miswrite
+class BaseConverter:  # enclose in classes to store temporary strings that makes the tikz strings, held by each individual VisibleShape instance to avoid data miswrite
     def __init__(self) -> None:
         self.color_str = ""
         self.lightness_str = ""
@@ -23,12 +23,11 @@ class BaseConverter: # enclose in classes to store temporary strings that makes 
         self.outline_thickness_str = ""
         self.outline_lightness_str = ""
 
-
-    def partition_camel_case(self,string):
+    def partition_camel_case(self, string):
         return re.sub(r"([a-z])([A-Z])", r"\1 \2", string).lower()
 
     @abstractmethod
-    def convert(self,target:entity.Entity):
+    def convert(self, target: entity.Entity):
         pass
 
     def get_pattern_tikz_string(self, pattern: Pattern):
@@ -66,8 +65,8 @@ class BaseConverter: # enclose in classes to store temporary strings that makes 
             self.outline_str = "draw=none"
             return
         self.outline_thickness_str = f"line width={outline_thickness.value*0.1}mm"
-        
-    def prepare_strings(self,target):
+
+    def prepare_strings(self, target):
         func_router = {
             "pattern": self.get_pattern_tikz_string,
             "color": self.get_color_tikz_string,
@@ -92,24 +91,22 @@ class SimpleShapeConverter(BaseConverter):
     def convert(self, target):
         self.prepare_strings(target)
 
-
         if target.shape in [
             Shape.triangle,
             Shape.square,
             Shape.pentagon,
             Shape.hexagon,
         ]:
-            trace =" -- ".join([ str(coord) for coord in target.base_geometry.exterior.coords])
+            trace = " -- ".join(
+                [str(coord) for coord in target.base_geometry.exterior.coords]
+            )
             tikz_instruction = (
                 # draw the background color in seperate instruction, otherwise will be covered by pattern
-                
                 # f"\\node[regular polygon, regular polygon sides={sides}, minimum size={round(target.size,3)}cm,fill opacity={GenerationConfig.opacity},"
                 # f"{self.color_str+self.lightness_str}, inner sep=0pt,rotate={target.rotation.value}]"
                 # f"at ({target.position[0]},{target.position[1]}) {{}};\n"
-                
                 f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity}] {trace};\n"
                 f"\\draw [{self.outline_thickness_str},{self.outline_color_str+self.outline_lightness_str},{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] {trace};\n"
-
                 # f"\\node[{self.outline_thickness_str},regular polygon, regular polygon sides={sides}, minimum size={round(target.size,3)}cm,"
                 # f"inner sep=0pt,{self.outline_color_str+self.outline_lightness_str},rotate={target.rotation.value},{self.pattern_str},"
                 # f"{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] at ({target.position[0]},{target.position[1]}) {{}};\n"
@@ -118,12 +115,11 @@ class SimpleShapeConverter(BaseConverter):
             tikz_instruction = (
                 f"\draw [{self.color_str+self.lightness_str},fill opacity={GenerationConfig.opacity}]"
                 f"({target.position[0]},{target.position[1]}) circle ({target.size});\n"
-
                 f"\draw [{self.outline_thickness_str},{self.outline_color_str},{self.outline_str},"
                 f"{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str}]"
                 f"({target.position[0]},{target.position[1]}) circle ({target.size});\n"
             )
-            
+
         # tikz_instruction += f"\\fill [black] ({shape.position[0]},{shape.position[1]}) circle (0.1);\n"
         return tikz_instruction
 
@@ -131,30 +127,36 @@ class SimpleShapeConverter(BaseConverter):
 class LineSegmentConverter(BaseConverter):
     def __init__(self) -> None:
         super().__init__()
-        
+
     def convert(self, target):
-        tikz = f"\draw[color={target.color.name.lower()},ultra thick] ({target.endpt_up[0]},{target.endpt_up[1]}) -- ({target.endpt_down[0]},{target.endpt_down[1]});"
+        tikz = f"\draw[color={target.color.name.lower()},ultra thick,{self.partition_camel_case(target.line_pattern.name)}] ({target.endpt_up[0]},{target.endpt_up[1]}) -- ({target.endpt_down[0]},{target.endpt_down[1]});"
         return tikz
+
 
 class ComplexShapeConverter(BaseConverter):
     def __init__(self) -> None:
         super().__init__()
 
-    def convert(self,target):
+    def convert(self, target):
         self.prepare_strings(target)
-        if isinstance(target.base_geometry,LineString):
+        if isinstance(target.base_geometry, LineString):
             tikz = f"\\draw [{target.color.name.lower()}] {target.base_geometry.coords[0]} -- {target.base_geometry.coords[1]};\n"
         elif target.shape == img_params.Type.INTERSECTIONREGION:
-            trace =" -- ".join([str(coord) for coord in target.base_geometry.exterior.coords])
+            trace = " -- ".join(
+                [str(coord) for coord in target.base_geometry.exterior.coords]
+            )
             tikz = f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity},] {trace};\n"
         else:
-            trace =" -- ".join([str(coord) for coord in target.base_geometry.exterior.coords])
+            trace = " -- ".join(
+                [str(coord) for coord in target.base_geometry.exterior.coords]
+            )
             tikz = f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity},{self.outline_thickness_str},{self.outline_color_str+self.outline_lightness_str},{self.outline_str}] {trace};\n"
         return tikz
 
+
 def convert_panel(input_panel) -> list[str]:
     instructions = [SimpleShapeConverter().convert(input_panel.background)]
-    
+
     for shape in input_panel.shapes:
         instructions.append(shape.tikz_converter.convert(shape))
 
