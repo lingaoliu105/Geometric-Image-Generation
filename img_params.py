@@ -22,6 +22,7 @@ class Shape(
     # ellipse =
     # star =
     # diamond =
+    arbitrary = 9
 
 
 class Type(Enum):

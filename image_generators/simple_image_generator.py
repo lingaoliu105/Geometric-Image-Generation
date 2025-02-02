@@ -26,6 +26,8 @@ class SimpleImageGenerator(ImageGenerator):
             element = ComplexShape.arbitrary_rectangle()
         elif shape==img_params.Shape.triangle_rt:
             element = ComplexShape.arbitrary_right_triangle()
+        elif shape==img_params.Shape.arbitrary:
+            element = ComplexShape.arbitrary_polygon()
         else:
             element = SimpleShape(position=(0,0),shape=shape,size=GenerationConfig.canvas_width/2)
         self.shapes.add_shape(element)

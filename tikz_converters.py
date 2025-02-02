@@ -8,11 +8,21 @@ from generation_config import GenerationConfig
 from img_params import *
 from abc import ABC, abstractmethod
 
+import img_params
+
 
 class BaseConverter: # enclose in classes to store temporary strings that makes the tikz strings, held by each individual VisibleShape instance to avoid data miswrite
     def __init__(self) -> None:
         self.color_str = ""
         self.lightness_str = ""
+        self.pattern_str = ""
+        self.pattern_color_str = ""
+        self.pattern_lightness_str = ""
+        self.outline_str = ""
+        self.outline_color_str = ""
+        self.outline_thickness_str = ""
+        self.outline_lightness_str = ""
+
 
     def partition_camel_case(self,string):
         return re.sub(r"([a-z])([A-Z])", r"\1 \2", string).lower()
@@ -73,19 +83,11 @@ class BaseConverter: # enclose in classes to store temporary strings that makes 
         for attr in target.dataset_annotation_categories:
             if attr in func_router:
                 func_router[attr](getattr(target, attr))
-        
 
 
 class SimpleShapeConverter(BaseConverter):
     def __init__(self) -> None:
         super().__init__()
-        self.pattern_str = ""
-        self.pattern_color_str = ""
-        self.pattern_lightness_str = ""
-        self.outline_str = ""
-        self.outline_color_str = ""
-        self.outline_thickness_str = ""
-        self.outline_lightness_str = ""
 
     def convert(self, target):
         self.prepare_strings(target)
@@ -142,9 +144,12 @@ class ComplexShapeConverter(BaseConverter):
         self.prepare_strings(target)
         if isinstance(target.base_geometry,LineString):
             tikz = f"\\draw [{target.color.name.lower()}] {target.base_geometry.coords[0]} -- {target.base_geometry.coords[1]};\n"
-        else:
+        elif target.shape == img_params.Type.INTERSECTIONREGION:
             trace =" -- ".join([str(coord) for coord in target.base_geometry.exterior.coords])
             tikz = f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity},] {trace};\n"
+        else:
+            trace =" -- ".join([str(coord) for coord in target.base_geometry.exterior.coords])
+            tikz = f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity},{self.outline_thickness_str},{self.outline_color_str+self.outline_lightness_str},{self.outline_str}] {trace};\n"
         return tikz
 
 def convert_panel(input_panel) -> list[str]:

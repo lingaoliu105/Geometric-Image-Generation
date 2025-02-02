@@ -200,6 +200,7 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
     | 5     | hexagon                                         |
     | 6     | rectangle (aspect ratio range from 1 to 3)      |
     | 7     | right triangle (aspect ratio range from 1 to 3) |
+    | 8     | arbitrary closed shape                          |
 
 
 
