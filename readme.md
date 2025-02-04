@@ -162,14 +162,14 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
 
     | Index | Position <br />(assigned clockwise) |
     | ----- | ----------------------------------- |
-    | 0     | top-left                            |
-    | 1     | top-middle                          |
-    | 2     | top-right                           |
-    | 3     | middle-right                        |
-    | 4     | bottom-right                        |
-    | 5     | bottom-middle                       |
-    | 6     | bottom-left                         |
-    | 7     | middle-left                         |
+    | 0     | middle-right                        |
+    | 1     | top-right                           |
+    | 2     | top-middle                          |
+    | 3     | top-left                            |
+    | 4     | middle-left                         |
+    | 5     | bottom-left                         |
+    | 6     | bottom-middle                       |
+    | 7     | bottom-right                        |
     | 8     | center                              |
 
     > Example:
@@ -286,4 +286,46 @@ output:
 
 
 
-#### 
+#### (age 7-8,page 11)
+
+Question:
+
+![image-20250204232158663](./readme.assets/image-20250204232158663.png)
+
+Input:
+
+```json
+{
+    "composition_type": "border",
+    "shape_distribution": [
+        0.0,
+        0.4,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.3,0.3,0.0
+    ],
+    "border_image_config":{
+        "position_probabilities":[
+            0.0,
+            0.5,
+            0.0,
+            0.5,
+            0.0,
+            0.5,
+            0.0,
+            0.5,
+            1.0
+        ],
+        "element_scaling":0.2,
+        "approach_factor":1.0,
+    }
+}
+```
+
+Output:
+
+![](./readme.assets/new-9.png)
+
+![new-10](./readme.assets/new-10.png)

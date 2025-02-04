@@ -1,13 +1,15 @@
 from collections import OrderedDict
+import copy
 import enum
 import math
 import random
 from re import sub
 from typing import List
 
+import img_params
 import numpy as np
 from responses import start
-from shapely import LineString, Point, Polygon
+from shapely import LineString, Point, Polygon,MultiPolygon
 from entities.complex_shape import ComplexShape
 from entities.line_segment import LineSegment
 from generation_config import GenerationConfig
@@ -83,14 +85,27 @@ class BorderImageGenerator(ImageGenerator):
                     )
                     self.spokes.append(spoke)
                 else:
+                    step_length = 0.05
                     sub_image.scale(self.element_scaling)
-                    while not sub_image.geometry(0).intersects(shrinked_boundary):
-                        sub_image.shift(move_direction_vector * 0.1)
+                    sub_image.rotate(random.choice(list(range(0,361,90))))
+                    xoff = 0
+                    yoff = 0
+                    if move_direction_vector[0]:
+                        cpy = copy.deepcopy(sub_image)
+                        while not cpy.geometry(0).intersects(shrinked_boundary):
+                            cpy.shift(np.array([move_direction_vector[0],0]) * step_length)
+                            xoff+=step_length
+                    if move_direction_vector[1]:
+                        cpy = copy.deepcopy(sub_image)
+                        while not cpy.geometry(0).intersects(shrinked_boundary):
+                            cpy.shift(np.array([0,move_direction_vector[1]]) * step_length)
+                            yoff+=step_length
+                    sub_image.shift([xoff*move_direction_vector[0],yoff*move_direction_vector[1]])
                 self.shapes.add_group(sub_image)
 
         if random.random() < self.position_probabilities[-1]:
             sub_image = self.choose_sub_generator().generate()
-            if len(sub_image) == 1 and isinstance(sub_image[0][0],LineSegment):
+            if isinstance(sub_image.geometry(0),Polygon) or isinstance(sub_image.geometry(0),MultiPolygon):
                 sub_image.scale(self.element_scaling)
                 self.shapes.add_group(sub_image)
             

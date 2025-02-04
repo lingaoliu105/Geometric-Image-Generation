@@ -265,7 +265,7 @@ class ComplexShape(ClosedShape, Relationship):
         try:
             return self._base_geometry.centroid.coords[0]
         except IndexError:
-            print(self, self.base_geometry)
+            print("irregular center!",self, self.base_geometry)
             return self._base_geometry.boundary.coords[0]
 
     @property

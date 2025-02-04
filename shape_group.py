@@ -218,21 +218,6 @@ class ShapeGroup:
         return False
 
     def search_size_by_interval(self, other: "ShapeGroup",interval: float):
-        """based on layer 0' s geometry"""
-        # other_shape = other.geometry(0).buffer(interval)
-        # assert other_shape.is_valid
-        # while (
-        #     not self.roughly_touches(other)
-        # ):
-        #     self_geometry = self.geometry(0)
-        #     if (
-        #         self_geometry.overlaps(other_shape)
-        #         or self_geometry.intersects(other_shape)
-        #         or self_geometry.contains(other_shape)
-        #     ):
-        #         self.scale(0.5)
-        #     else:
-        #         self.scale(2.0)
         """based on layer 0's geometry"""
         other_shape = other.geometry(0).buffer(interval)
         assert other_shape.is_valid
