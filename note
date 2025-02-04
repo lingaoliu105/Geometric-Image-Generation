@@ -28,3 +28,24 @@ controlled probability on other attributes (shapes, outline, etc.)
 closer to the style(less shading, b&w, fixed styles of positioning (up&down, left&right etc))
 generate and compare with the examples
 fixed positioning (corner, etc) instrad of random
+
+
+1.14
+random control points for bezier curve - done
+chain below elements - done
+extend border generator: 
+    linesegments from center to corner; - done
+    center positioning; - done
+    partial touching; - done
+    shade closed region formed between line segments - done
+draw outline and bg shading for panels - done
+document: pic + input setup
+add rectangles: length / width [1,3] and right angle triangle
+linesegments strings : extend from point up/down/left/right
+chaining images next element cover previous
+
+
+smoother curve (random distribution around old control points)
+problem : shape exceeds panel boundary
+check outline for rectangles
+find easier categories to generate 

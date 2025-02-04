@@ -1,4 +1,5 @@
 
+from re import sub
 from common_types import *
 from entities.closed_shape import ClosedShape
 from entities.complex_shape import ComplexShape
@@ -23,7 +24,6 @@ class ChainingImageGenerator(ImageGenerator):
         self.element_num = GenerationConfig.chaining_image_config["element_num"]
         self.interval = GenerationConfig.chaining_image_config['interval']
         self.chain = [] # initial positions of each element
-        self.sub_generators = {SimpleImageGenerator:1.0} # default value
         self.rotation = GenerationConfig.chaining_image_config["rotation"]
         self.chain_level = GenerationConfig.chaining_image_config["chain_level"]
     def generate_chain(self):
@@ -55,22 +55,28 @@ class ChainingImageGenerator(ImageGenerator):
     def generate_shapes_on_chain(self):
         for i in range(self.element_num):
             # skip if current center is already covered by the previous shape
-            if len(self.shapes[0]) > 0 and shapely.Point(self.chain[i]).within(
-                self.shapes[0][-1].expand_fixed(max(self.interval,0.0)).base_geometry
+            if shapely.Point(self.chain[i]).within(
+                self.shapes.geometry(0).buffer(self.interval)
             ):
+                print(i,"skipped")
                 continue
             sub_generator = self.choose_sub_generator()
+            print("chosen: ",sub_generator)
             element_grp = sub_generator.generate()
-            element_grp.scale(1/self.element_num)
             element_grp.shift(self.chain[i]-element_grp.center)
+            # element_grp.fit_canvas()
+            element_grp.scale(1/self.element_num)
             element_grp.rotate(angle=random.choice(list(img_params.Angle)))
 
-            if i != 0 and element_grp.size()==1 and isinstance(element_grp[0][0],ClosedShape):
-                prev_shape = self.shapes[0][-1]
-                closed_shape_element = element_grp[0][0]
-                closed_shape_element.scale(2*get_point_distance(prev_shape.center, self.chain[i]) / closed_shape_element.size) # expand new shape to make sure it overlaps prev to guarantee size search result
-                closed_shape_element.search_size_by_interval(prev_shape, self.interval)
-
+            if i != 0 and any([isinstance(shape,ClosedShape) for shape in element_grp[0]]):
+                while not (element_grp.geometry(0).overlaps(prev_elements.geometry(0)) or element_grp.geometry(0).contains(prev_elements.geometry(0))):
+                    print("expand")
+                    element_grp.scale(2) # expand new shape to make sure it overlaps prev to guarantee size search result
+                print(i,"before: ",element_grp.bounds())
+                element_grp.search_size_by_interval(prev_elements, self.interval)
+                print(i,"adjusted: ",element_grp.bounds())
+            prev_elements = element_grp
+            print(i,element_grp)
             self.shapes.add_group(element_grp)
 
     def generate(self) -> ShapeGroup:
@@ -100,4 +106,6 @@ class ChainingImageGenerator(ImageGenerator):
                     self.shapes.add_shape_on_layer(seg,top_layer)
             else:
                 raise ValueError()
+        self.shapes.fit_canvas()
+        self.shapes.show()
         return self.shapes

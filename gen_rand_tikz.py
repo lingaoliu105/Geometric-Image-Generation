@@ -51,7 +51,6 @@ def generate_panels() -> list[Panel]:
             generator = BorderImageGenerator()
         elif composition_type == "parallel":
             generator = ParallelImageGenerator()
-        generator.set_sub_generators()
         elements_on_panel:ShapeGroup = generator.generate()
         panel = elements_on_panel.to_panel(top_left=top_left,bottom_right=bottom_right)
         panels.append(panel)

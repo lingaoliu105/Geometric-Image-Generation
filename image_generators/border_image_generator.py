@@ -95,7 +95,7 @@ class BorderImageGenerator(ImageGenerator):
                 self.shapes.add_group(sub_image)
             
         self.shade_regions()
-
+        self.shapes.show()
         return self.shapes
     
     def shade_regions(self):

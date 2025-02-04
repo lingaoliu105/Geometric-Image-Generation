@@ -48,9 +48,12 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
       > }
       > ```
       >
-      > 
 
-9. `color_distribution`: a list of floats of length 11, each number represents the probability of choosing the specific color as the filling color of the elements. The list of numbers should add up to 1. The mapping of each index and color is as follows:
+      *Edited:*
+
+      `sub_composition_distribution` no longer be placed at outmost level. Instead, it should be placed in the config objects of each image generator setup, to customize for each generator and allow multi-level sub compositions
+
+1. `color_distribution`: a list of floats of length 11, each number represents the probability of choosing the specific color as the filling color of the elements. The list of numbers should add up to 1. The mapping of each index and color is as follows:
 
       | Index | Color   |
       | ----- | ------- |
@@ -77,7 +80,7 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
       > 
       > ```
 
-10. `lightness_distribution`: the probability distribution for filling color's lightness:
+2. `lightness_distribution`: the probability distribution for filling color's lightness:
 
       | Index | Lightness    |
       | ----- | ------------ |
@@ -94,23 +97,23 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
 
       
 
-11. `pattern_distribution`: an array of floats representing the probabilities of filling patterns:
+3. `pattern_distribution`: an array of floats representing the probabilities of filling patterns:
 
-       | Index | Pattern            |
-       | ----- | ------------------ |
-       | 0     | blank              |
-       | 1     | horizontal Lines   |
-       | 2     | vertical Lines     |
-       | 3     | north East Lines   |
-       | 4     | north West Lines   |
-       | 5     | grid               |
-       | 6     | crosshatch         |
-       | 7     | dots               |
-       | 8     | crosshatch Dots    |
-       | 9     | five pointed Stars |
-       | 10    | six pointed Stars  |
-       | 11    | bricks             |
-       | 12    | checkerboard       |
+      | Index | Pattern            |
+      | ----- | ------------------ |
+      | 0     | blank              |
+      | 1     | horizontal Lines   |
+      | 2     | vertical Lines     |
+      | 3     | north East Lines   |
+      | 4     | north West Lines   |
+      | 5     | grid               |
+      | 6     | crosshatch         |
+      | 7     | dots               |
+      | 8     | crosshatch Dots    |
+      | 9     | five pointed Stars |
+      | 10    | six pointed Stars  |
+      | 11    | bricks             |
+      | 12    | checkerboard       |
 
 
 ​      
@@ -213,3 +216,74 @@ The generated images will be stored in `/my_dataset`, together with `label.json`
 
 
 
+### Expected Output Images and Corresponding Inputs
+
+#### (age 7-8 page 5)
+
+### ![image-20250203181307107](./readme.assets/image-20250203181307107.png)
+
+
+
+Input: 
+
+```json
+{   
+    "composition_type": "chain",
+    "shape_distribution": [
+        0.0,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.0,0.0,0.0
+    ], // only keep desired shapes
+    "border_image_config":{
+        "position_probabilities":[
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+            0.0
+        ], // adjust for the nested part to be single shape / multi shape, etc
+        "element_scaling":0.5,
+    },
+    "chaining_image_config": {
+        "draw_chain": false,
+        "chain_shape": "line",
+        "interval": 0.0,
+        "element_num": 2,
+        "sub_composition_distribution": {
+            "simple": 0.3,
+            "enclosing": 0.7
+        }
+
+    },
+    "enclosing_image_config": {
+        "enclose_level": 2,
+        "sub_composition_distribution": {
+            "border": 1.0
+        }
+    },
+}
+```
+
+output:
+
+![](./readme.assets/new-0.png)
+
+![new-1](./readme.assets/new-1.png)
+
+![new-2](./readme.assets/new-2.png)
+
+![new-3](./readme.assets/new-3.png)
+
+![new-4](./readme.assets/new-4.png)
+
+
+
+#### 

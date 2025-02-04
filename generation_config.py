@@ -20,6 +20,7 @@ class GenerationConfig:
     radial_image_config = None
     random_image_config = None
     enclosing_image_config = None
+    simple_image_config = None
     shape_distribution = [1/len(list(img_params.Shape))] * len(list(img_params.Shape))
     highlight_overlap = True
     composition_type = "chain"

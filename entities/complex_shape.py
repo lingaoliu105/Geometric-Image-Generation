@@ -6,6 +6,7 @@ from typing import List, Literal, Optional, Set, Tuple
 from matplotlib.pyplot import isinteractive
 import numpy as np
 import shapely
+from sympy import false
 from entities.closed_shape import ClosedShape
 from entities.entity import Relationship
 from entities.line_segment import LineSegment
@@ -201,6 +202,8 @@ class ComplexShape(ClosedShape, Relationship):
                 polygon = [start]
                 current = start
                 prev = None
+                max_try = 1000
+                cnt=0
                 while True:
                     nbrs = conn[current]
                     # 由于度为2（起始点除外），选择一个不是上一步的顶点即可
@@ -215,6 +218,9 @@ class ComplexShape(ClosedShape, Relationship):
                         break
                     polygon.append(next_v)
                     prev, current = current, next_v
+                    cnt+=1
+                    if cnt>max_try:
+                        raise TimeoutError()
 
                 return polygon
 
@@ -237,209 +243,18 @@ class ComplexShape(ClosedShape, Relationship):
                     else:
                         merged.append(p_curr)
                 return merged
-            polyomino = generate_polyomino(20)
-            edges = get_boundary_edges(polyomino)
-            polygon = chain_edges_to_polygon(edges)
-            vertices = merge_collinear(polygon)
+            flag=True
+            while flag:
+                try:
+                    polyomino = generate_polyomino(20)
+                    edges = get_boundary_edges(polyomino)
+                    polygon = chain_edges_to_polygon(edges)
+                    vertices = merge_collinear(polygon)
+                    flag = False
+                except TimeoutError:
+                    continue
             return vertices
-        
-            """
-            生成一个由垂直和水平线段组成的简单多边形（不自交）
-            
-            参数:
-                min_vertices: 最少顶点数
-                max_vertices: 最多顶点数
-            
-            返回:
-                顶点坐标列表，按顺序连接即可形成多边形
-            """
-            
-            def is_valid_next_point(points: List[Tuple[int, int]], next_point: Tuple[int, int],
-                                occupied: Set[Tuple[int, int]]) -> bool:
-                """检查新点是否会导致多边形自交"""
-                if not points:
-                    return True
-                    
-                current = points[-1]
-                # 检查新的线段是否与已有线段相交
-                if next_point in occupied:
-                    return False
-                    
-                # 检查路径上的点是否被占用
-                if current[0] == next_point[0]:  # 垂直线段
-                    y_min = min(current[1], next_point[1])
-                    y_max = max(current[1], next_point[1])
-                    for y in range(y_min + 1, y_max):
-                        if (current[0], y) in occupied:
-                            return False
-                else:  # 水平线段
-                    x_min = min(current[0], next_point[0])
-                    x_max = max(current[0], next_point[0])
-                    for x in range(x_min + 1, x_max):
-                        if (x, current[1]) in occupied:
-                            return False
-                            
-                return True
-
-            def get_possible_directions(current: Tuple[int, int], occupied: Set[Tuple[int, int]], 
-                                    start_point: Tuple[int, int], points_count: int) -> List[Tuple[int, int]]:
-                """获取可能的下一步方向"""
-                directions = []
-                # 可能的移动方向：上、下、左、右
-                moves = [(0, 1), (0, -1), (-1, 0), (1, 0)]
-                
-                for dx, dy in moves:
-                    # 随机选择移动距离（1到5个单位）
-                    distance = random.randint(1, 5)
-                    next_point = (current[0] + dx * distance, current[1] + dy * distance)
-                    
-                    # 如果已经有足够的点，检查是否可以回到起点
-                    if points_count >= min_vertices - 1 and next_point == start_point:
-                        if is_valid_next_point(points, next_point, occupied):
-                            directions.append(next_point)
-                    # 否则添加新的有效点
-                    elif is_valid_next_point(points, next_point, occupied):
-                        directions.append(next_point)
-                        
-                return directions
-
-            # 主算法开始
-            points = []
-            occupied = set()
-            
-            # 从原点开始
-            start_point = (0, 0)
-            current = start_point
-            points.append(current)
-            occupied.add(current)
-            
-            while len(points) < max_vertices:
-                possible_next = get_possible_directions(current, occupied, start_point, len(points))
-                
-                # 如果没有可行的下一步，且已达到最小顶点数要求，尝试闭合多边形
-                if not possible_next and len(points) >= min_vertices:
-                    # 尝试直接连回起点
-                    if is_valid_next_point(points, start_point, occupied):
-                        points.append(start_point)
-                        break
-                        
-                # 如果没有可行的下一步，且未达到最小顶点数，则重新开始
-                if not possible_next:
-                    return generate_orthogonal_polygon(min_vertices, max_vertices)
-                    
-                # 随机选择下一个点
-                next_point = random.choice(possible_next)
-                points.append(next_point)
-                occupied.add(next_point)
-                current = next_point
-                
-                # 如果回到起点，结束算法
-                if next_point == start_point:
-                    break
-            
-            return points
-        
-            """
-            生成一个不自交的正交多边形
-            
-            参数:
-            min_size: 最小转角数量
-            max_size: 最大转角数量
-            grid_size: 网格大小
-            
-            返回:
-            vertices: 多边形顶点坐标列表 [(x1,y1), (x2,y2), ...]
-            """
-            def is_valid_step(curr_x, curr_y, direction, occupied):
-                """检查下一步是否有效"""
-                next_x, next_y = curr_x, curr_y
-                if direction == 0:  # 右
-                    next_x += 1
-                elif direction == 1:  # 上
-                    next_y += 1
-                elif direction == 2:  # 左
-                    next_x -= 1
-                else:  # 下
-                    next_y -= 1
-                    
-                # 检查是否在网格内
-                if not (0 <= next_x < grid_size and 0 <= next_y < grid_size):
-                    return False
-                    
-                # 检查是否已被占用
-                if (next_x, next_y) in occupied:
-                    return False
-                    
-                return True
-
-            def can_close_polygon(curr_x, curr_y, start_x, start_y, direction, vertices):
-                """检查是否可以闭合多边形"""
-                if len(vertices) < min_size:
-                    return False
-                    
-                # 检查是否可以通过一次或两次转向回到起点
-                if direction == 0:  # 当前向右
-                    if curr_y == start_y and curr_x < start_x:
-                        return True
-                    if curr_x < start_x:
-                        return (curr_x, start_y) not in vertices
-                elif direction == 1:  # 当前向上
-                    if curr_x == start_x and curr_y < start_y:
-                        return True
-                    if curr_y < start_y:
-                        return (start_x, curr_y) not in vertices
-                elif direction == 2:  # 当前向左
-                    if curr_y == start_y and curr_x > start_x:
-                        return True
-                    if curr_x > start_x:
-                        return (curr_x, start_y) not in vertices
-                else:  # 当前向下
-                    if curr_x == start_x and curr_y > start_y:
-                        return True
-                    if curr_y > start_y:
-                        return (start_x, curr_y) not in vertices
-                return False
-
-            # 主算法开始
-            while True:
-                # 随机选择起点
-                start_x = random.randint(1, grid_size-2)
-                start_y = random.randint(1, grid_size-2)
-                vertices = [(start_x, start_y)]
-                occupied = {(start_x, start_y)}
-                
-                curr_x, curr_y = start_x, start_y
-                direction = random.randint(0, 3)  # 0:右, 1:上, 2:左, 3:下
-                
-                while len(vertices) < max_size:
-                    # 尝试继续当前方向
-                    if is_valid_step(curr_x, curr_y, direction, occupied):
-                        if direction == 0:
-                            curr_x += 1
-                        elif direction == 1:
-                            curr_y += 1
-                        elif direction == 2:
-                            curr_x -= 1
-                        else:
-                            curr_y -= 1
-                            
-                        vertices.append((curr_x, curr_y))
-                        occupied.add((curr_x, curr_y))
-                        
-                        # 检查是否可以闭合多边形
-                        if can_close_polygon(curr_x, curr_y, start_x, start_y, direction, vertices):
-                            # 添加闭合路径的顶点
-                            if curr_x != start_x:
-                                vertices.append((start_x, curr_y))
-                            if curr_y != start_y:
-                                vertices.append((start_x, start_y))
-                            return vertices
-                    else:
-                        # 转向
-                        direction = (direction + 1) % 4
-                        
-                # 如果当前尝试失败，重新开始
-                continue
+           
 
         vertices = generate_orthogonal_polygon_by_cells()
                         

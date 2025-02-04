@@ -83,7 +83,7 @@ class SimpleShape(ClosedShape):
             else random.choice(
                 [
                     x
-                    for x in list(img_params.Shape)
+                    for x in list(img_params.Shape)[1:6]
                     if x not in excluded_shapes_set
                     and x != img_params.Shape.linesegment
                 ]
@@ -118,6 +118,8 @@ class SimpleShape(ClosedShape):
                 angle_list = [-54 + 72 * x for x in range(5)]
             elif self.shape == Shape.hexagon:
                 angle_list = [60 * x for x in range(6)]
+            else:
+                raise ValueError(f"illegal shape: {self.shape}")
 
             vertices = [None] * (len(angle_list))
             index = 0
@@ -162,36 +164,36 @@ class SimpleShape(ClosedShape):
         super().scale(ratio,origin)
         self.position = self._base_geometry.centroid.coords[0]
         new_size = self.size * ratio
-        self.set_size(new_size)
+        self.size = new_size
 
-    def search_touching_size(self, other: VisibleShape):
-        """with a initial size that guarantees to overlap, search the appropriate size that touches the other shape (with tolerance defined in the class), and set the own size to it
+    # def search_touching_size(self, other: VisibleShape):
+    #     """with a initial size that guarantees to overlap, search the appropriate size that touches the other shape (with tolerance defined in the class), and set the own size to it
 
-        Args:
-            other (SimpleShape): the other size you want to touch
-        """
-        # TODO: optimize performance
-        upper = self.size
-        lower = 0.1
-        other_shape = other.base_geometry
-        while (
-            not other_shape.touches(self._base_geometry)
-            and (upper - lower) > self.touching_tolerance
-        ):
-            mid = (upper + lower) / 2.0
-            self.set_size(mid)
-            if (
-                self._base_geometry.overlaps(other_shape)
-                or self._base_geometry.intersects(other_shape)
-                or self._base_geometry.contains(other_shape)
-            ):
-                upper = mid
-            else:
-                lower = mid
+    #     Args:
+    #         other (SimpleShape): the other size you want to touch
+    #     """
+    #     # TODO: optimize performance
+    #     upper = self.size
+    #     lower = 0.1
+    #     other_shape = other.base_geometry
+    #     while (
+    #         not other_shape.touches(self._base_geometry)
+    #         and (upper - lower) > self.touching_tolerance
+    #     ):
+    #         mid = (upper + lower) / 2.0
+    #         self.set_size(mid)
+    #         if (
+    #             self._base_geometry.overlaps(other_shape)
+    #             or self._base_geometry.intersects(other_shape)
+    #             or self._base_geometry.contains(other_shape)
+    #         ):
+    #             upper = mid
+    #         else:
+    #             lower = mid
 
-    def search_size_by_interval(self, other: "VisibleShape", interval: float):
-        padded_other = other.expand_fixed(interval)
-        self.search_touching_size(padded_other)
+    # def search_size_by_interval(self, other: "VisibleShape", interval: float):
+    #     padded_other = other.expand_fixed(interval)
+    #     self.search_touching_size(padded_other)
 
     def shift(self, offset: common_types.Coordinate):
         offset = np.array(offset)
