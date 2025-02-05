@@ -42,7 +42,6 @@ class ImageGenerator(ABC):
             self.distribution_dict = {"simple":1.0}
         self.sub_generators = {}
         self.__set_sub_generators()
-        print(child_class_name,self.sub_generators)
     @abstractmethod
     def generate(self)->ShapeGroup:
         pass

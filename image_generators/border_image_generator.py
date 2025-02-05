@@ -90,12 +90,12 @@ class BorderImageGenerator(ImageGenerator):
                     sub_image.rotate(random.choice(list(range(0,361,90))))
                     xoff = 0
                     yoff = 0
-                    if move_direction_vector[0]:
+                    if not math.isclose(move_direction_vector[0],0.0,abs_tol=1e-9):
                         cpy = copy.deepcopy(sub_image)
                         while not cpy.geometry(0).intersects(shrinked_boundary):
                             cpy.shift(np.array([move_direction_vector[0],0]) * step_length)
                             xoff+=step_length
-                    if move_direction_vector[1]:
+                    if not math.isclose(move_direction_vector[1],0.0,abs_tol=1e-9):
                         cpy = copy.deepcopy(sub_image)
                         while not cpy.geometry(0).intersects(shrinked_boundary):
                             cpy.shift(np.array([0,move_direction_vector[1]]) * step_length)
@@ -108,15 +108,15 @@ class BorderImageGenerator(ImageGenerator):
             if isinstance(sub_image.geometry(0),Polygon) or isinstance(sub_image.geometry(0),MultiPolygon):
                 sub_image.scale(self.element_scaling)
                 self.shapes.add_group(sub_image)
-            
+
         self.shade_regions()
         self.shapes.show()
         return self.shapes
-    
+
     def shade_regions(self):
         if len(self.spokes)<=1:
             return
-                    
+
         corner_angles = [45+i*90 for i in range(4)]
         for i in range(-1,len(self.spokes)-1):
             if random.random()<self.shade_probability:
@@ -135,12 +135,10 @@ class BorderImageGenerator(ImageGenerator):
                 for corner_index in range (4):
                     if corner_angles[corner_index] > start_angle and corner_angles[corner_index]<end_angle:
                         vertices.append(self.canvas_corner_points[corner_index])
-                        
+
                 final_vertices = [(0,0)]+[start_pt]+vertices+[end_pt]+[(0,0)]
                 self.shaded_areas.append(ComplexShape(geometry=Polygon(final_vertices)))
-                
+
         self.shapes.lift_up_layer()
         for area in self.shaded_areas:
             self.shapes.add_shape(area)
-                
-                

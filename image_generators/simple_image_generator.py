@@ -29,6 +29,6 @@ class SimpleImageGenerator(ImageGenerator):
         elif shape==img_params.Shape.arbitrary:
             element = ComplexShape.arbitrary_polygon()
         else:
-            element = SimpleShape(position=(0,0),shape=shape,size=GenerationConfig.canvas_width/2)
+            element = SimpleShape(position=(0,0),shape=shape,size=GenerationConfig.canvas_width/2,rotation=img_params.Angle.deg0)
         self.shapes.add_shape(element)
         return self.shapes

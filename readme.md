@@ -329,3 +329,182 @@ Output:
 ![](./readme.assets/new-9.png)
 
 ![new-10](./readme.assets/new-10.png)
+
+#### (age 7-8, page 11)
+
+Question:
+
+![image-20250205001724055](./readme.assets/image-20250205001724055.png)
+
+Input:
+
+```json
+{
+    "composition_type": "chain",
+    "shape_distribution": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,0.0,0.0
+    ],
+        "chaining_image_config": {
+        "draw_chain": true,
+        "chain_level":"bottom",
+        "chain_shape": "bezier",
+        "interval": 0.4,
+        "element_num": 6,
+        "rotation": 90,
+        "sub_composition_distribution": {
+            "simple": 1.0
+        }
+
+    },
+}
+```
+
+Output:
+
+![](./readme.assets/new-1-1738685925467-8.png)
+
+![new-4](./readme.assets/new-4-1738685925467-9.png)
+
+#### (age 7-8, page 13)
+
+Question:
+
+![image-20250205085150561](./readme.assets/image-20250205085150561.png)
+
+Input:
+
+```json
+{
+    "composition_type": "chain",
+    "shape_distribution": [
+        0.0,
+        0.7,
+        0.0,
+        0.3,
+        0.0,
+        0.0,
+        0.0,0.0,0.0
+    ],
+        "chaining_image_config": {
+        "draw_chain": false,
+        "chain_level":"bottom",
+        "chain_shape": "line",
+        "interval": 0.4,
+        "element_num": 10,
+        "rotation": 90,
+        "sub_composition_distribution": {
+            "simple": 1.0
+        }
+
+    },
+}
+```
+
+Output:
+
+![](./readme.assets/new-1-1738730538204-12.png)
+
+#### (age 7-8, page 17) Missing Shapes
+
+Question:
+
+![image-20250205124325887](./readme.assets/image-20250205124325887.png)
+
+Input:
+
+```json
+{
+    "composition_type": "border",
+
+    "shape_distribution": [
+        0.6,
+        0.2,
+        0.0,
+        0.2,
+        0.0,
+        0.0,
+        0.0,0.0,0.0
+    ],
+    "border_image_config":{
+        "position_probabilities":[
+            0.0,
+            0.7,
+            0.0,
+            0.7,
+            0.0,
+            0.7,
+            0.0,
+            0.7,
+            0.0
+        ],
+        "element_scaling":0.25,
+        "approach_factor":1.0,
+        "shade_probability":0.7
+    }
+}
+```
+
+Output:
+
+![](./readme.assets/new-7.png)
+
+![new-14](./readme.assets/new-14.png)
+
+![new-16](./readme.assets/new-16.png)
+
+#### (age 7-8, page 17) Missing Shapes
+
+Question:
+
+![image-20250205132006598](./readme.assets/image-20250205132006598.png)
+
+Input:
+
+```json
+{
+    "composition_type": "border",
+    "shape_distribution": [
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "border_image_config":{
+        "position_probabilities":[
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5,
+            0.5
+        ], // alter the probabilities to get specific layout
+        "element_scaling":0.2,
+        "approach_factor":1.0,
+        "shade_probability":0.7
+    }
+}
+```
+
+Output:
+
+![](./readme.assets/new-4-1738736056874-17.png)
+
+![new-18](./readme.assets/new-18.png)
+
+![new-19](./readme.assets/new-19.png)
+
+#### 

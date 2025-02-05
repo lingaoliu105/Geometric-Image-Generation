@@ -26,6 +26,7 @@ class ChainingImageGenerator(ImageGenerator):
         self.chain = [] # initial positions of each element
         self.rotation = GenerationConfig.chaining_image_config["rotation"]
         self.chain_level = GenerationConfig.chaining_image_config["chain_level"]
+
     def generate_chain(self):
         assert self.element_num >= 2 and self.element_num <= 20
         # composite the image first, then shift to the center pos
@@ -58,25 +59,19 @@ class ChainingImageGenerator(ImageGenerator):
             if shapely.Point(self.chain[i]).within(
                 self.shapes.geometry(0).buffer(self.interval)
             ):
-                print(i,"skipped")
                 continue
             sub_generator = self.choose_sub_generator()
-            print("chosen: ",sub_generator)
             element_grp = sub_generator.generate()
             element_grp.shift(self.chain[i]-element_grp.center)
-            # element_grp.fit_canvas()
             element_grp.scale(1/self.element_num)
+            element_grp.scale(1-self.interval / GenerationConfig.canvas_height / 2)
             element_grp.rotate(angle=random.choice(list(img_params.Angle)))
 
             if i != 0 and any([isinstance(shape,ClosedShape) for shape in element_grp[0]]):
                 while not (element_grp.geometry(0).overlaps(prev_elements.geometry(0)) or element_grp.geometry(0).contains(prev_elements.geometry(0))):
-                    print("expand")
                     element_grp.scale(2) # expand new shape to make sure it overlaps prev to guarantee size search result
-                print(i,"before: ",element_grp.bounds())
                 element_grp.search_size_by_interval(prev_elements, self.interval)
-                print(i,"adjusted: ",element_grp.bounds())
             prev_elements = element_grp
-            print(i,element_grp)
             self.shapes.add_group(element_grp)
 
     def generate(self) -> ShapeGroup:

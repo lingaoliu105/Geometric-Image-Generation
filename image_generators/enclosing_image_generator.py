@@ -16,7 +16,6 @@ class EnclosingImageGenerator(ImageGenerator):
         
         
     def generate(self)->ShapeGroup:
-        print("enclosing:",self.sub_generators)
         self.canvas_radius_limit = min(GenerationConfig.canvas_height/2,GenerationConfig.canvas_width/2)
         self.generate_composite_image_nested(self.canvas_radius_limit,self.enclose_level)
         return self.shapes
@@ -27,7 +26,6 @@ class EnclosingImageGenerator(ImageGenerator):
     ):
         """generate a nested image, centered at 0,0, and within a square area of outer_size * outer_size
         """
-        print("hello:",recur_depth)
         if recur_depth <= 1:
             core_generator = self.choose_sub_generator() # sub generator is only used for core image
             core_shape_group = core_generator.generate() 

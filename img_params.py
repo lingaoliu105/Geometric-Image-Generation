@@ -135,6 +135,7 @@ class AttachPosition(Enum):
 
 
 class Lightness(Enum):
+    lightness0 = 0
     lightness20 = 20
     lightness25 = 25
     lightness33 = 33

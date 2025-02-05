@@ -21,13 +21,6 @@ class ShapeGroup:
     # @timeout_decorator.timeout(4,use_signals = False)
 
     def geometry(self, layer) -> BaseGeometry:
-        # to keep geometries list updated
-        # current_frame = inspect.currentframe()
-
-        # caller_frame = current_frame.f_back
-        # # 获取调用者的函数名
-        # caller_name = caller_frame.f_code.co_name
-        # print(f"Called by function: {caller_name}")
         return unary_union(
             [
                 shape.base_geometry
@@ -228,7 +221,6 @@ class ShapeGroup:
         max_iterations = 100  # 最大迭代次数
         while abs(max_scale - min_scale) > tolerance:
             own_cpy = copy.deepcopy(self)
-            print("adjust")
             if iteration_count >= max_iterations:
                 print("Exceeded maximum iterations")
                 break
