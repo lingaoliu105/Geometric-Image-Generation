@@ -1,7 +1,6 @@
 
 from re import sub
 
-from networkx import is_empty
 from common_types import *
 from entities.closed_shape import ClosedShape
 from entities.complex_shape import ComplexShape
@@ -12,6 +11,7 @@ from image_generators.image_generator import ImageGenerator
 from image_generators.simple_image_generator import SimpleImageGenerator
 from shape_group import ShapeGroup
 from util import *
+from shapely import LineString
 
 
 class ChainingImageGenerator(ImageGenerator):
@@ -71,9 +71,10 @@ class ChainingImageGenerator(ImageGenerator):
 
             if i != 0 and any([isinstance(shape,ClosedShape) for shape in element_grp[0]]):
                 prev_geometry = prev_elements.geometry(0,include_1d=True)
-                while not (element_grp.geometry(0).overlaps(prev_geometry) or element_grp.geometry(0).contains(prev_geometry)):
-                    element_grp.scale(2) # expand new shape to make sure it overlaps prev to guarantee size search result
-                element_grp.search_size_by_interval(prev_elements, self.interval)
+                if not isinstance(prev_geometry,LineString):
+                    while not (element_grp.geometry(0).overlaps(prev_geometry) or element_grp.geometry(0).contains(prev_geometry)):
+                        element_grp.scale(2) # expand new shape to make sure it overlaps prev to guarantee size search result
+                    element_grp.search_size_by_interval(prev_elements, self.interval)
             prev_elements = element_grp
 
             self.shapes.add_group(element_grp)

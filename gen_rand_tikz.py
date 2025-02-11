@@ -30,13 +30,12 @@ def generate_panels() -> list[Panel]:
     layout = GenerationConfig.layout
     row_num = layout[0]
     col_num = layout[1]
-    composition_type = GenerationConfig.composition_type
-    panel_num = (
-        row_num * col_num if composition_type != "enclosing" else 1
-    )
+    panel_num = row_num * col_num
+    
     panels = []
     # for each panel, draw simple shapes
     for i in range(panel_num):
+        composition_type = random.choices(list(GenerationConfig.composition_type.keys()),list(GenerationConfig.composition_type.values()))[0]
         center, top_left, bottom_right = compute_panel_position(layout, i)
         if composition_type == "simple":
             generator = SimpleImageGenerator()

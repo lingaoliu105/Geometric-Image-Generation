@@ -23,7 +23,7 @@ class GenerationConfig:
     simple_image_config = None
     shape_distribution = [1/len(list(img_params.Shape))] * len(list(img_params.Shape))
     highlight_overlap = True
-    composition_type = "chain"
+    composition_type = {"simple":1.0}
     sub_composition_distribution = {}
     opacity=0.0
     arbitrary_shape_cell_num = 10

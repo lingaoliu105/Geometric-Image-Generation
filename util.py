@@ -4,7 +4,7 @@ This module includes pure computation functions used in the code base
 
 from enum import Enum
 import random
-from typing import List, Type
+from typing import List, Type, Union
 import numpy as np
 import shapely
 
@@ -387,7 +387,7 @@ def choose_color(color_distribution: List[float]) -> img_params.Color:
     return choose_item_by_distribution(img_params.Color, color_distribution)
 
 
-def choose_item_by_distribution(enum: Type[Enum], distribution: List[float]):
+def choose_item_by_distribution(enum: Union[Type[Enum],List[str]], distribution: List[float]):
     if len(distribution) != len(list(enum)):
         raise ValueError("Distribution must have correct number of probabilities.")
     if not abs(sum(distribution) - 1.0) < 1e-6:
