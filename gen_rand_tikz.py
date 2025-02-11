@@ -38,7 +38,6 @@ def generate_panels() -> list[Panel]:
     # for each panel, draw simple shapes
     for i in range(panel_num):
         center, top_left, bottom_right = compute_panel_position(layout, i)
-        rot = random.choice(list(img_params.Angle))
         if composition_type == "simple":
             generator = SimpleImageGenerator()
         elif composition_type == "chain":

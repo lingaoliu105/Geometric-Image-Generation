@@ -204,6 +204,8 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
     | 6     | rectangle (aspect ratio range from 1 to 3)      |
     | 7     | right triangle (aspect ratio range from 1 to 3) |
     | 8     | arbitrary closed shape                          |
+    
+17. `arbitrary_shape_cell_num`: the number of cells (blocks) for generating arbitrary orthogonal shapes. The more cells will generate more complex shapes.
 
 
 
@@ -236,7 +238,9 @@ Input:
         0.2,
         0.2,
         0.2,
-        0.0,0.0,0.0
+        0.0,
+        0.0,
+        0.0
     ], // only keep desired shapes
     "border_image_config":{
         "position_probabilities":[
@@ -493,7 +497,7 @@ Input:
             0.5
         ], // alter the probabilities to get specific layout
         "element_scaling":0.2,
-        "approach_factor":1.0,
+        "approach_factor":0.8,
         "shade_probability":0.7
     }
 }
@@ -507,4 +511,80 @@ Output:
 
 ![new-19](./readme.assets/new-19.png)
 
-#### 
+#### (age 7-8, page 19) Rotating Shapes
+
+Question:
+
+![image-20250205142437392](./readme.assets/image-20250205142437392.png)
+
+Input:
+
+```json
+{
+    "composition_type": "simple",
+    "shape_distribution": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+    ],
+}
+```
+
+Output:
+
+![](./readme.assets/new-3-1738737614368-21.png)
+
+![new-10](./readme.assets/new-10-1738737614368-22.png)
+
+![new-17](./readme.assets/new-17.png)
+
+#### (age 7-8, page 22) Mixed
+
+Question:
+
+![image-20250205144816922](./readme.assets/image-20250205144816922.png)
+
+Input
+
+```json
+{
+    "composition_type": "border",
+    "shape_distribution": [
+        0.5,
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "border_image_config":{
+        "position_probabilities":[
+            0.5,
+            0.0,
+            1.0,
+            0.0,
+            0.5,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+        ],
+        "element_scaling":0.2,
+        "approach_factor":1.0,
+        "shade_probability":0.7
+    }
+}
+```
+
+Output:
+
+![]()

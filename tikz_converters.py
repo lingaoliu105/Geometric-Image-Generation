@@ -150,7 +150,10 @@ class ComplexShapeConverter(BaseConverter):
             trace = " -- ".join(
                 [str(coord) for coord in target.base_geometry.exterior.coords]
             )
-            tikz = f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity},{self.outline_thickness_str},{self.outline_color_str+self.outline_lightness_str},{self.outline_str}] {trace};\n"
+            tikz = (
+                f"\\fill [{self.color_str + self.lightness_str},fill opacity={GenerationConfig.opacity}] {trace};\n"
+                f"\\draw [{self.outline_thickness_str},{self.outline_color_str+self.outline_lightness_str},{self.pattern_str},{self.pattern_color_str+self.pattern_lightness_str},{self.outline_str}] {trace};\n"
+            )
         return tikz
 
 

@@ -246,7 +246,7 @@ class ComplexShape(ClosedShape, Relationship):
             flag=True
             while flag:
                 try:
-                    polyomino = generate_polyomino(20)
+                    polyomino = generate_polyomino(GenerationConfig.arbitrary_shape_cell_num)
                     edges = get_boundary_edges(polyomino)
                     polygon = chain_edges_to_polygon(edges)
                     vertices = merge_collinear(polygon)

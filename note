@@ -49,3 +49,9 @@ smoother curve (random distribution around old control points)
 problem : shape exceeds panel boundary
 check outline for rectangles
 find easier categories to generate 
+
+
+accept rectangular canvas and layout (grid)
+probability distribution for top level generator
+add json annotation to documentation. use a offline json visualizer
+annotating arbitrary shape: using matrix of 0 and 1, smallest matrix possible 

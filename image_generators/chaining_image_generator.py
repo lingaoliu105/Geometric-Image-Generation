@@ -1,5 +1,7 @@
 
 from re import sub
+
+from networkx import is_empty
 from common_types import *
 from entities.closed_shape import ClosedShape
 from entities.complex_shape import ComplexShape
@@ -35,7 +37,7 @@ class ChainingImageGenerator(ImageGenerator):
         elif self.chain_shape == "circle":
             curve_function = lambda: generate_circle_curve(random.randrange(4, 8))
         elif self.chain_shape == "line":
-            curve_function = lambda: get_points_on_line((-5.0, 0.0), (5.0, 0.0))
+            curve_function = lambda: get_points_on_line((-GenerationConfig.canvas_limit/2, 0.0), (GenerationConfig.canvas_limit/2, 0.0))
         else:
             print("curve type not assigned")
             raise
@@ -64,14 +66,16 @@ class ChainingImageGenerator(ImageGenerator):
             element_grp = sub_generator.generate()
             element_grp.shift(self.chain[i]-element_grp.center)
             element_grp.scale(1/self.element_num)
-            element_grp.scale(1-self.interval / GenerationConfig.canvas_height / 2)
+            element_grp.scale(1-self.interval / GenerationConfig.canvas_limit / 2)
             element_grp.rotate(angle=random.choice(list(img_params.Angle)))
 
             if i != 0 and any([isinstance(shape,ClosedShape) for shape in element_grp[0]]):
-                while not (element_grp.geometry(0).overlaps(prev_elements.geometry(0)) or element_grp.geometry(0).contains(prev_elements.geometry(0))):
+                prev_geometry = prev_elements.geometry(0,include_1d=True)
+                while not (element_grp.geometry(0).overlaps(prev_geometry) or element_grp.geometry(0).contains(prev_geometry)):
                     element_grp.scale(2) # expand new shape to make sure it overlaps prev to guarantee size search result
                 element_grp.search_size_by_interval(prev_elements, self.interval)
             prev_elements = element_grp
+
             self.shapes.add_group(element_grp)
 
     def generate(self) -> ShapeGroup:
@@ -102,5 +106,4 @@ class ChainingImageGenerator(ImageGenerator):
             else:
                 raise ValueError()
         self.shapes.fit_canvas()
-        self.shapes.show()
         return self.shapes

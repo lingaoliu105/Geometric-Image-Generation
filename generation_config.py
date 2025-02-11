@@ -26,6 +26,7 @@ class GenerationConfig:
     composition_type = "chain"
     sub_composition_distribution = {}
     opacity=0.0
+    arbitrary_shape_cell_num = 10
     outline_distribution = [1 / len(list(img_params.Outline))] * len(
         list(img_params.Outline)
     )
@@ -45,4 +46,8 @@ class GenerationConfig:
     @classmethod
     @property
     def lower_canvas_bound(self):
-        return -self.canvas_width/2   
+        return -self.canvas_height/2   
+    @classmethod
+    @property
+    def canvas_limit(self):
+        return min(self.canvas_height,self.canvas_width)

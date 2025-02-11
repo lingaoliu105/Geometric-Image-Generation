@@ -11,21 +11,19 @@ from generation_config import GenerationConfig
 import img_params
 from panel import Panel
 from shapely.geometry.base import BaseGeometry
-import timeout_decorator
-from shapely import Polygon,MultiPolygon
+from shapely import Polygon, MultiPolygon
+
 
 class ShapeGroup:
     def __init__(self, shapes: List[List[VisibleShape]]) -> None:
         self.shapes = shapes if shapes is not None else [[]]
 
-    # @timeout_decorator.timeout(4,use_signals = False)
-
-    def geometry(self, layer) -> BaseGeometry:
+    def geometry(self, layer, include_1d = False) -> BaseGeometry:
         return unary_union(
             [
                 shape.base_geometry
                 for shape in self.shapes[layer]
-                if isinstance(shape, ClosedShape)
+                if isinstance(shape, ClosedShape) or include_1d
             ]
         )
 
@@ -81,6 +79,8 @@ class ShapeGroup:
             for layer_cnt, shapes in enumerate(overlapping_group):
                 self.shapes[layer_cnt].extend(shapes)
         self.shapes[layer].append(shape)
+        while len(self.shapes[-1])==0: # remove unused layers
+            self.shapes.pop()
 
     def __add__(self, other):
         if isinstance(other, VisibleShape):
@@ -140,6 +140,7 @@ class ShapeGroup:
             for shape in layer:
                 shape.scale(scale_ratio, origin)
 
+
     def to_panel(self, top_left, bottom_right):
         """place the shape group in a panel. shape group is by default placed on the entire canvas, and will be shifted and shrinked to fit in the panel"""
         panel_center = (
@@ -147,12 +148,11 @@ class ShapeGroup:
             (top_left[1] + bottom_right[1]) / 2,
         )
         self.shift(panel_center)
-        scale_ratio = (bottom_right[0] - top_left[0]) / (
-            GenerationConfig.right_canvas_bound - GenerationConfig.left_canvas_bound
-        )
-        assert scale_ratio == (top_left[1] - bottom_right[1]) / (
-            GenerationConfig.upper_canvas_bound - GenerationConfig.lower_canvas_bound
-        )
+        scale_ratio = max(
+            (bottom_right[0] - top_left[0]) / GenerationConfig.canvas_width,
+            (top_left[1] - bottom_right[1]) / GenerationConfig.canvas_height,
+        ) * 0.85
+
         self.scale(scale_ratio=scale_ratio, origin=panel_center)
         flattened_list = [item for sublist in self.shapes for item in sublist]
         return Panel(
@@ -164,7 +164,7 @@ class ShapeGroup:
 
     def show(self):
         for layer in self.shapes:
-            print([f"{shape.__class__.__name__}, uid: {shape.uid}" for shape in layer])
+            print([f"{shape.__class__.__name__},{shape.shape}, uid: {shape.uid}" for shape in layer])
 
     def flattened(self):
         return [item for sublist in self.shapes for item in sublist]
@@ -210,7 +210,7 @@ class ShapeGroup:
                     return True
         return False
 
-    def search_size_by_interval(self, other: "ShapeGroup",interval: float):
+    def search_size_by_interval(self, other: "ShapeGroup", interval: float):
         """based on layer 0's geometry"""
         other_shape = other.geometry(0).buffer(interval)
         assert other_shape.is_valid
@@ -231,7 +231,11 @@ class ShapeGroup:
             if own_cpy.roughly_touches(other):
                 print(f"Found a valid scale: {scale_factor}")
                 break
-            elif own_cpy.geometry(0).overlaps(other_shape) or own_cpy.geometry(0).intersects(other_shape) or own_cpy.geometry(0).contains(other_shape):
+            elif (
+                own_cpy.geometry(0).overlaps(other_shape)
+                or own_cpy.geometry(0).intersects(other_shape)
+                or own_cpy.geometry(0).contains(other_shape)
+            ):
                 max_scale = scale_factor  # 调整最小缩放比例
             else:
                 min_scale = scale_factor  # 调整最大缩放比例
@@ -256,13 +260,14 @@ class ShapeGroup:
             )
         )
 
-    def bounds(self,layer=0):
+    def bounds(self, layer=0):
         geom = self.geometry(layer=layer)
-
 
         def calculate_bounds(
             geom,
-        ) -> Tuple[Tuple[float, float], Tuple[float, float], float, float, float, float]:
+        ) -> Tuple[
+            Tuple[float, float], Tuple[float, float], float, float, float, float
+        ]:
             """
             计算 Polygon 或 MultiPolygon 的最左、最右、最高、最低点，
             以及上下高度和左右宽度。
