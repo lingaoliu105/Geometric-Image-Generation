@@ -3,10 +3,11 @@ import random
 import sys
 from networkx import center
 import numpy as np
-from shapely import LineString, Point
+from shapely import LineString, Point, Polygon
 from common_types import *
 from typing import Literal, Optional, Union
 
+from entities.closed_shape import ClosedShape
 from entities.visible_shape import OpenShape, VisibleShape
 import generation_config
 import img_params
@@ -20,6 +21,7 @@ from util import (
     rotate_point,
 )
 from shapely.affinity import translate
+from shapely.geometry.base import BaseGeometry
 from shapely.ops import nearest_points
 
 import util
@@ -45,8 +47,9 @@ class LineSegment(OpenShape):
         self,
         pt1: Optional[Union[np.ndarray, tuple, list]] = None,
         pt2: Optional[Union[np.ndarray, tuple, list]] = None,
+        color = None
     ) -> None:
-        super().__init__(tikz_converter=LineSegmentConverter())
+        super().__init__(tikz_converter=LineSegmentConverter(),color=color)
         self.shape = img_params.Shape.linesegment
         if pt1 is None and pt2 is None:
             # if neither points is specified, choose both points randomly
@@ -58,23 +61,26 @@ class LineSegment(OpenShape):
         else:
             self._base_geometry = LineString([pt1, pt2])
 
-        self.line_pattern = util.choose_item_by_distribution(img_params.Outline,generation_config.GenerationConfig.outline_distribution)
+        self.line_pattern = util.choose_item_by_distribution(
+            img_params.Outline, generation_config.GenerationConfig.outline_distribution
+        )
         self.is_expanded = False
-        
+
     @property
     def base_geometry(self):
         if self.is_expanded:
             return self._base_geometry_expanded
         else:
             return self._base_geometry
-        
+
     @staticmethod
-    def within_distance(point:Coordinate, distance:float):
-        pt1,pt2 = generate_random_points_around_point(center=point,distance=distance)
-        ls = LineSegment(pt1,pt2)
+    def within_distance(point: Coordinate, distance: float):
+        pt1, pt2 = generate_random_points_around_point(center=point, distance=distance)
+        ls = LineSegment(pt1, pt2)
         if ls.length <= 0.5:
             ls.scale(2)
         return ls
+
     @property
     def endpt_left(self) -> np.ndarray:
         endpt_coords = self._base_geometry.coords
@@ -143,17 +149,16 @@ class LineSegment(OpenShape):
         return self._base_geometry.intersects(other.base_geometry)
 
     def expand_fixed(self, length):
-        if almost_equal(length,0.0):
+        if almost_equal(length, 0.0):
             pass
         elif length > 0:
-            if self.is_expanded: # reset if already expanded before
+            if self.is_expanded:  # reset if already expanded before
                 self._base_geometry_expanded = self._base_geometry
             self._base_geometry_expanded = self._base_geometry.buffer(length)
             self.is_expanded = True
         elif length < 0:
             self.scale(1 - 2 * abs(length) / self.length)
         return self
-
 
     def scale_with_pivot(self, ratio, pivot: Coordinate):
         assert self._base_geometry.buffer(0.01).contains(Point(pivot))
@@ -167,52 +172,56 @@ class LineSegment(OpenShape):
     def expand(self, ratio):
         self.scale(ratio=ratio)
 
-    def adjust_by_interval(
-        self,
-        other: VisibleShape,
-        interval: float,
-        prior_method: Literal["rotate", "scale"],
-    ):
-        other_copy = other.copy
-        mid_point = Point(self.center)
-        if prior_method == "rotate":
-            maximum_achievable_distance = mid_point.distance(other.base_geometry)
-            minimum_achievable_distance = maximum_achievable_distance - self.radius
-            if maximum_achievable_distance < interval:
-                print("interval too large", file=sys.stderr)
-                return
-            nearest_point_on_shape, _ = nearest_points(
-                other_copy.base_geometry, mid_point
-            )
-            perpendicular_line_rotation = get_line_rotation(
-                nearest_point_on_shape.coords[0], self.center
+    @staticmethod
+    def connect(object1: BaseGeometry, object2: BaseGeometry) -> "LineSegment":
+        def choose_endpoint_around_shape(shape: Polygon, ref_point: Coordinate):
+            def sample_geometry_boundary(geometry, num_points=30) -> Coordinate:
+                if isinstance(geometry, Polygon):
+                    # 获取多边形的外环
+                    exterior_coords = geometry.exterior.coords
+                    if len(exterior_coords) >= num_points:  # most likely a circle
+                        return exterior_coords
+                    geometry = LineString(exterior_coords)
+
+                # 根据周长进行等距采样
+                sampled_points = []
+                for i in np.linspace(0, geometry.length, num_points):
+                    sampled_points.append(geometry.interpolate(i).coords[0])
+                return sampled_points
+
+            assert not isinstance(shape, LineString)
+            # pick a point on the expanded shape, which faces the next endpoint
+            bound_points: list = sample_geometry_boundary(shape)
+            filtered_bound_points = list(
+                filter(
+                    lambda point: not LineString([point, ref_point]).intersects(shape)
+                    or LineString([point, ref_point]).touches(shape),
+                    bound_points,
+                )
             )
             if (
-                minimum_achievable_distance <= interval
-            ):  # the interval is achievable with rotation
-                upper, lower = perpendicular_line_rotation, self.rotation
-                while (
-                    abs(upper - lower)
-                    > generation_config.GenerationConfig.search_threshhold
-                ):
-                    mid = (upper + lower) / 2
-                    self.rotate(self.center, mid - self.rotation)
-                    distance = self._base_geometry.distance(other_copy.base_geometry)
-                    if distance > interval:
-                        lower = mid
-                    else:
-                        upper = mid
-            else:
-                self.rotate(self.center, perpendicular_line_rotation - self.rotation)
+                len(filtered_bound_points) == 0
+            ):  # don't know why no point passed the filter. if so, simply choose the point directly facing the next endpoint
+                return (
+                    LineString([ref_point, shape.position])
+                    .intersection(shape.base_geometry.buffer(0.01))
+                    .coords[0]
+                )
+            return random.choice(filtered_bound_points)
 
+        if isinstance(object1, Polygon) and isinstance(object2, Polygon):
+            pt1 = choose_endpoint_around_shape(object1, object2.centroid.coords[0])
+            pt2 = choose_endpoint_around_shape(object2, pt1)
+        elif isinstance(object2, Polygon):
+            pt1 = object1.coords[0]
+            pt2 = choose_endpoint_around_shape(object2, pt1)
+        elif isinstance(object1, Polygon):
+            pt1 = object2.coords[0]
+            pt2 = choose_endpoint_around_shape(object1, pt1)
+        elif isinstance(object1, Point) and isinstance(object2, Point):
+            pt1, pt2 = object1.coords[0], object2.coords[0]
         else:
-            return
-
-    # def adjust_by_scaling(self,other:VisibleShape,interval:float,pivot:Coordinate):
-    #     # if almost_equal(pivot,self.endpt_up) or almost_equal(pivot,self.endpt_down):
-    #     # check if the desired interval is achievable by simply scaling
-    #     cpy = self.copy
-    #     cpy.scale_with_pivot((generation_config.GenerationConfig.canvas_height + generation_config.GenerationConfig.canvas_width)*10/cpy.length)
-    #     minimum_achievable_distance = cpy.base_geometry.distance(other.base_geometry)
-    #     if minimum_achievable_distance <= interval:
-    #         min_ratio =
+            raise TypeError(
+                f"unsupported types to connect:object1:{object1.__class__,object1},object2:{object2.__class__,object2}"
+            )
+        return LineSegment(pt1=pt1, pt2=pt2)

@@ -1,5 +1,7 @@
+from re import L, sub
 
-from re import sub
+from numpy import average
+from sympy import posify
 
 from common_types import *
 from entities.closed_shape import ClosedShape
@@ -11,7 +13,9 @@ from image_generators.image_generator import ImageGenerator
 from image_generators.simple_image_generator import SimpleImageGenerator
 from shape_group import ShapeGroup
 from util import *
-from shapely import LineString
+from shapely import LineString, Point
+
+import util
 
 
 class ChainingImageGenerator(ImageGenerator):
@@ -19,7 +23,7 @@ class ChainingImageGenerator(ImageGenerator):
         super().__init__()
         self.position: Coordinate = (0, 0)
         # TODO: combine the chain linesegments into one entity for json labelling
-        
+
         # TODO: add default value when some configs are not given by user
         self.draw_chain = generation_config.GenerationConfig.chaining_image_config['draw_chain']
         self.chain_shape = generation_config.GenerationConfig.chaining_image_config['chain_shape']
@@ -28,6 +32,7 @@ class ChainingImageGenerator(ImageGenerator):
         self.chain = [] # initial positions of each element
         self.rotation = GenerationConfig.chaining_image_config["rotation"]
         self.chain_level = GenerationConfig.chaining_image_config["chain_level"]
+        self.skipped = {}
 
     def generate_chain(self):
         assert self.element_num >= 2 and self.element_num <= 20
@@ -54,8 +59,8 @@ class ChainingImageGenerator(ImageGenerator):
 
         self.chain = get_chain()
 
-
     def generate_shapes_on_chain(self):
+        prev_elements = None
         for i in range(self.element_num):
             # skip if current center is already covered by the previous shape
             if shapely.Point(self.chain[i]).within(
@@ -68,16 +73,75 @@ class ChainingImageGenerator(ImageGenerator):
             element_grp.scale(1/self.element_num)
             element_grp.scale(1-self.interval / GenerationConfig.canvas_limit / 2)
             element_grp.rotate(angle=random.choice(list(img_params.Angle)))
+            if isinstance(element_grp.geometry(0,include_1d=True),LineString):
+                self.skipped[i] = {"prev":prev_elements,"next":None}
+                prev_elements = None
+                continue
 
             if i != 0 and any([isinstance(shape,ClosedShape) for shape in element_grp[0]]):
-                prev_geometry = prev_elements.geometry(0,include_1d=True)
-                if not isinstance(prev_geometry,LineString):
-                    while not (element_grp.geometry(0).overlaps(prev_geometry) or element_grp.geometry(0).contains(prev_geometry)):
-                        element_grp.scale(2) # expand new shape to make sure it overlaps prev to guarantee size search result
-                    element_grp.search_size_by_interval(prev_elements, self.interval)
+                if prev_elements is not None:
+                    prev_geometry = prev_elements.geometry(0,include_1d=True)
+                    if not isinstance(prev_geometry,LineString):
+                        while not (element_grp.geometry(0).overlaps(prev_geometry) or element_grp.geometry(0).contains(prev_geometry)):
+                            element_grp.scale(2) # expand new shape to make sure it overlaps prev to guarantee size search result
+                        element_grp.search_size_by_interval(prev_elements, self.interval)
+                else:
+                    try:
+                        self.skipped[i-1]["next"] = element_grp
+                    except KeyError as e:
+                        print(e)
+                        raise
+
             prev_elements = element_grp
 
             self.shapes.add_group(element_grp)
+
+    def fill_connecting_line_segments(self):
+        for pos_index in range(self.element_num):
+            if pos_index not in self.skipped:
+                continue
+            prv: ShapeGroup = self.skipped[pos_index].get("prev")
+
+            # Collect all consecutive skipped elements
+            intermediates = []
+            while pos_index in self.skipped:
+                intermediates.append(pos_index)
+                pos_index += 1
+            print(intermediates)
+            end: ShapeGroup = self.skipped[intermediates[-1]].get("next")
+            if end is None:
+                end = Point(self.chain[intermediates[-1]])
+            else:
+                end = end.geometry(0)
+            start = prv.geometry(0) if prv else Point(self.chain[intermediates[0]])
+            for i in intermediates[:-1]:
+                joint = LineString([self.chain[i], self.chain[i + 1]]).interpolate(0.5)
+                self.shapes.add_shape(LineSegment.connect(start, joint))
+                start = joint
+            last = LineSegment.connect(start,end)
+            print(last)
+            self.shapes.add_shape(last)
+
+
+    def add_chain_segments(self):
+        chain_segments = [
+            LineSegment(
+                self.curve_point_set[i], self.curve_point_set[i + 1],color=img_params.Color.black
+            )
+            for i in range(len(self.curve_point_set) - 2)
+            # for i in range(0,len(self.curve_point_set) - 2,2)
+        ]
+        
+        if self.chain_level=="bottom":
+            self.shapes.lift_up_layer()
+            for seg in chain_segments:
+                self.shapes.add_shape_on_layer(seg,0)
+        elif self.chain_level=="top":
+            top_layer = self.shapes.layer_num-1
+            for seg in chain_segments:
+                self.shapes.add_shape_on_layer(seg,top_layer)
+        else:
+            raise ValueError()
 
     def generate(self) -> ShapeGroup:
         """generate a composite geometry entity by chaining simple shapes
@@ -88,23 +152,8 @@ class ChainingImageGenerator(ImageGenerator):
         """
         self.generate_chain()
         self.generate_shapes_on_chain()
+        self.fill_connecting_line_segments()
         if self.draw_chain:
-            chain_segments = [
-                LineSegment(
-                    self.curve_point_set[i], self.curve_point_set[i + 1]
-                )
-                for i in range(len(self.curve_point_set) - 2)
-                # for i in range(0,len(self.curve_point_set) - 2,2)
-            ]
-            if self.chain_level=="bottom":
-                self.shapes.lift_up_layer()
-                for seg in chain_segments:
-                    self.shapes.add_shape_on_layer(seg,0)
-            elif self.chain_level=="top":
-                top_layer = self.shapes.layer_num-1
-                for seg in chain_segments:
-                    self.shapes.add_shape_on_layer(seg,top_layer)
-            else:
-                raise ValueError()
+            self.add_chain_segments()
         self.shapes.fit_canvas()
         return self.shapes
