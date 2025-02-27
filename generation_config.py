@@ -16,6 +16,7 @@ class GenerationConfig:
     color_distribution = [1/len(list(img_params.Color))] * len(list(img_params.Color))
     pattern_distribution = [1/len(list(img_params.Pattern))] * len(list(img_params.Pattern))
     lightness_distribution = [1/len(list(img_params.Lightness))] * len(list(img_params.Lightness))
+    background_lightness_distribution = None
     chaining_image_config = None
     radial_image_config = None
     random_image_config = None

@@ -38,7 +38,7 @@ class Panel:
         lightness = (
             lightness
             if lightness is not None
-            else util.choose_item_by_distribution(img_params.Lightness,GenerationConfig.lightness_distribution)
+            else util.choose_item_by_distribution(img_params.Lightness,GenerationConfig.background_lightness_distribution)
         )
         if GenerationConfig.color_mode == "mono":
             color = img_params.Color.black
