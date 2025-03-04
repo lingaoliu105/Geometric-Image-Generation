@@ -12,6 +12,12 @@ import img_params
 from panel import Panel
 from shapely.geometry.base import BaseGeometry
 from shapely import Polygon, MultiPolygon
+from shapely.geometry import ( 
+    Point,
+    LinearRing,
+    MultiLineString,
+    GeometryCollection, 
+)
 
 
 class ShapeGroup:
@@ -261,44 +267,53 @@ class ShapeGroup:
         )
 
     def bounds(self, layer=0):
-        geom = self.geometry(layer=layer)
+        geom = self.geometry(layer=layer, include_1d=True)
 
-        def calculate_bounds(
-            geom,
-        ) -> Tuple[
-            Tuple[float, float], Tuple[float, float], float, float, float, float
-        ]:
-            """
-            计算 Polygon 或 MultiPolygon 的最左、最右、最高、最低点，
-            以及上下高度和左右宽度。
+        def extract_coordinates(geometry):
+            """递归提取所有几何对象的坐标"""
+            coords = []
+            if geometry.is_empty:
+                return coords
+                
+            if isinstance(geometry, (Point)):
+                coords.append((geometry.x, geometry.y))
+            elif isinstance(geometry, (LineString, LinearRing)):
+                coords.extend(list(geometry.coords))
+            elif isinstance(geometry, (Polygon)):
+                coords.extend(list(geometry.exterior.coords))
+                for interior in geometry.interiors:
+                    coords.extend(list(interior.coords))
+            elif isinstance(geometry, (MultiPolygon, MultiLineString, GeometryCollection)):
+                for geom in geometry.geoms:
+                    coords.extend(extract_coordinates(geom))
+            return coords
 
-            :param geom: Polygon 或 MultiPolygon
-            :return: (最左点, 最右点, 最高点, 最低点, 高度, 宽度)
-            """
+        def calculate_bounds(geom):
+            """通用边界计算方法"""
+            if geom.is_empty:
+                return ((0,0), (0,0), (0,0), (0,0), 0, 0)
 
-            if isinstance(geom, MultiPolygon):
-                # 对 MultiPolygon 类型，我们需要处理每个子多边形
-                all_coords = []
-                for polygon in geom:
-                    all_coords.extend(list(polygon.exterior.coords))
-                    for interior in polygon.interiors:
-                        all_coords.extend(list(interior.coords))
-            else:
-                # 对 Polygon 类型
-                all_coords = list(geom.exterior.coords)
-                for interior in geom.interiors:
-                    all_coords.extend(list(interior.coords))
+            # 提取所有坐标（支持任意几何类型）
+            all_coords = extract_coordinates(geom)
+            
+            if not all_coords:  # 处理空几何的情况
+                return ((0,0), (0,0), (0,0), (0,0), 0, 0)
 
-            # 找到最左、最右、最高、最低的点
-            left_point = min(all_coords, key=lambda x: x[0])  # 最左点 (x最小)
-            right_point = max(all_coords, key=lambda x: x[0])  # 最右点 (x最大)
-            highest_point = max(all_coords, key=lambda x: x[1])  # 最高点 (y最大)
-            lowest_point = min(all_coords, key=lambda x: x[1])  # 最低点 (y最小)
+            # 找到极值点
+            left_point = min(all_coords, key=lambda x: x[0])
+            right_point = max(all_coords, key=lambda x: x[0])
+            highest_point = max(all_coords, key=lambda x: x[1])
+            lowest_point = min(all_coords, key=lambda x: x[1])
 
-            # 计算高度和宽度
-            height = highest_point[1] - lowest_point[1]  # 高度 = 最高点的y - 最低点的y
-            width = right_point[0] - left_point[0]  # 宽度 = 最右点的x - 最左点的x
+            # 计算尺寸
+            height = highest_point[1] - lowest_point[1]
+            width = right_point[0] - left_point[0]
 
-            return left_point, right_point, highest_point, lowest_point, height, width
+            return (tuple(left_point), 
+                    tuple(right_point), 
+                    tuple(highest_point), 
+                    tuple(lowest_point), 
+                    height, 
+                    width)
 
         return calculate_bounds(geom)
