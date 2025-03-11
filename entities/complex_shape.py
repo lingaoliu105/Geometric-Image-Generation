@@ -1,15 +1,10 @@
 from collections import defaultdict
-import math
 import random
-from typing import List, Literal, Optional, Set, Tuple
+from typing import List, Optional
 
-from matplotlib.pyplot import isinteractive
-import numpy as np
 import shapely
-from sympy import false
 from entities.closed_shape import ClosedShape
 from entities.entity import Relationship
-from entities.line_segment import LineSegment
 from generation_config import GenerationConfig
 import img_params
 from tikz_converters import ComplexShapeConverter

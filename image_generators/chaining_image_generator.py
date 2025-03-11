@@ -1,22 +1,12 @@
-from re import L, sub
-
-from numpy import average
-from sympy import posify
 
 from common_types import *
 from entities.closed_shape import ClosedShape
-from entities.complex_shape import ComplexShape
 from entities.line_segment import LineSegment
-from entities.simple_shape import SimpleShape
 from generation_config import GenerationConfig
 from image_generators.image_generator import ImageGenerator
-from image_generators.simple_image_generator import SimpleImageGenerator
 from shape_group import ShapeGroup
 from util import *
 from shapely import LineString, Point
-
-import util
-
 
 class ChainingImageGenerator(ImageGenerator):
     def __init__(self) -> None:

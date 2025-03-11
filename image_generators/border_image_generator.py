@@ -1,15 +1,10 @@
-from collections import OrderedDict
 import copy
-import enum
 import math
 import random
-from re import sub
 from typing import List
 
-import img_params
 import numpy as np
-from responses import start
-from shapely import LineString, Point, Polygon, MultiPolygon
+from shapely import LineString, Polygon, MultiPolygon
 from entities.complex_shape import ComplexShape
 from entities.line_segment import LineSegment
 from generation_config import GenerationConfig
