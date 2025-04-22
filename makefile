@@ -1,4 +1,4 @@
-GEN_NUM = 20
+GEN_NUM = 5
 
 GEN_FILE_PREFIX = new-
 

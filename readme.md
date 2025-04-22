@@ -193,11 +193,43 @@ User input shall be given in a json file (`/input.json`). Supported fields are:
 
 16. `shape_distribution`: an array that specifies the probability of shape occurrence. The details are as follows:
 
-    | Index | Shape                                           |
-    | ----- | ----------------------------------------------- |
-    | 0     | line segment                                    |
-    | 1     | circle                                          |
-    | 2     | triangle (eq)                                   |
+    | Index | Shape         |
+    | ----- | ------------- |
+    | 0     | line segment  |
+    | 1     | circle        |
+    | 2     | triangle      |
+    | 3     | square        |
+    | 4     | pentagon      |
+    | 5     | hexagon       |
+    | 6     | rectangle     |
+    | 7     | triangle_rt   |
+    | 8     | arbitrary     |
+
+17. `simple_image_config`: an individual json object that controls the generation of simple shapes. The structure is as follows:
+
+    | Field Name | Accepted Values | Meaning |
+    | ---------- | --------------- | ------- |
+    | `"seed"` | integer | The random seed for deterministic generation |
+    | `"shape_size"` | object with "min" and "max" fields | The size range for generated shapes |
+    | `"aspect_ratio"` | object with "min" and "max" fields | The aspect ratio range for rectangles and right triangles |
+    | `"rotation_angles"` | array of integers | List of allowed rotation angles in degrees |
+    | `"polygon_generation"` | object | Configuration for arbitrary polygon generation |
+
+    Example:
+    ```json
+    {
+        "simple_image_config": {
+            "seed": 42,
+            "shape_size": {"min": 1.0, "max": 5.0},
+            "aspect_ratio": {"min": 0.5, "max": 2.0},
+            "rotation_angles": [0, 45, 90, 135, 180],
+            "polygon_generation": {
+                "start_position": [0, 0],
+                "cell_selection_order": "random"
+            }
+        }
+    }
+    ```
     | 3     | square                                          |
     | 4     | pentagon                                        |
     | 5     | hexagon                                         |

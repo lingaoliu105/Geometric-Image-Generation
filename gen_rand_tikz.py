@@ -35,6 +35,8 @@ def generate_panels() -> list[Panel]:
     panels = []
     # for each panel, draw simple shapes
     for i in range(panel_num):
+        reconfigure_for_panel(i)
+        print(f"Generating panel {i+1}/{panel_num}")
         composition_type = random.choices(list(GenerationConfig.composition_type.keys()),list(GenerationConfig.composition_type.values()))[0]
         center, top_left, bottom_right = compute_panel_position(layout, i)
         if composition_type == "simple":
@@ -52,6 +54,7 @@ def generate_panels() -> list[Panel]:
         elements_on_panel:ShapeGroup = generator.generate()
         panel = elements_on_panel.to_panel(top_left=top_left,bottom_right=bottom_right)
         panels.append(panel)
+    
     return panels
 
 
@@ -148,10 +151,23 @@ def main(n):
 def initialize_config():
     with open("input.json", "r") as input_file:
         data = json.load(input_file)
-        
+    
+    # Set global configs first
     for key in data:
-        if hasattr(GenerationConfig,key):
-            setattr(GenerationConfig,key,data[key])
+        if key != "panel_configs" and hasattr(GenerationConfig, key):
+            setattr(GenerationConfig, key, data[key])
+    
+    # Store panel configs if present for later use
+    GenerationConfig.panel_configs = data.get("panel_configs", [])
+    
+def reconfigure_for_panel(panel_index):
+    if hasattr(GenerationConfig, "panel_configs") and panel_index < len(GenerationConfig.panel_configs):
+        panel_config = GenerationConfig.panel_configs[panel_index]
+        for key, value in panel_config.items():
+            if hasattr(GenerationConfig, key):
+                setattr(GenerationConfig, key, value)
+    
+
 
 
 if __name__ == "__main__":

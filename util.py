@@ -146,22 +146,27 @@ def generate_equidistant_bezier_curve(
 
 
 def generate_random_bezier_curve():
-    pivots = [
-        0.75 * generation_config.GenerationConfig.left_canvas_bound,
-        0.25 * generation_config.GenerationConfig.left_canvas_bound,
-        0.25 * generation_config.GenerationConfig.right_canvas_bound,
-        0.75 * generation_config.GenerationConfig.right_canvas_bound,
-    ]
+    config = generation_config.GenerationConfig.chaining_image_config
+    control_dist = config.get('control_point_distribution', {
+        'x_range': [-0.125, 0.125],
+        'y_range': [-0.5, 0.5],
+        'pivot_points': [-0.75, -0.25, 0.25, 0.75]
+    })
+    
+    pivots = [p * generation_config.GenerationConfig.canvas_width for p in control_dist['pivot_points']]
+    x_range = [r * generation_config.GenerationConfig.canvas_width for r in control_dist['x_range']]
+    y_range = [r * generation_config.GenerationConfig.canvas_height for r in control_dist['y_range']]
+    
     control_points = [
         np.array(
             [
                 random.uniform(
-                    pivot - 0.125*generation_config.GenerationConfig.canvas_width,
-                    pivot + 0.125*generation_config.GenerationConfig.canvas_width,
+                    pivot + x_range[0],
+                    pivot + x_range[1],
                 ),
                 random.uniform(
-                    generation_config.GenerationConfig.lower_canvas_bound,
-                    generation_config.GenerationConfig.upper_canvas_bound,
+                    y_range[0],
+                    y_range[1],
                 ),
             ]
         )

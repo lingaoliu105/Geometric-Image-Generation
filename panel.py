@@ -52,5 +52,6 @@ class Panel:
             outline=img_params.Outline.solid,
             outline_color=img_params.OutlineColor.outlineBlack,
             outline_lightness=img_params.OutlineLightness.outlineLightness100,
+            outline_thickness=img_params.OutlineThickness.thick,
             rotation=img_params.Angle.deg0,
         )

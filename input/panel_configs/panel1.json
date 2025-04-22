@@ -1,0 +1,15 @@
+{
+    "composition_type": {
+        "chaining": 1.0
+    },
+    "chaining_image_config": {
+        "element_num":3,
+        "chain_shape":"line",
+
+        "elements":[
+            "./element_configs/element_config_1.json",
+            "./element_configs/element_config_2.json",
+            "./element_configs/element_config_3.json"
+        ]
+    }
+} 

@@ -88,9 +88,10 @@ class ComplexShape(ClosedShape, Relationship):
         return overlaps
 
     @staticmethod
-    def arbitrary_rectangle():
-        """return a rectangle, aspect ratio between 1 to 3, and size occupying canvas"""
-        aspect_ratio = random.uniform(1, 3)
+    def arbitrary_rectangle(aspect_ratio=None):
+        """return a rectangle with specified or default aspect ratio"""
+        if aspect_ratio is None:
+            aspect_ratio = random.uniform(1, 3)
         length = min(GenerationConfig.canvas_height, GenerationConfig.canvas_width)
         width = length / aspect_ratio
         shape = ComplexShape(
@@ -107,8 +108,10 @@ class ComplexShape(ClosedShape, Relationship):
         return shape
 
     @staticmethod
-    def arbitrary_right_triangle():
-        aspect_ratio = random.uniform(1, 3)
+    def arbitrary_right_triangle(aspect_ratio=None):
+        """return a right triangle with specified or default aspect ratio"""
+        if aspect_ratio is None:
+            aspect_ratio = random.uniform(1, 3)
         length = min(GenerationConfig.canvas_height, GenerationConfig.canvas_width)
         width = length / aspect_ratio
         shape = ComplexShape(
@@ -124,33 +127,40 @@ class ComplexShape(ClosedShape, Relationship):
         return shape
 
     @staticmethod
-    def arbitrary_polygon():
-        def generate_orthogonal_polygon_by_cells():
+    def arbitrary_polygon(start_position=None, cell_selection_order="random"):
+        def generate_orthogonal_polygon_by_cells(start_pos=None, selection_order="random"):
         
-            def generate_polyomino(n_cells, seed=None):
+            def generate_polyomino(n_cells, start_pos=(0,0), selection_order="random"):
                 """
-                随机生成一个由 n_cells 个单元格构成的多胞形（polyomino），
-                每个单元格由其左下角坐标 (x, y) 表示。
+                Generate a polyomino with n_cells cells using deterministic cell selection.
+                Each cell is represented by its bottom-left coordinate (x, y).
                 """
-                if seed is not None:
-                    random.seed(seed)
-                
                 polyomino = set()
-                polyomino.add((0, 0))
+                polyomino.add(start_pos)
                 
-                # frontier: 与当前多胞形邻接且尚未加入的格子
+                # frontier: cells adjacent to current polyomino but not yet added
                 frontier = set()
                 def add_neighbors(cell):
                     x, y = cell
+                    neighbors = []
                     for dx, dy in [(1,0),(-1,0),(0,1),(0,-1)]:
                         nbr = (x+dx, y+dy)
                         if nbr not in polyomino:
-                            frontier.add(nbr)
+                            neighbors.append(nbr)
+                    if selection_order == "sequential":
+                        # Sort neighbors for deterministic selection
+                        neighbors.sort(key=lambda p: (p[1], p[0]))
+                    for nbr in neighbors:
+                        frontier.add(nbr)
                 
-                add_neighbors((0,0))
+                add_neighbors(start_pos)
                 
                 while len(polyomino) < n_cells and frontier:
-                    cell = random.choice(list(frontier))
+                    if selection_order == "sequential":
+                        # Choose the leftmost-bottommost cell
+                        cell = min(frontier, key=lambda p: (p[1], p[0]))
+                    else:
+                        cell = random.choice(list(frontier))
                     polyomino.add(cell)
                     frontier.remove(cell)
                     add_neighbors(cell)

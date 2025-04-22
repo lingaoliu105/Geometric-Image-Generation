@@ -148,18 +148,53 @@ class ShapeGroup:
 
 
     def to_panel(self, top_left, bottom_right):
-        """place the shape group in a panel. shape group is by default placed on the entire canvas, and will be shifted and shrinked to fit in the panel"""
         panel_center = (
             (top_left[0] + bottom_right[0]) / 2,
             (top_left[1] + bottom_right[1]) / 2,
         )
         self.shift(panel_center)
-        scale_ratio = max(
-            (bottom_right[0] - top_left[0]) / GenerationConfig.canvas_width,
-            (top_left[1] - bottom_right[1]) / GenerationConfig.canvas_height,
-        ) * 0.85
-
+        
+        # 计算初始缩放比例，使用更大的初始值
+        scale_ratio = min(
+            abs(bottom_right[0] - top_left[0]) / GenerationConfig.canvas_width,
+            abs(bottom_right[1] - top_left[1]) / GenerationConfig.canvas_height,
+        ) * 0.95  # 增加初始系数到0.95
+        
         self.scale(scale_ratio=scale_ratio, origin=panel_center)
+        
+        # 创建面板边界
+        panel_polygon = Polygon([
+            (top_left[0], top_left[1]),
+            (bottom_right[0], top_left[1]),
+            (bottom_right[0], bottom_right[1]),
+            (top_left[0], bottom_right[1])
+        ])
+        
+        # 使用更温和的缩放因子
+        max_attempts = 10  # 减少最大尝试次数
+        attempt = 0
+        scale_factor = 0.95  # 更温和的缩放因子
+        
+        while attempt < max_attempts:
+            fits = True
+            for layer in self.shapes:
+                for shape in layer:
+                    if not shape.base_geometry.within(panel_polygon):
+                        fits = False
+                        break
+                if not fits:
+                    break
+                
+            if fits:
+                break
+                
+            self.scale(scale_factor, origin=panel_center)
+            attempt += 1
+            
+            # 如果多次尝试后仍然不适应，才使用更激进的缩放
+            if attempt > 5:
+                scale_factor = 0.9
+        
         flattened_list = [item for sublist in self.shapes for item in sublist]
         return Panel(
             top_left=top_left,
@@ -181,40 +216,36 @@ class ShapeGroup:
 
     def fit_canvas(self):
         while self.exceeds_canvas():
-            self.scale(0.9)
+            self.scale(0.8)
 
     def exceeds_canvas(self):
-        self.canvas_corner_points = np.array(
-            [
-                (
-                    GenerationConfig.right_canvas_bound,
-                    GenerationConfig.upper_canvas_bound,
-                ),
-                (
-                    GenerationConfig.left_canvas_bound,
-                    GenerationConfig.upper_canvas_bound,
-                ),
-                (
-                    GenerationConfig.left_canvas_bound,
-                    GenerationConfig.lower_canvas_bound,
-                ),
-                (
-                    GenerationConfig.right_canvas_bound,
-                    GenerationConfig.lower_canvas_bound,
-                ),
-                (
-                    GenerationConfig.right_canvas_bound,
-                    GenerationConfig.upper_canvas_bound,
-                ),
-            ]
-        )
-        canvas_boundary_geometry = LineString(self.canvas_corner_points)
-
+        # 创建画布边界多边形而不是线段
+        canvas_polygon = Polygon([
+            (GenerationConfig.right_canvas_bound, GenerationConfig.upper_canvas_bound),
+            (GenerationConfig.left_canvas_bound, GenerationConfig.upper_canvas_bound),
+            (GenerationConfig.left_canvas_bound, GenerationConfig.lower_canvas_bound),
+            (GenerationConfig.right_canvas_bound, GenerationConfig.lower_canvas_bound)
+        ])
+    
         for layer in self.shapes:
             for shape in layer:
-                if shape.base_geometry.intersects(canvas_boundary_geometry):
+                geom = shape.base_geometry
+                # 检查是否完全在画布内
+                if not geom.within(canvas_polygon):
                     return True
         return False
+    
+        def fit_canvas(self):
+            max_attempts = 100  # 防止无限循环
+            attempt = 0
+            scale_factor = 0.9  # 每次缩小10%
+            
+            while self.exceeds_canvas() and attempt < max_attempts:
+                self.scale(scale_factor)
+                attempt += 1
+                # 如果多次缩放后仍然超出，增加缩放强度
+                if attempt > 10:
+                    scale_factor = 0.8
 
     def search_size_by_interval(self, other: "ShapeGroup", interval: float):
         """based on layer 0's geometry"""
@@ -315,5 +346,3 @@ class ShapeGroup:
                     tuple(lowest_point), 
                     height, 
                     width)
-
-        return calculate_bounds(geom)

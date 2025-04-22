@@ -1,0 +1,12 @@
+{
+    "panel1":{
+        "element1":"./panel_configs/panel1_element_configs/element1_config.json",
+        "element2":"./panel_configs/panel1_element_configs/element2_config.json",
+        "element3":"./panel_configs/panel1_element_configs/element3_config.json"
+    },
+    "panel2":{
+        "element1":"./panel_configs/panel2_element_configs/element1_config.json",
+        "element2":"./panel_configs/panel2_element_configs/element2_config.json",
+        "element3":"./panel_configs/panel2_element_configs/element3_config.json"
+    }
+}

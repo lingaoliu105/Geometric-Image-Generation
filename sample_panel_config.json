@@ -1,0 +1,179 @@
+{
+    "color_mode": "mono",
+    "opacity": 1.0,
+    "composition_type": {
+        "chain": 1.0
+    },
+    "color_distribution": [
+        0.0,
+        0.25,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.1,
+        0.05,
+        0.05,
+        0.05
+    ],
+    "lightness_distribution": [
+        0.2,
+        0.2,
+        0.2,
+        0.1,
+        0.1,
+        0.1,
+        0.02,
+        0.02,
+        0.02,
+        0.02,
+        0.02
+    ],
+    "background_lightness_distribution": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "pattern_distribution": [
+        0.4,
+        0.3,
+        0.3,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "outline_distribution": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "shape_distribution": [
+        0.0,
+        0.5,
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "arbitrary_shape_cell_num": 10,
+    "chaining_image_config": {
+        "draw_chain": false,
+        "chain_level": "bottom",
+        "chain_shape": "bezier",
+        "interval": 0.2,
+        "element_num": 5,
+        "rotation": 0,
+        "control_point_distribution": {
+            "x_range": [-0.125, 0.125],
+            "y_range": [-0.5, 0.5],
+            "pivot_points": [-0.75, -0.25, 0.25, 0.75]
+        },
+        "sub_composition_distribution": {
+            "simple": 1.0
+        },
+        "elements_config": [
+            {
+                "color_distribution": [0.0, 0.25, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05],
+                "lightness_distribution": [0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02, 0.02],
+                "pattern_distribution": [0.4, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "shape_distribution": [0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "outline_distribution": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "size": 1.0
+            },
+            {
+                "color_distribution": [0.0, 0.25, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05],
+                "lightness_distribution": [0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02, 0.02],
+                "pattern_distribution": [0.4, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "shape_distribution": [0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "outline_distribution": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "size": 1.0
+            },
+            {
+                "color_distribution": [0.0, 0.25, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05],
+                "lightness_distribution": [0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02, 0.02],
+                "pattern_distribution": [0.4, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "shape_distribution": [0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "outline_distribution": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "size": 1.0
+            },
+            {
+                "color_distribution": [0.0, 0.25, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05],
+                "lightness_distribution": [0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02, 0.02],
+                "pattern_distribution": [0.4, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "shape_distribution": [0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "outline_distribution": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "size": 1.0
+            },
+            {
+                "color_distribution": [0.0, 0.25, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05, 0.05],
+                "lightness_distribution": [0.2, 0.2, 0.2, 0.1, 0.1, 0.1, 0.02, 0.02, 0.02, 0.02, 0.02],
+                "pattern_distribution": [0.4, 0.3, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "shape_distribution": [0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "outline_distribution": [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "size": 1.0
+            }
+        ]
+    },
+    "random_image_config": {
+        "centralization": 0.8,
+        "element_num": 2
+    },
+    "radial_image_config": {
+        "TBD": "value"
+    },
+    "enclosing_image_config": {
+        "enclose_level": 2,
+        "sub_composition_distribution": {
+            "border": 1.0
+        }
+    },
+    "border_image_config": {
+        "position_probabilities": [
+            0.5,
+            0.0,
+            1.0,
+            0.0,
+            0.5,
+            0.0,
+            1.0,
+            0.0,
+            0.0
+        ],
+        "element_scaling": 0.2,
+        "approach_factor": 0.8,
+        "shade_probability": 0.7
+    },
+    "parallel_image_config": {
+        "sub_composition_distribution": {
+            "chain": 1.0
+        }
+    }
+}
