@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Union, Any
 from pathlib import Path
+from .base_config import BasicAttributesDistribution # Import BasicAttributesDistribution
 
 @dataclass
 class BaseGeneratorConfig:
@@ -16,6 +17,69 @@ class BaseGeneratorConfig:
     def create_child(self) -> 'BaseGeneratorConfig':
         """Create a child configuration that inherits from this one"""
         return self.__class__(parent=self)
+        
+    def to_dict(self) -> Dict[str, Any]:
+        """将配置对象转换为字典表示"""
+        # 获取所有实例变量
+        result = {}
+        for key, value in self.__dict__.items():
+            # 跳过parent属性，避免循环引用
+            if key == 'parent':
+                continue
+                
+            # 处理嵌套对象
+            if hasattr(value, 'to_dict'):
+                result[key] = value.to_dict()
+            elif isinstance(value, BasicAttributesDistribution):
+                # Manually serialize BasicAttributesDistribution
+                result[key] = {
+                    'color_distribution': value.color_distribution,
+                    'lightness_distribution': value.lightness_distribution,
+                    'background_lightness_distribution': value.background_lightness_distribution,
+                    'pattern_distribution': value.pattern_distribution,
+                    'outline_distribution': value.outline_distribution,
+                    'shape_distribution': value.shape_distribution
+                }
+            # 处理列表类型，检查列表中的每个元素是否可序列化
+            elif isinstance(value, list):
+                result[key] = []
+                for item in value:
+                    if hasattr(item, 'to_dict'):
+                        result[key].append(item.to_dict())
+                    elif isinstance(item, BasicAttributesDistribution):
+                        # Manually serialize BasicAttributesDistribution in lists
+                        result[key].append({
+                            'color_distribution': item.color_distribution,
+                            'lightness_distribution': item.lightness_distribution,
+                            'background_lightness_distribution': item.background_lightness_distribution,
+                            'pattern_distribution': item.pattern_distribution,
+                            'outline_distribution': item.outline_distribution,
+                            'shape_distribution': item.shape_distribution
+                        })
+                    else:
+                        result[key].append(item)
+            # 处理字典类型，检查字典中的每个值是否可序列化
+            elif isinstance(value, dict):
+                result[key] = {}
+                for k, v in value.items():
+                    if hasattr(v, 'to_dict'):
+                        result[key][k] = v.to_dict()
+                    elif isinstance(v, BasicAttributesDistribution):
+                         # Manually serialize BasicAttributesDistribution in dicts
+                        result[key][k] = {
+                            'color_distribution': v.color_distribution,
+                            'lightness_distribution': v.lightness_distribution,
+                            'background_lightness_distribution': v.background_lightness_distribution,
+                            'pattern_distribution': v.pattern_distribution,
+                            'outline_distribution': v.outline_distribution,
+                            'shape_distribution': v.shape_distribution
+                        }
+                    else:
+                        result[key][k] = v
+            else:
+                result[key] = value
+                
+        return result
 
 @dataclass
 class SimpleImageConfig(BaseGeneratorConfig):

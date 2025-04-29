@@ -1,0 +1,57 @@
+import os
+import json
+from pathlib import Path
+from input_configs.base_config import BaseConfig
+
+def main():
+    # 获取当前脚本所在目录
+    current_dir = Path(__file__).parent
+    
+    # 加载基础配置文件
+    base_json_path = current_dir / 'input' / 'base.json'
+    print(f"加载配置文件: {base_json_path}")
+    
+    # 使用修改后的from_json方法加载配置
+    config = BaseConfig.from_json(str(base_json_path))
+    
+    # 打印配置信息，验证文件路径已被替换为实际内容
+    print("\n配置加载完成，检查panel_configs:")
+    for i, panel in enumerate(config.panel_configs):
+        print(f"\nPanel {i+1}:")
+        print(f"  类型: {type(panel).__name__}")
+        print(f"  组合类型: {panel.composition_type}")
+        
+        # 检查chaining_image_config
+        if panel.chaining_image_config:
+            print(f"  Chaining配置:")
+            print(f"    元素数量: {panel.chaining_image_config.element_num}")
+            print(f"    链形状: {panel.chaining_image_config.chain_shape}")
+            
+            # 检查elements是否已被加载为对象而非文件路径
+            if hasattr(panel.chaining_image_config, 'elements'):
+                print(f"    元素列表:")
+                for j, elem in enumerate(panel.chaining_image_config.elements):
+                    # 打印元素类型和内容
+                    elem_type = type(elem).__name__
+                    print(f"      元素 {j+1}: {elem_type}")
+                    
+                    # 如果是字符串，检查是否是文件路径
+                    if isinstance(elem, str) and elem.endswith('.json'):
+                        print(f"        文件路径: {elem}")
+                    # 如果是对象，打印其属性
+                    elif hasattr(elem, '__dict__'):
+                        print(f"        属性: {list(elem.__dict__.keys())}")
+    
+    print("\n配置加载测试完成!")
+
+    # 将加载的配置对象序列化为JSON文件
+    output_file = current_dir / 'output_loaded_config.json' # Changed output filename for clarity
+    print(f"\n将加载的配置序列化到: {output_file}")
+
+    # 调用save_to_json方法直接保存配置对象
+    config.save_to_json(str(output_file))
+
+    print(f"配置序列化完成！输出文件: {output_file}")
+
+if __name__ == "__main__":
+    main()
