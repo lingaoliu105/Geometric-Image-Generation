@@ -1,0 +1,11 @@
+{
+    "composition_type": {
+        "simple": 1.0
+    },
+    "simple_image_config": {
+        "shape_size": {
+            "min": 0.5,
+            "max": 2.0
+        }
+    }
+}

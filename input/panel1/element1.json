@@ -1,25 +1,7 @@
 {
-    "layout": [
-        1,
-        1
-    ],
-    "panel_configs": [
-        {
-            "panel_id": 1,
-            "composition_type": {
-                "chaining": 1.0
-            },
-            "chaining_image_config": {
-                "element_num": 3,
-                "chain_shape": "line",
-                "sub_elements": [
-                    "./panel1/element1.json",
-                    "./panel1/element2.json",
-                    "./panel1/element3.json"
-                ]
-            }
-        }
-    ],
+    "composition_type": {
+        "enclosing": 1.0
+    },
     "basic_attributes_distribution": {
         "color_distribution": [
             0.0,
@@ -100,5 +82,9 @@
             0.0,
             0.0
         ]
+    },
+    "enclosing_image_config": {
+        "enclose_level": 2,
+        "sub_elements": ["./element1/element1.json"]
     }
 }

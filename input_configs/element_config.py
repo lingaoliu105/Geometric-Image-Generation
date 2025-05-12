@@ -1,93 +1,70 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields, asdict
 from typing import Dict, Optional, Union, Any, List
 import json
 from pathlib import Path
-from .base_config import BaseConfig
 
+from input_configs.basic_attributes_distribution import BasicAttributesDistribution
 @dataclass
-class ElementConfig(BaseConfig):
+class ElementConfig:
     """Configuration for an element in the panel"""
-    attributes: Dict[str, Any] = None
-    parent: Optional[BaseConfig] = None
-    children: List['ElementConfig'] = field(default_factory=list)
-    
+    basic_attributes_distribution:BasicAttributesDistribution = field(default=None)
+    composition_type:Dict[str,float] = field(default_factory=lambda:{"simple":1.0})
+
+    from input_configs.generator_configs import BaseGeneratorConfig, ChainingImageConfig, EnclosingImageConfig, ParallelImageConfig, RadialImageConfig, SimpleImageConfig
+    simple_image_config: Optional["SimpleImageConfig"] = None
+    chaining_image_config: Optional["ChainingImageConfig"] = None
+    enclosing_image_config: Optional["EnclosingImageConfig"] = None
+    parallel_image_config: Optional["ParallelImageConfig"] = None
+    radial_image_config: Optional["RadialImageConfig"] = None
     @classmethod
     def from_json(cls, json_path: str) -> 'ElementConfig':
         """Create an ElementConfig instance from a JSON file"""
         with open(json_path, 'r') as f:
             data = json.load(f)
-        
-        return cls(
-            attributes=data['attributes']
-        )
-    
+
+        return cls.from_dict(data,curr_path=Path(json_path))
+
     @classmethod
-    def from_dict(cls, data: dict, base_dir: str = None) -> 'ElementConfig':
-        """从字典创建ElementConfig实例，支持处理文件引用
-        
-        Args:
-            data: 配置数据字典
-            base_dir: 基础目录路径，用于解析相对路径引用的文件
-            
-        Returns:
-            ElementConfig实例
-        """
-        # 处理属性中的文件引用
-        attributes = data.get('attributes', {})
-        processed_attrs = {}
-        
-        for key, value in attributes.items():
-            if isinstance(value, str) and value.endswith('.json') and base_dir:
-                # 如果属性值是文件路径，尝试读取文件内容
-                try:
-                    file_path = Path(base_dir) / value
-                    if file_path.exists():
-                        with open(file_path, 'r') as f:
-                            file_data = json.load(f)
-                        processed_attrs[key] = file_data
-                    else:
-                        processed_attrs[key] = value
-                except Exception as e:
-                    print(f"Warning: Error processing file reference in ElementConfig: {e}")
-                    processed_attrs[key] = value
-            else:
-                processed_attrs[key] = value
-                
-        # 处理children中的文件引用
-        children = []
-        for child in data.get('children', []):
-            if isinstance(child, dict):
-                children.append(cls.from_dict(child, base_dir))
-            elif isinstance(child, str) and child.endswith('.json') and base_dir:
-                # 如果child是文件路径，读取文件内容
-                try:
-                    file_path = Path(base_dir) / child
-                    if file_path.exists():
-                        with open(file_path, 'r') as f:
-                            child_data = json.load(f)
-                        # 使用文件所在目录作为新的基础目录
-                        new_base_dir = str(file_path.parent)
-                        children.append(cls.from_dict(child_data, new_base_dir))
-                except Exception as e:
-                    print(f"Warning: Error processing child file reference in ElementConfig: {e}")
-            else:
-                children.append(child)
-                
-        return cls(
-            attributes=processed_attrs,
-            children=children
-        )
+    def from_dict(cls, data: dict, curr_path:Path) -> 'ElementConfig':
+        processed_data = data.copy() # Work on a copy
+
+        # Convert basic_attributes_distribution dict to class instance if present
+        if 'basic_attributes_distribution' in processed_data and \
+           isinstance(processed_data['basic_attributes_distribution'], dict):
+            processed_data['basic_attributes_distribution'] = BasicAttributesDistribution(**processed_data['basic_attributes_distribution'])
+
+        generator_config_fields = [
+            "simple_image_config",
+            "chaining_image_config",
+            "enclosing_image_config",
+            "parallel_image_config",
+            "radial_image_config",
+        ] # generator configs that are  complex and have to be explicitly created and attached
+
+        # Prepare init_args, ensuring only defined fields are passed to constructor
+        # This avoids passing unexpected keys if 'data' contains more than ElementConfig fields.
+        init_args = {}
+        for f in fields(cls): # Iterate over dataclass fields
+            if f.name in processed_data:
+                if f.name in generator_config_fields:
+                    from input_configs.generator_configs import BaseGeneratorConfig
+
+                    init_args[f.name] = BaseGeneratorConfig.from_dict(processed_data[f.name],generator_config_type_name=f.name,curr_path=curr_path.parent)
+                init_args[f.name] = processed_data[f.name]
+
+        instance = cls(**init_args)
+        return instance
 
     def to_dict(self) -> dict:
-        return {
-            'attributes': self.attributes
-        }
-    
+        """将 ElementConfig 实例转换为字典。"""
+        return asdict(self)
+
     def to_json(self, json_path: str) -> None:
-        """Save the ElementConfig instance to a JSON file"""
-        data = {
-            'attributes': self.attributes
-        }
-        
-        with open(json_path, 'w') as f:
+        """将 ElementConfig 实例转换为 JSON 文件。"""
+        data = self.to_dict()
+        output_path = Path(json_path)
+        # Ensure the directory exists
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(output_path, 'w') as f:
             json.dump(data, f, indent=4)

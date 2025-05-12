@@ -13,10 +13,12 @@ def main():
     
     # 使用修改后的from_json方法加载配置
     config = BaseConfig.from_json(str(base_json_path))
+    # Assign the source path to the config object for hierarchy generation
+    config._source_path = str(base_json_path)
     
     # 打印配置信息，验证文件路径已被替换为实际内容
     print("\n配置加载完成，检查panel_configs:")
-    for i, panel in enumerate(config.panel_configs):
+    for i, panel in enumerate(config.panel_configs):#
         print(f"\nPanel {i+1}:")
         print(f"  类型: {type(panel).__name__}")
         print(f"  组合类型: {panel.composition_type}")
@@ -26,6 +28,7 @@ def main():
             print(f"  Chaining配置:")
             print(f"    元素数量: {panel.chaining_image_config.element_num}")
             print(f"    链形状: {panel.chaining_image_config.chain_shape}")
+            
             
             # 检查elements是否已被加载为对象而非文件路径
             if hasattr(panel.chaining_image_config, 'elements'):
@@ -50,8 +53,12 @@ def main():
 
     # 调用save_to_json方法直接保存配置对象
     config.save_to_json(str(output_file))
-
     print(f"配置序列化完成！输出文件: {output_file}")
+
+    # 生成并保存配置层级结构
+    hierarchy_output_file = current_dir / 'input' / 'hierachy.json'
+    print(f"\n将配置层级结构保存到: {hierarchy_output_file}")
+    config.save_hierarchy_to_json(str(hierarchy_output_file))
 
 if __name__ == "__main__":
     main()

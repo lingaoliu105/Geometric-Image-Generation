@@ -1,85 +1,55 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict, fields
 from typing import List, Dict, Optional, Union, Any
+# Forward declaration to avoid circular import
 from pathlib import Path
-from .base_config import BasicAttributesDistribution # Import BasicAttributesDistribution
 
 @dataclass
 class BaseGeneratorConfig:
     """Base class for all generator configs with inheritance support"""
-    parent: Optional['BaseGeneratorConfig'] = None
-    
-    def __getattr__(self, name: str) -> Any:
-        """Support attribute inheritance from parent config"""
-        if self.parent is not None and hasattr(self.parent, name):
-            return getattr(self.parent, name)
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
-    
-    def create_child(self) -> 'BaseGeneratorConfig':
-        """Create a child configuration that inherits from this one"""
-        return self.__class__(parent=self)
-        
+    sub_elements:List = field(default_factory=list)
+    @staticmethod
+    def from_dict(data,generator_config_type_name:str, curr_path:Path):
+        init_args = {}
+
+        cls_map = {
+            "simple_image_config":SimpleImageConfig,
+            "chaining_image_config":ChainingImageConfig,
+            "enclosing_image_config":EnclosingImageConfig,
+            "parallel_image_config":ParallelImageConfig,
+            "radial_image_config":RadialImageConfig
+        }
+        cls = cls_map[generator_config_type_name]
+        sub_data_list = []
+        for f in fields(cls):
+
+            if f.name in data:
+                if f.name=="sub_elements":
+                    sub_data_list = data[f.name]
+                    continue
+                init_args[f.name] = data[f.name]
+        instance = cls(**init_args)
+
+        for sub_data_path in sub_data_list:
+            from .element_config import ElementConfig
+            instance.sub_elements.append(ElementConfig.from_json(curr_path / sub_data_path))
+        return instance
+
     def to_dict(self) -> Dict[str, Any]:
-        """将配置对象转换为字典表示"""
-        # 获取所有实例变量
-        result = {}
-        for key, value in self.__dict__.items():
-            # 跳过parent属性，避免循环引用
-            if key == 'parent':
-                continue
-                
-            # 处理嵌套对象
-            if hasattr(value, 'to_dict'):
-                result[key] = value.to_dict()
-            elif isinstance(value, BasicAttributesDistribution):
-                # Manually serialize BasicAttributesDistribution
-                result[key] = {
-                    'color_distribution': value.color_distribution,
-                    'lightness_distribution': value.lightness_distribution,
-                    'background_lightness_distribution': value.background_lightness_distribution,
-                    'pattern_distribution': value.pattern_distribution,
-                    'outline_distribution': value.outline_distribution,
-                    'shape_distribution': value.shape_distribution
-                }
-            # 处理列表类型，检查列表中的每个元素是否可序列化
-            elif isinstance(value, list):
-                result[key] = []
-                for item in value:
-                    if hasattr(item, 'to_dict'):
-                        result[key].append(item.to_dict())
-                    elif isinstance(item, BasicAttributesDistribution):
-                        # Manually serialize BasicAttributesDistribution in lists
-                        result[key].append({
-                            'color_distribution': item.color_distribution,
-                            'lightness_distribution': item.lightness_distribution,
-                            'background_lightness_distribution': item.background_lightness_distribution,
-                            'pattern_distribution': item.pattern_distribution,
-                            'outline_distribution': item.outline_distribution,
-                            'shape_distribution': item.shape_distribution
-                        })
-                    else:
-                        result[key].append(item)
-            # 处理字典类型，检查字典中的每个值是否可序列化
-            elif isinstance(value, dict):
-                result[key] = {}
-                for k, v in value.items():
-                    if hasattr(v, 'to_dict'):
-                        result[key][k] = v.to_dict()
-                    elif isinstance(v, BasicAttributesDistribution):
-                         # Manually serialize BasicAttributesDistribution in dicts
-                        result[key][k] = {
-                            'color_distribution': v.color_distribution,
-                            'lightness_distribution': v.lightness_distribution,
-                            'background_lightness_distribution': v.background_lightness_distribution,
-                            'pattern_distribution': v.pattern_distribution,
-                            'outline_distribution': v.outline_distribution,
-                            'shape_distribution': v.shape_distribution
-                        }
-                    else:
-                        result[key][k] = v
-            else:
-                result[key] = value
-                
-        return result
+        """递归地将 BaseGeneratorConfig 及其嵌套对象（包括子元素）转换为字典。"""
+        data = asdict(self) # 将当前实例（可能是子类）转换为字典
+        
+        # 处理 sub_elements，确保它们也被转换为字典
+        if 'sub_elements' in data and self.sub_elements:
+            serialized_sub_elements = []
+            for el in self.sub_elements:
+                if hasattr(el, 'to_dict'):
+                    serialized_sub_elements.append(el.to_dict())
+                else:
+                    # 如果元素没有 to_dict 方法（例如，它是一个路径或其他原始类型），
+                    # 则按原样添加。但在正常加载后，它们应该是 ElementConfig 实例。
+                    serialized_sub_elements.append(el) 
+            data['sub_elements'] = serialized_sub_elements
+        return data
 
 @dataclass
 class SimpleImageConfig(BaseGeneratorConfig):
@@ -99,7 +69,6 @@ class ChainingImageConfig(BaseGeneratorConfig):
     interval: float = 0.4
     rotation: float = 0
     control_point_distribution: Optional[Dict[str, Union[List[float], List[int]]]] = None
-    elements: Optional[List[str]] = None  # paths to element configs
 
 @dataclass
 class EnclosingImageConfig(BaseGeneratorConfig):
@@ -115,7 +84,7 @@ class ParallelImageConfig(BaseGeneratorConfig):
     element_num: int = 2
     spacing: float = 0.5
     orientation: str = "horizontal"  # "horizontal", "vertical"
-    elements: List[str] = field(default_factory=list)  # paths to element configs
+
 
 @dataclass
 class RadialImageConfig(BaseGeneratorConfig):
@@ -123,4 +92,3 @@ class RadialImageConfig(BaseGeneratorConfig):
     element_num: int = 4
     radius: float = 1.0
     rotation: float = 0
-    elements: List[str] = field(default_factory=list)  # paths to element configs
