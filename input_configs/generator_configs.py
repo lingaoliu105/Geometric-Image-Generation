@@ -36,19 +36,31 @@ class BaseGeneratorConfig:
 
     def to_dict(self) -> Dict[str, Any]:
         """递归地将 BaseGeneratorConfig 及其嵌套对象（包括子元素）转换为字典。"""
-        data = asdict(self) # 将当前实例（可能是子类）转换为字典
-        
-        # 处理 sub_elements，确保它们也被转换为字典
-        if 'sub_elements' in data and self.sub_elements:
-            serialized_sub_elements = []
-            for el in self.sub_elements:
-                if hasattr(el, 'to_dict'):
-                    serialized_sub_elements.append(el.to_dict())
+        data = {} # Manual serialization
+        for f_info in fields(self):
+            field_name = f_info.name
+            field_value = getattr(self, field_name)
+
+            if field_name == "sub_elements":
+                if field_value:
+                    serialized_sub_elements = []
+                    for el in field_value: # field_value is self.sub_elements
+                        if hasattr(el, 'to_dict') and callable(getattr(el, 'to_dict')):
+                            serialized_sub_elements.append(el.to_dict())
+                        else:
+                            # Fallback for unexpected types, though normally ElementConfig instances
+                            serialized_sub_elements.append(el) 
+                    data[field_name] = serialized_sub_elements
                 else:
-                    # 如果元素没有 to_dict 方法（例如，它是一个路径或其他原始类型），
-                    # 则按原样添加。但在正常加载后，它们应该是 ElementConfig 实例。
-                    serialized_sub_elements.append(el) 
-            data['sub_elements'] = serialized_sub_elements
+                    data[field_name] = [] # or None, depending on desired output for empty
+            # elif is_dataclass(field_value): # We assume other fields are simple or handled by json.dump
+                # if hasattr(field_value, 'to_dict'):
+                #     data[field_name] = field_value.to_dict()
+                # else:
+                #     data[field_name] = asdict(field_value) # Avoid this for potentially complex dataclasses
+            else:
+                 # For all other fields (expected to be simple types like int, str, bool, dict, list of primitives)
+                data[field_name] = field_value
         return data
 
 @dataclass
@@ -92,3 +104,9 @@ class RadialImageConfig(BaseGeneratorConfig):
     element_num: int = 4
     radius: float = 1.0
     rotation: float = 0
+    
+@dataclass
+class RandomImageConfig(BaseGeneratorConfig):
+    """Configuration for RandomImageGenerator"""
+    centralization: float = 0.2
+    element_num: int = 4

@@ -104,10 +104,59 @@
                             "simple_image_config": null,
                             "chaining_image_config": null,
                             "enclosing_image_config": {
-                                "enclose_level": 2,
                                 "sub_elements": [
-                                    "./element1/element1.json"
-                                ]
+                                    {
+                                        "basic_attributes_distribution": {
+                                            "color_distribution": [
+                                                0.0
+                                            ],
+                                            "lightness_distribution": [
+                                                0.0
+                                            ],
+                                            "background_lightness_distribution": [
+                                                0.0
+                                            ],
+                                            "pattern_distribution": [
+                                                0.0
+                                            ],
+                                            "outline_distribution": [
+                                                0.0
+                                            ],
+                                            "shape_distribution": [
+                                                0.0,
+                                                0.5,
+                                                0.5,
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                0.0,
+                                                0.0
+                                            ]
+                                        },
+                                        "composition_type": {
+                                            "simple": 1.0
+                                        },
+                                        "simple_image_config": {
+                                            "sub_elements": [],
+                                            "shape_size": {
+                                                "min": 0.5,
+                                                "max": 2.0
+                                            },
+                                            "aspect_ratio": {},
+                                            "rotation_angles": [],
+                                            "polygon_generation": {}
+                                        },
+                                        "chaining_image_config": null,
+                                        "enclosing_image_config": null,
+                                        "parallel_image_config": null,
+                                        "radial_image_config": null
+                                    }
+                                ],
+                                "outer_shape": "circle",
+                                "inner_shape": "circle",
+                                "scale_ratio": 0.8,
+                                "rotation": 0
                             },
                             "parallel_image_config": null,
                             "radial_image_config": null
@@ -118,10 +167,14 @@
                                 "simple": 1.0
                             },
                             "simple_image_config": {
+                                "sub_elements": [],
                                 "shape_size": {
                                     "min": 0.5,
                                     "max": 2.0
-                                }
+                                },
+                                "aspect_ratio": {},
+                                "rotation_angles": [],
+                                "polygon_generation": {}
                             },
                             "chaining_image_config": null,
                             "enclosing_image_config": null,
@@ -134,10 +187,14 @@
                                 "simple": 1.0
                             },
                             "simple_image_config": {
+                                "sub_elements": [],
                                 "shape_size": {
                                     "min": 0.5,
                                     "max": 2.0
-                                }
+                                },
+                                "aspect_ratio": {},
+                                "rotation_angles": [],
+                                "polygon_generation": {}
                             },
                             "chaining_image_config": null,
                             "enclosing_image_config": null,

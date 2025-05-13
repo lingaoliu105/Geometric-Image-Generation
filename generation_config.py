@@ -2,6 +2,7 @@ import json
 from typing import Literal
 
 import img_params
+from input_configs.generator_configs import ChainingImageConfig, EnclosingImageConfig, RadialImageConfig, RandomImageConfig, SimpleImageConfig
 
 
 class GenerationConfig:
@@ -17,11 +18,11 @@ class GenerationConfig:
     pattern_distribution = [1/len(list(img_params.Pattern))] * len(list(img_params.Pattern))
     lightness_distribution = [1/len(list(img_params.Lightness))] * len(list(img_params.Lightness))
     background_lightness_distribution = None
-    chaining_image_config = None
-    radial_image_config = None
-    random_image_config = None
-    enclosing_image_config = None
-    simple_image_config = None
+    chaining_image_config:ChainingImageConfig = None
+    radial_image_config:RadialImageConfig = None
+    random_image_config:RandomImageConfig = None
+    enclosing_image_config:EnclosingImageConfig = None
+    simple_image_config:SimpleImageConfig = None
     shape_distribution = [1/len(list(img_params.Shape))] * len(list(img_params.Shape))
     highlight_overlap = True
     composition_type = {"simple":1.0}

@@ -31,12 +31,26 @@ def main():
             
             
             # 检查elements是否已被加载为对象而非文件路径
-            if hasattr(panel.chaining_image_config, 'elements'):
-                print(f"    元素列表:")
-                for j, elem in enumerate(panel.chaining_image_config.elements):
+            if hasattr(panel.chaining_image_config, 'sub_elements'):
+                print(f"    元素列表 (sub_elements):")
+                for j, elem in enumerate(panel.chaining_image_config.sub_elements):
                     # 打印元素类型和内容
                     elem_type = type(elem).__name__
                     print(f"      元素 {j+1}: {elem_type}")
+
+                    # 检查并打印父对象信息
+                    parent_info_str = "        父对象: "
+                    if hasattr(elem, 'parent') and elem.parent is not None:
+                        parent_info_str += f"{type(elem.parent).__name__}"
+                        if elem.parent == panel: # 'panel' is the PanelConfig from the outer loop
+                            parent_info_str += f" (Panel ID: {panel.panel_id} - Correct)"
+                        elif isinstance(elem.parent, ElementConfig): # Check if parent is an ElementConfig (for nested scenarios)
+                            parent_info_str += " (Parent is an ElementConfig)"
+                        else:
+                            parent_info_str += " (Unexpected parent type or ID mismatch)"
+                    else:
+                        parent_info_str += "None or not set"
+                    print(parent_info_str)
                     
                     # 如果是字符串，检查是否是文件路径
                     if isinstance(elem, str) and elem.endswith('.json'):

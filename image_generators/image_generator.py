@@ -11,6 +11,7 @@ from shape_group import ShapeGroup
 
 
 class ImageGenerator(ABC):
+    
 
     def __init__(self) -> None:
         self.shapes:ShapeGroup = ShapeGroup([[]])
