@@ -5,7 +5,7 @@
     ],
     "canvas_width": 20.0,
     "canvas_height": 20.0,
-
+    "opacity": 0.5,
     "panel_configs": [
         {
             "panel_id": 1,

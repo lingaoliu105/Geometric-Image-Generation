@@ -7,7 +7,7 @@ from generation_config import GenerationConfig
 import generation_config
 from image_generators.image_generator import ImageGenerator
 import img_params
-from input_configs.generator_configs import SimpleImageConfig
+from input_configs import SimpleImageConfig
 from shape_group import ShapeGroup
 from util import get_rand_point
 

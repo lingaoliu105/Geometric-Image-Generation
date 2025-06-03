@@ -4,6 +4,7 @@ from pathlib import Path
 import random
 from typing import List, Literal
 from jinja2 import Environment, FileSystemLoader
+import jsonref
 
 from generation_config import GenerationConfig
 from entities.line_segment import LineSegment
@@ -17,7 +18,7 @@ from image_generators_merged import (
     get_image_generator,
     generate_shape_group
 )
-from input_configs.base_config import BaseConfig
+from input_configs import BaseConfig
 from panel import Panel
 from entities.touching_point import TouchingPoint
 from shape_group import ShapeGroup
@@ -144,14 +145,16 @@ def main(n):
         )
 
 def initialize_config()->BaseConfig:
-    current_dir = Path(__file__).parent
+    base_path = Path("input/base.json").resolve()
 
-    # 加载基础配置文件
-    base_json_path = current_dir / "input" / "base.json"
-    print(f"加载配置文件: {base_json_path}")
+    # 加载主文件并解析引用
+    with open(base_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
-    # 使用修改后的from_json方法加载配置
-    config = BaseConfig.from_json(str(base_json_path))
+    resolved = jsonref.JsonRef.replace_refs(data,base_uri=base_path.as_uri())
+
+    resolved_json_str = json.dumps(resolved,indent=4)
+    config = BaseConfig.model_validate_json(resolved_json_str)
     GenerationConfig.current_config = config
     return config
 

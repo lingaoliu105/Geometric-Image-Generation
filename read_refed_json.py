@@ -3,7 +3,7 @@ import json
 import jsonref
 from pathlib import Path
 
-from input_configs.config_base_model import BaseConfigModel
+from input_configs.input_configs import BaseConfig
 
 # 主文件路径
 base_path = Path("input/base.json").resolve()
@@ -15,6 +15,6 @@ with open(base_path, "r", encoding="utf-8") as f:
 resolved = jsonref.JsonRef.replace_refs(data,base_uri=base_path.as_uri())
 
 resolved_json_str = json.dumps(resolved,indent=4)
-config = BaseConfigModel.model_validate_json(resolved_json_str)
+config = BaseConfig.model_validate_json(resolved_json_str)
 
 print(config)

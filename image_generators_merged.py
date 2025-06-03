@@ -21,7 +21,7 @@ from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
 from generation_config import GenerationConfig, step_into_config_scope_decorator, step_out_config_scope
 import generation_config
-from input_configs.generator_configs import SimpleImageConfig
+from input_configs import SimpleImageConfig
 from shape_group import ShapeGroup
 from util import *
 import img_params
@@ -115,13 +115,14 @@ class ImageGenerator(metaclass=AutoInheritDecoratorMeta):
 
 
 class SimpleImageGenerator(ImageGenerator):
-    """generate single elements like SimpleShape or LineSegment and return as ShapeGroup"""
+    """
+    Generate single elements like SimpleShape or LineSegment and return as ShapeGroup
+    No further sub elements
+    """
 
     def __init__(self) -> None:
         super().__init__()
-        self.shape_distribution = (
-            GenerationConfig.shape_distribution
-        )
+        self.shape_distribution = GenerationConfig.shape_distribution
         self.config: SimpleImageConfig = GenerationConfig.simple_image_config
 
     def generate(self) -> ShapeGroup:
@@ -129,9 +130,6 @@ class SimpleImageGenerator(ImageGenerator):
         shape = random.choices(
             list(img_params.Shape), weights=self.shape_distribution, k=1
         )[0]
-        size = random.uniform(
-            self.config.shape_size["min"], self.config.shape_size["max"]
-        )
 
         if shape == img_params.Shape.linesegment:
             element = LineSegment(
@@ -149,10 +147,7 @@ class SimpleImageGenerator(ImageGenerator):
             )
             element = ComplexShape.arbitrary_right_triangle(aspect_ratio=aspect_ratio)
         elif shape == img_params.Shape.arbitrary:
-            element = ComplexShape.arbitrary_polygon(
-                start_position=self.config.polygon_generation.start_position,
-                cell_selection_order=self.config.polygon_generation.cell_selection_order,
-            )
+            element = ComplexShape.arbitrary_polygon()
         else:
             element = SimpleShape(
                 position=(0, 0),
@@ -226,7 +221,6 @@ class ChainingImageGenerator(ImageGenerator):
                 self.skipped[i] = {"prev": prev_elements, "next": None}
                 continue
 
-            generation_config.step_into_config_scope("chaining_image_config")
             element_grp = generate_shape_group()
             element_grp.shift(self.chain[i] - element_grp.center)
             element_grp.scale(1 / self.element_num)
@@ -359,41 +353,45 @@ class ChainingImageGenerator(ImageGenerator):
 
 # === EnclosingImageGenerator ===
 
+
 class EnclosingImageGenerator(ImageGenerator):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
-        self.enclose_level=GenerationConfig.enclosing_image_config.enclose_level
-        self.center_pos: Point = Point(0, 0)
-        self.element_num = 1
-        # self.sub_generators=self.sub_generators | {"enclosing":0}
+        self.enclose_level = GenerationConfig.enclosing_image_config.enclose_level
+
     def generate(self) -> ShapeGroup:
-        """generate a composite geometry entity by enclosing simple shapes
-
-        Args:
-            position (numpy 2-d array): coordinate of the center of the enclosing shape
-            rotation (float): rotation angle in degree
-        """
-        # if self.enclose_level < 2:
-        #     raise ValueError("enclose level need to be larger than 2")
-        for i in range(self.enclose_level):
-            generation_config.step_into_config_scope("enclosing_image_config")
-            element = generate_shape_group()
-            # the outermost shape rotate accordingly
-            if i == self.enclose_level - 1:
-                element.rotate(angle=self.rotation)
-            else:
-                element.rotate(angle=random.choice(list(img_params.Angle)))
-
-            # progressively scale the generated shape up such that
-            # there's always some interval with the parent
-            element.scale((i + 1) / self.enclose_level)
-            if i > 0:
-                # assert isinstance(element[0][0], ClosedShape), "cannot have the sub shape for enclosing to be non closed shape"
-                element.search_size_by_interval(self.shapes, self.interval)
-            element.shift(self.center_pos)
-            self.shapes.add_group(element,0)
-        self.shapes.fit_canvas()
+        self.canvas_radius_limit = min(
+            GenerationConfig.canvas_height / 2, GenerationConfig.canvas_width / 2
+        )
+        self.generate_composite_image_nested(
+            self.canvas_radius_limit, self.enclose_level
+        )
         return self.shapes
+
+    def generate_composite_image_nested(self, outer_radius, recur_depth):
+        """generate a nested image, centered at 0,0, and within a square area of outer_size * outer_size"""
+        if recur_depth <= 1:
+            from image_generators import generate_shape_group
+
+            core_shape_group = generate_shape_group()
+
+            shrink_ratio = outer_radius / self.canvas_radius_limit
+            core_shape_group.scale(shrink_ratio, origin=(0, 0))
+            self.shapes.add_group(core_shape_group)
+        else:
+            outer_shape = SimpleShape(
+                np.array([0.0, 0.0]),
+                rotation=random.choice(list(img_params.Angle)),
+                size=outer_radius,
+            )
+            self.shapes.add_shape(outer_shape)
+            if outer_shape.shape == img_params.Shape.triangle:
+                shrink_ratio = 0.4
+            else:
+                shrink_ratio = 0.6
+            self.generate_composite_image_nested(
+                outer_radius=outer_radius * shrink_ratio, recur_depth=recur_depth - 1
+            )
 
 
 # === RandomImageGenerator ===
@@ -854,6 +852,19 @@ def get_image_generator(composition_type: str) -> ImageGenerator:
         return RadialImageGenerator()
     else:
         raise ValueError(f"Invalid composition type: {composition_type}")
+    
+def get_config_name(generator: ImageGenerator) -> str:
+    """根据生成器实例返回相应的配置名称"""
+    d = {
+        "SimpleImageGenerator": "simple_image_config",
+        "ChainingImageGenerator": "chaining_image_config",
+        "EnclosingImageGenerator": "enclosing_image_config",
+        "RandomImageGenerator": "random_image_config",
+        "BorderImageGenerator": "border_image_config",
+        "ParallelImageGenerator": "parallel_image_config",
+        "RadialImageGenerator": "radial_image_config",
+    }
+    return d[generator.__class__.__name__]
 
 
 def generate_shape_group() -> ShapeGroup:
@@ -863,6 +874,8 @@ def generate_shape_group() -> ShapeGroup:
         list(GenerationConfig.composition_type.values()),
     )[0]
     generator = get_image_generator(composition_type)
+    cfg_name = get_config_name(generator)
+    generation_config.step_into_config_scope(cfg_name)
     elements: ShapeGroup = generator.generate()
     return elements
 

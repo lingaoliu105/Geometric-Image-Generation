@@ -115,16 +115,15 @@ def step_into_config_scope_decorator(func):
     return wrapper
 
 def step_into_config_scope(img_config_name):
-    if len(GenerationConfig.current_config.child_configs) == 0:
+    if img_config_name == "simple_image_config":
+        return
+    if GenerationConfig.current_config.child_configs is None:
+        GenerationConfig.current_config.set_selected_generator_config(img_config_name)
 
-        if img_config_name != "simple_image_config":
-            GenerationConfig.current_config.child_configs = getattr(GenerationConfig.current_config, img_config_name).sub_elements
-            GenerationConfig.current_config.iterate_next_child_to_access()
-    if GenerationConfig.current_config.next_child_to_access is None:
+    GenerationConfig.current_config = GenerationConfig.current_config.iterate_next_child_to_access()
+    if GenerationConfig.current_config is None:
         raise ValueError("No config object to access")
-    else:
-        next_child = GenerationConfig.current_config.next_child_to_access
-        GenerationConfig.current_config = next_child
+
 def step_out_config_scope(func):
     def wrapper(self, *args, **kwargs):
         GenerationConfig.current_config = GenerationConfig.current_config.parent
