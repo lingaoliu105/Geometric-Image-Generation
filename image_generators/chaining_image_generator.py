@@ -1,4 +1,3 @@
-
 from common_types import *
 from entities.closed_shape import ClosedShape
 from entities.line_segment import LineSegment
@@ -15,17 +14,13 @@ class ChainingImageGenerator(ImageGenerator):
         # TODO: combine the chain linesegments into one entity for json labelling
 
         # TODO: add default value when some configs are not given by user
-        self.draw_chain = generation_config.GenerationConfig.chaining_image_config[
-            "draw_chain"
-        ]
-        self.chain_shape = generation_config.GenerationConfig.chaining_image_config[
-            "chain_shape"
-        ]
-        self.element_num = GenerationConfig.chaining_image_config["element_num"]
-        self.interval = GenerationConfig.chaining_image_config["interval"]
+        self.draw_chain = generation_config.GenerationConfig.chaining_image_config.draw_chain
+        self.chain_shape = generation_config.GenerationConfig.chaining_image_config.chain_shape
+        self.element_num = GenerationConfig.chaining_image_config.element_num
+        self.interval = GenerationConfig.chaining_image_config.interval
         self.chain = []  # initial positions of each element
-        self.rotation = GenerationConfig.chaining_image_config["rotation"]
-        self.chain_level = GenerationConfig.chaining_image_config["chain_level"]
+        self.rotation = GenerationConfig.chaining_image_config.rotation
+        self.chain_level = GenerationConfig.chaining_image_config.chain_level
         self.skipped = {}
 
     def generate_chain(self):
@@ -71,8 +66,9 @@ class ChainingImageGenerator(ImageGenerator):
                 self.skipped[i] = {"prev": prev_elements, "next": None}
                 continue
 
-            sub_generator = self.choose_sub_generator()
-            element_grp = sub_generator.generate()
+            generation_config.step_into_config_scope("chaining_image_config")
+            from image_generators import generate_shape_group
+            element_grp = generate_shape_group(GenerationConfig.current_config)
             element_grp.shift(self.chain[i] - element_grp.center)
             element_grp.scale(1 / self.element_num)
             element_grp.scale(1 - self.interval / GenerationConfig.canvas_limit / 2)

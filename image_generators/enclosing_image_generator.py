@@ -4,6 +4,7 @@ import random
 import numpy as np
 from entities.simple_shape import SimpleShape
 from generation_config import GenerationConfig
+import generation_config
 from image_generators.image_generator import ImageGenerator
 import img_params
 from shape_group import ShapeGroup
@@ -12,7 +13,7 @@ from shape_group import ShapeGroup
 class EnclosingImageGenerator(ImageGenerator):
     def __init__(self) -> None:
         super().__init__()
-        self.enclose_level = GenerationConfig.enclosing_image_config["enclose_level"]
+        self.enclose_level = GenerationConfig.enclosing_image_config.enclose_level
         
         
     def generate(self)->ShapeGroup:
@@ -27,8 +28,10 @@ class EnclosingImageGenerator(ImageGenerator):
         """generate a nested image, centered at 0,0, and within a square area of outer_size * outer_size
         """
         if recur_depth <= 1:
-            core_generator = self.choose_sub_generator() # sub generator is only used for core image
-            core_shape_group = core_generator.generate() 
+            generation_config.step_into_config_scope("enclosing_image_config")
+            from image_generators import generate_shape_group
+            core_shape_group = generate_shape_group(GenerationConfig.current_config)
+            GenerationConfig.step_out_config_scope()
             
             shrink_ratio = outer_radius / self.canvas_radius_limit
             core_shape_group.scale(shrink_ratio,origin=(0,0))  

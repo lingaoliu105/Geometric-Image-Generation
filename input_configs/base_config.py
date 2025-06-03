@@ -2,20 +2,19 @@ from dataclasses import dataclass, field, fields, asdict, is_dataclass
 from typing import List, Dict, Any, Optional, Union
 import json
 from pathlib import Path
-import os
 
-from .basic_attributes_distribution import BasicAttributesDistribution
 from .panel_config import PanelConfig
 from .config_serialization_mixin import ConfigSerializationMixin
-
+from .child_config_pointer_mixin import ChildConfigPointerMixin
 
 
 @dataclass
-class BaseConfig(ConfigSerializationMixin):
+class BaseConfig(ConfigSerializationMixin, ChildConfigPointerMixin):
+    '''Configs for global(outmost), canvas-level scope'''
     layout: List[int]
-     
+    canvas_width: float
+    canvas_height: float
     panel_configs: List[PanelConfig]
-    basic_attributes_distribution: BasicAttributesDistribution
 
     @classmethod
     def _preprocess_data_for_from_dict(cls, data: Dict[str, Any], curr_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -116,7 +115,6 @@ class BaseConfig(ConfigSerializationMixin):
         """Recursively build a dictionary representing the configuration hierarchy."""
         panel_hierarchies = []
         for pc in self.panel_configs:
-            # pc.to_dict() now comes from the Mixin and should be correct
             panel_data = pc.to_dict() 
             panel_hierarchies.append({
                 f"panel_{pc.panel_id}": {
@@ -129,7 +127,6 @@ class BaseConfig(ConfigSerializationMixin):
             "type": self.__class__.__name__,
             "layout": self.layout,
             "panel_configs": panel_hierarchies,
-            # self.basic_attributes_distribution is a dataclass, asdict is fine for hierarchy too.
             "basic_attributes_distribution": self.basic_attributes_distribution.to_dict()
         }
 
@@ -142,8 +139,12 @@ class BaseConfig(ConfigSerializationMixin):
         with open(output_path, 'w') as f:
             json.dump(hierarchy_data, f, indent=4)
 
-    # Old from_json, to_dict, save_to_json are removed and functionality replaced by Mixin + hooks.
-    # Ensure the actual methods below this comment (if any) are deleted.
-    # For example, the old to_dict and save_to_json that might have been here:
-    # def to_dict(self) -> Dict[str, Any]: ...
-    # def save_to_json(self, json_path: str) -> None: ...
+    def _set_child_parent_references(self) -> None:
+        """Sets the parent reference for child PanelConfigs and recursively calls this method on them."""
+        # BaseConfig owns PanelConfigs
+        for panel_config in self.panel_configs:
+            if isinstance(panel_config, PanelConfig):
+                panel_config.parent = self  # `self` is the current BaseConfig instance
+                # Recursively set parent references for children of this panel
+                panel_config._set_child_parent_references()
+

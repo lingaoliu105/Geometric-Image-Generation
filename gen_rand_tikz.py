@@ -1,17 +1,23 @@
 import json
-from math import ceil
 import math
+from pathlib import Path
 import random
 from typing import List, Literal
 from jinja2 import Environment, FileSystemLoader
 
 from generation_config import GenerationConfig
 from entities.line_segment import LineSegment
-from image_generators.border_image_generator import BorderImageGenerator
-from image_generators.enclosing_image_generator import EnclosingImageGenerator
-from image_generators.parallel_image_generator import ParallelImageGenerator
-from image_generators.random_image_generator import RandomImageGenerator
-from image_generators.simple_image_generator import SimpleImageGenerator
+from image_generators_merged import (
+    ChainingImageGenerator,
+    BorderImageGenerator,
+    EnclosingImageGenerator,
+    ParallelImageGenerator,
+    RandomImageGenerator,
+    SimpleImageGenerator,
+    get_image_generator,
+    generate_shape_group
+)
+from input_configs.base_config import BaseConfig
 from panel import Panel
 from entities.touching_point import TouchingPoint
 from shape_group import ShapeGroup
@@ -22,10 +28,8 @@ from entities.simple_shape import SimpleShape
 import numpy as np
 import shapely
 from util import *
-from image_generators import ChainingImageGenerator
 
-
-def generate_panels() -> list[Panel]:
+def generate_panels(base_config:BaseConfig) -> list[Panel]:
     """combine images of each sub-panel"""
     layout = GenerationConfig.layout
     row_num = layout[0]
@@ -37,26 +41,18 @@ def generate_panels() -> list[Panel]:
     for i in range(panel_num):
         reconfigure_for_panel(i)
         print(f"Generating panel {i+1}/{panel_num}")
-        composition_type = random.choices(list(GenerationConfig.composition_type.keys()),list(GenerationConfig.composition_type.values()))[0]
+
         center, top_left, bottom_right = compute_panel_position(layout, i)
-        if composition_type == "simple":
-            generator = SimpleImageGenerator()
-        elif composition_type == "chain":
-            generator = ChainingImageGenerator()
-        elif composition_type == "enclosing":
-            generator = EnclosingImageGenerator()
-        elif composition_type == "random":
-            generator = RandomImageGenerator()
-        elif composition_type =="border":
-            generator = BorderImageGenerator()
-        elif composition_type == "parallel":
-            generator = ParallelImageGenerator()
-        elements_on_panel:ShapeGroup = generator.generate()
-        panel = elements_on_panel.to_panel(top_left=top_left,bottom_right=bottom_right)
+        elements = generate_shape_group()
+        
+        panel = elements.to_panel(top_left=top_left,bottom_right=bottom_right)
         panels.append(panel)
     
     return panels
-
+ 
+def reconfigure_for_panel(panel_index):
+    assert isinstance(GenerationConfig.current_config, BaseConfig)
+    GenerationConfig.current_config = GenerationConfig.current_config.panel_configs[panel_index]
 
 def compute_panel_position(layout: tuple[int, int], index: int):
     convert = lambda x: [
@@ -78,8 +74,6 @@ def compute_panel_position(layout: tuple[int, int], index: int):
         [(panel_col + 1) * col_width, (panel_row + 1) * row_height]
     )
     return center_coord, top_left_coord, bottom_right_coord
-
-
 
 
 def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal["orthogonal","random"] = "random") -> List[LineSegment]:
@@ -120,7 +114,8 @@ def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal
 def main(n):
     env = Environment(loader=FileSystemLoader("."))
     template = env.get_template("tikz_template.jinja")
-    panels = generate_panels()
+    base_config = initialize_config()
+    panels = generate_panels(base_config)
     tikz_instructions = convert_panels(panels)
     # tikz_instructions = [line.to_tikz() for line in generate_consecutive_line_segments(position=(0,0))]
     context = {
@@ -148,26 +143,17 @@ def main(n):
             default=lambda x: x.to_dict(),
         )
 
-def initialize_config():
-    with open("input.json", "r") as input_file:
-        data = json.load(input_file)
-    
-    # Set global configs first
-    for key in data:
-        if key != "panel_configs" and hasattr(GenerationConfig, key):
-            setattr(GenerationConfig, key, data[key])
-    
-    # Store panel configs if present for later use
-    GenerationConfig.panel_configs = data.get("panel_configs", [])
-    
-def reconfigure_for_panel(panel_index):
-    if hasattr(GenerationConfig, "panel_configs") and panel_index < len(GenerationConfig.panel_configs):
-        panel_config = GenerationConfig.panel_configs[panel_index]
-        for key, value in panel_config.items():
-            if hasattr(GenerationConfig, key):
-                setattr(GenerationConfig, key, value)
-    
+def initialize_config()->BaseConfig:
+    current_dir = Path(__file__).parent
 
+    # 加载基础配置文件
+    base_json_path = current_dir / "input" / "base.json"
+    print(f"加载配置文件: {base_json_path}")
+
+    # 使用修改后的from_json方法加载配置
+    config = BaseConfig.from_json(str(base_json_path))
+    GenerationConfig.current_config = config
+    return config
 
 
 if __name__ == "__main__":
@@ -177,6 +163,5 @@ if __name__ == "__main__":
         generation_config.GenerationConfig.color_mode = sys.argv[2]
     if len(sys.argv) >= 4 and sys.argv[3]:
         generation_config.GenerationConfig.generated_file_prefix = sys.argv[3]
-    initialize_config()
     for i in range(generation_config.GenerationConfig.generate_num):
         main(i)

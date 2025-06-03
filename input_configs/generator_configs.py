@@ -53,11 +53,7 @@ class BaseGeneratorConfig:
                     data[field_name] = serialized_sub_elements
                 else:
                     data[field_name] = [] # or None, depending on desired output for empty
-            # elif is_dataclass(field_value): # We assume other fields are simple or handled by json.dump
-                # if hasattr(field_value, 'to_dict'):
-                #     data[field_name] = field_value.to_dict()
-                # else:
-                #     data[field_name] = asdict(field_value) # Avoid this for potentially complex dataclasses
+
             else:
                  # For all other fields (expected to be simple types like int, str, bool, dict, list of primitives)
                 data[field_name] = field_value
@@ -85,10 +81,7 @@ class ChainingImageConfig(BaseGeneratorConfig):
 @dataclass
 class EnclosingImageConfig(BaseGeneratorConfig):
     """Configuration for EnclosingImageGenerator"""
-    outer_shape: str = "circle"
-    inner_shape: str = "circle"
-    scale_ratio: float = 0.8
-    rotation: float = 0
+    enclose_level: int = 2
 
 @dataclass
 class ParallelImageConfig(BaseGeneratorConfig):
@@ -110,3 +103,9 @@ class RandomImageConfig(BaseGeneratorConfig):
     """Configuration for RandomImageGenerator"""
     centralization: float = 0.2
     element_num: int = 4
+    
+@dataclass
+class BorderImageConfig(BaseGeneratorConfig):
+    """Configuration for BorderImageGenerator"""
+    pass
+

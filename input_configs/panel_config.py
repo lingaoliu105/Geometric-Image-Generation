@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from input_configs.basic_attributes_distribution import BasicAttributesDistribution
+from input_configs.child_config_pointer_mixin import ChildConfigPointerMixin
 
 # Removed incorrect import: from .distribution_config import BasicAttributesDistribution
 from .element_config import ElementConfig # Added import
@@ -18,7 +19,7 @@ from .generator_configs import (
 from .config_serialization_mixin import ConfigSerializationMixin # Import the mixin
 
 @dataclass
-class PanelConfig(ConfigSerializationMixin): # Inherit from the mixin
+class PanelConfig(ConfigSerializationMixin, ChildConfigPointerMixin): # Inherit from the mixin
     """Configuration for a panel in the image"""
     panel_id: int
     # Optional for basic_attributes_distribution and composition_type, to be consistent with ElementConfig and from_dict logic
@@ -31,6 +32,11 @@ class PanelConfig(ConfigSerializationMixin): # Inherit from the mixin
     parallel_image_config: Optional["ParallelImageConfig"] = None
     radial_image_config: Optional["RadialImageConfig"] = None
 
+    # Parent attribute, not initialized from JSON, not serialized, set programmatically
+    parent: Optional[Any] = field(default=None, init=False, repr=False, compare=False)
+
+    def __post_init__(self):
+        super().__post_init__()
     @classmethod
     def _get_generator_config_field_names(cls) -> List[str]:
         return [
@@ -68,9 +74,8 @@ class PanelConfig(ConfigSerializationMixin): # Inherit from the mixin
 
         for f_info in fields(self):
             field_name = f_info.name
-            # No 'parent' field in PanelConfig to skip, but good practice if it were added.
-            # if field_name == 'parent': 
-            #     continue
+            if field_name == 'parent': # Explicitly skip the parent field
+                continue
             
             field_value = getattr(self, field_name)
 

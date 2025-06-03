@@ -3,11 +3,12 @@ from typing import Dict, Optional, Any, List
 from pathlib import Path
 
 from input_configs.basic_attributes_distribution import BasicAttributesDistribution
+from input_configs.child_config_pointer_mixin import ChildConfigPointerMixin
 from input_configs.config_serialization_mixin import ConfigSerializationMixin
 from input_configs.generator_configs import BaseGeneratorConfig, ChainingImageConfig, EnclosingImageConfig, ParallelImageConfig, RadialImageConfig, SimpleImageConfig
 
 @dataclass
-class ElementConfig(ConfigSerializationMixin):
+class ElementConfig(ConfigSerializationMixin, ChildConfigPointerMixin):
     """Configuration for an element in the panel"""
     basic_attributes_distribution: Optional[BasicAttributesDistribution] = None
     composition_type: Dict[str,float] = field(default_factory=lambda:{"simple":1.0})
@@ -74,8 +75,6 @@ class ElementConfig(ConfigSerializationMixin):
                 # This covers simple types like dict, list, str, int, float, bool
                 data[field_name] = field_value
         
-        # We are not calling super()._postprocess_data_for_to_dict() here because we have fully defined
-        # the serialization for ElementConfig. If Mixin's postprocess had other generic logic, we might reconsider.
         return data
 
     def _set_child_parent_references(self) -> None:
@@ -90,24 +89,3 @@ class ElementConfig(ConfigSerializationMixin):
                         # Recursively set parent references for children of this sub_element
                         sub_element_cfg._set_child_parent_references()
 
-    # from_json, to_json, from_dict, to_dict are now inherited from ConfigSerializationMixin
-    # Original from_json relied on cls.from_dict(data, curr_path=Path(json_path))
-    # Original from_dict logic:
-    #     processed_data = data.copy()
-    #     if 'basic_attributes_distribution' in processed_data and \
-    #        isinstance(processed_data['basic_attributes_distribution'], dict):
-    #         processed_data['basic_attributes_distribution'] = BasicAttributesDistribution(**processed_data['basic_attributes_distribution'])
-    #     generator_config_fields = [...] # Handled by Mixin now
-    #     init_args = {}
-    #     for f in fields(cls):
-    #         if f.name in processed_data:
-    #             if f.name in generator_config_fields: # Handled by Mixin now
-    #                 init_args[f.name] = BaseGeneratorConfig.from_dict(processed_data[f.name],generator_config_type_name=f.name,curr_path=curr_path.parent)
-    #             else: # ensure this logic is captured if not directly assigning
-    #                 init_args[f.name] = processed_data[f.name]
-    #     instance = cls(**init_args)
-    #     return instance
-    # Original to_dict used asdict(self), which is the base for Mixin's to_dict, then _postprocess_data_for_to_dict is called.
-    # Since BasicAttributesDistribution is a dataclass, asdict should handle it correctly.
-    # Generator configs are handled by the Mixin's _postprocess_data_for_to_dict via _get_generator_config_field_names.
-    # So, _postprocess_data_for_to_dict might not need an override unless other custom serialization is needed.

@@ -37,7 +37,7 @@ class ClosedShape(VisibleShape):
     ) -> None:
         super().__init__(tikz_converter, color=color, lightness=lightness)
         self.pattern = (
-            pattern if pattern is not None else util.choose_item_by_distribution(img_params.Pattern,GenerationConfig.pattern_distribution)
+            pattern if pattern is not None else util.choose_item_by_distribution(img_params.Pattern,GenerationConfig.basic_attributes_distribution.pattern_distribution)
         )
         self.pattern_lightness = (
             pattern_lightness
@@ -50,7 +50,7 @@ class ClosedShape(VisibleShape):
             else random.choice(list(img_params.PattenColor))
         )
         self.outline = (
-            outline if outline is not None else choose_item_by_distribution(img_params.Outline,GenerationConfig.outline_distribution)
+            outline if outline is not None else choose_item_by_distribution(img_params.Outline,GenerationConfig.basic_attributes_distribution.outline_distribution)
         )
         self.outline_color = (
             outline_color

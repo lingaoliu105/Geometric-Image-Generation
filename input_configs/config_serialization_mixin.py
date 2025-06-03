@@ -145,8 +145,7 @@ class ConfigSerializationMixin:
         # For example, to instantiate BasicAttributesDistribution if it was complex:
         # if 'basic_attributes_distribution' in processed_data and \
         #    isinstance(processed_data['basic_attributes_distribution'], dict):
-        #     from .basic_attributes_distribution import BasicAttributesDistribution
-        #     processed_data['basic_attributes_distribution'] = BasicAttributesDistribution(**processed_data['basic_attributes_distribution'])
+        #             #     processed_data['basic_attributes_distribution'] = BasicAttributesDistribution(**processed_data['basic_attributes_distribution'])
 
         return processed_data
 
