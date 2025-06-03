@@ -2,7 +2,6 @@ from dataclasses import dataclass, field, fields, asdict, is_dataclass
 from typing import Dict, Optional, Any, List
 from pathlib import Path
 
-from input_configs.basic_attributes_distribution import BasicAttributesDistribution
 from input_configs.child_config_pointer_mixin import ChildConfigPointerMixin
 from input_configs.config_serialization_mixin import ConfigSerializationMixin
 from input_configs.generator_configs import BaseGeneratorConfig, ChainingImageConfig, EnclosingImageConfig, ParallelImageConfig, RadialImageConfig, SimpleImageConfig
@@ -10,7 +9,6 @@ from input_configs.generator_configs import BaseGeneratorConfig, ChainingImageCo
 @dataclass
 class ElementConfig(ConfigSerializationMixin, ChildConfigPointerMixin):
     """Configuration for an element in the panel"""
-    basic_attributes_distribution: Optional[BasicAttributesDistribution] = None
     composition_type: Dict[str,float] = field(default_factory=lambda:{"simple":1.0})
 
     simple_image_config: Optional["SimpleImageConfig"] = None

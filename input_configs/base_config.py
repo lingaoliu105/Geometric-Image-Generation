@@ -127,7 +127,7 @@ class BaseConfig(ConfigSerializationMixin, ChildConfigPointerMixin):
             "type": self.__class__.__name__,
             "layout": self.layout,
             "panel_configs": panel_hierarchies,
-            "basic_attributes_distribution": self.basic_attributes_distribution.to_dict()
+            "basic_attributes_distribution": self.to_dict()
         }
 
     def save_hierarchy_to_json(self, json_path: str, base_path: Optional[Path] = None) -> None:

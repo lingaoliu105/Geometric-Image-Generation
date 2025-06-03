@@ -171,7 +171,7 @@ class ConfigSerializationMixin:
         # Subclasses can extend this method to handle other specific field types.
         # For example, if BasicAttributesDistribution needed special serialization:
         # if 'basic_attributes_distribution' in processed_data and hasattr(self.basic_attributes_distribution, 'to_dict'):
-        #    processed_data['basic_attributes_distribution'] = self.basic_attributes_distribution.to_dict()
+        #    processed_data['basic_attributes_distribution'] = self.to_dict()
         # elif 'basic_attributes_distribution' in processed_data and is_dataclass(self.basic_attributes_distribution):
         #    # asdict should handle simple dataclasses correctly, but explicit handling can be added.
         #    processed_data['basic_attributes_distribution'] = asdict(self.basic_attributes_distribution)

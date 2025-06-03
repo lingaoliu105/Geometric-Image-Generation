@@ -13,18 +13,19 @@ from util import get_rand_point
 
 
 class SimpleImageGenerator(ImageGenerator):
-    '''generate single elements like SimpleShape or LineSegment and return as ShapeGroup'''
+    '''
+    Generate single elements like SimpleShape or LineSegment and return as ShapeGroup
+    No further sub elements
+    '''
 
     def __init__(self) -> None:
         super().__init__()
-        self.shape_distribution = GenerationConfig.basic_attributes_distribution.shape_distribution
+        self.shape_distribution = GenerationConfig.shape_distribution
         self.config:SimpleImageConfig = GenerationConfig.simple_image_config
 
     def generate(self) -> ShapeGroup:
         '''generate a single element with deterministic configuration'''
         shape = random.choices(list(img_params.Shape), weights=self.shape_distribution, k=1)[0]
-        size = random.uniform(self.config.shape_size["min"], self.config.shape_size["max"])
-        rotation = random.choice(self.config.rotation_angles)
         
         if shape == img_params.Shape.linesegment:
             element = LineSegment(pt1=(-GenerationConfig.canvas_limit/2,0), pt2=(GenerationConfig.canvas_limit/2,0))
@@ -35,8 +36,7 @@ class SimpleImageGenerator(ImageGenerator):
             aspect_ratio = random.uniform(self.config.aspect_ratio.min, self.config.aspect_ratio.max)
             element = ComplexShape.arbitrary_right_triangle(aspect_ratio=aspect_ratio)
         elif shape == img_params.Shape.arbitrary:
-            element = ComplexShape.arbitrary_polygon(start_position=self.config.polygon_generation.start_position,
-                                                  cell_selection_order=self.config.polygon_generation.cell_selection_order)
+            element = ComplexShape.arbitrary_polygon()
         else:
             element = SimpleShape(position=(0,0),shape=shape,size=min(GenerationConfig.canvas_width,GenerationConfig.canvas_height)/2,rotation=img_params.Angle.deg0)
         self.shapes.add_shape(element)

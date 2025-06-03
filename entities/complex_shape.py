@@ -127,7 +127,7 @@ class ComplexShape(ClosedShape, Relationship):
         return shape
 
     @staticmethod
-    def arbitrary_polygon(start_position=None, cell_selection_order="random"):
+    def arbitrary_polygon():
         def generate_orthogonal_polygon_by_cells(start_pos=None, selection_order="random"):
         
             def generate_polyomino(n_cells, start_pos=(0,0), selection_order="random"):

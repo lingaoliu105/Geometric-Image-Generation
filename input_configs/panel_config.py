@@ -3,7 +3,6 @@ from typing import Dict, Optional, Union, Any, List
 import json
 from pathlib import Path
 
-from input_configs.basic_attributes_distribution import BasicAttributesDistribution
 from input_configs.child_config_pointer_mixin import ChildConfigPointerMixin
 
 # Removed incorrect import: from .distribution_config import BasicAttributesDistribution
@@ -23,8 +22,8 @@ class PanelConfig(ConfigSerializationMixin, ChildConfigPointerMixin): # Inherit 
     """Configuration for a panel in the image"""
     panel_id: int
     # Optional for basic_attributes_distribution and composition_type, to be consistent with ElementConfig and from_dict logic
-    basic_attributes_distribution: Optional[BasicAttributesDistribution] = None
-    composition_type: Optional[Dict[str, float]] = None        
+    basic_attributes_distribution = None
+    composition_type: Optional[Dict[str, float]] = None       
 
     simple_image_config: Optional["SimpleImageConfig"] = None
     chaining_image_config: Optional["ChainingImageConfig"] = None

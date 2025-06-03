@@ -73,7 +73,7 @@ class TestElementConfig(unittest.TestCase):
         element_config = ElementConfig.from_json(str(self.sample_element_json_path))
         self.assertIsInstance(element_config, ElementConfig)
         self.assertIsInstance(element_config.basic_attributes_distribution, BasicAttributesDistribution)
-        self.assertEqual(element_config.basic_attributes_distribution.color_distribution, self.basic_attrs_dict["color_distribution"])
+        self.assertEqual(element_config.color_distribution, self.basic_attrs_dict["color_distribution"])
         self.assertEqual(element_config.composition_type, self.element_config_data_dict["composition_type"])
 
     def test_from_json_without_basic_attrs(self):
@@ -88,7 +88,7 @@ class TestElementConfig(unittest.TestCase):
         element_config = ElementConfig.from_dict(self.element_config_data_dict)
         self.assertIsInstance(element_config, ElementConfig)
         self.assertIsInstance(element_config.basic_attributes_distribution, BasicAttributesDistribution)
-        self.assertEqual(element_config.basic_attributes_distribution.color_distribution, self.basic_attrs_dict["color_distribution"])
+        self.assertEqual(element_config.color_distribution, self.basic_attrs_dict["color_distribution"])
         self.assertEqual(element_config.composition_type, self.element_config_data_dict["composition_type"])
         
     def test_from_dict_without_basic_attrs(self):

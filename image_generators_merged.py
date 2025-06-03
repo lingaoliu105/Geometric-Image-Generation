@@ -120,7 +120,7 @@ class SimpleImageGenerator(ImageGenerator):
     def __init__(self) -> None:
         super().__init__()
         self.shape_distribution = (
-            GenerationConfig.basic_attributes_distribution.shape_distribution
+            GenerationConfig.shape_distribution
         )
         self.config: SimpleImageConfig = GenerationConfig.simple_image_config
 

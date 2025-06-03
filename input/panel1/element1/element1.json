@@ -3,22 +3,17 @@
         "simple": 1.0
     },
     "simple_image_config": {
-        "shape_size": {
-            "min": 0.5,
-            "max": 2.0
-        }
+
     },
-    "basic_attributes_distribution": {
-        "shape_distribution": [
-            0.0,
-            0.5,
-            0.5,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0
-        ]
-    }
+    "shape_distribution": [
+        0.0,
+        0.5,
+        0.5,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ]
 }

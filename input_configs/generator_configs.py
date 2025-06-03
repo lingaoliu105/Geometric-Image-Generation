@@ -86,17 +86,13 @@ class EnclosingImageConfig(BaseGeneratorConfig):
 @dataclass
 class ParallelImageConfig(BaseGeneratorConfig):
     """Configuration for ParallelImageGenerator"""
-    element_num: int = 2
-    spacing: float = 0.5
-    orientation: str = "horizontal"  # "horizontal", "vertical"
+    pass
 
 
 @dataclass
 class RadialImageConfig(BaseGeneratorConfig):
     """Configuration for RadialImageGenerator"""
-    element_num: int = 4
-    radius: float = 1.0
-    rotation: float = 0
+    pass
     
 @dataclass
 class RandomImageConfig(BaseGeneratorConfig):
