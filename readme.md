@@ -1,3 +1,6 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/lingaoliu105/Geometric-Image-Generation)
+
+
 ### Input Format
 
 User input shall be given in a json file (`/input.json`). Supported fields are:
