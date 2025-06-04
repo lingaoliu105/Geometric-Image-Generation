@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional, TypeAlias, Union
+
 from pydantic import BaseModel, Field, model_validator
 
 
@@ -9,7 +10,7 @@ class ConfigBaseModel(BaseModel):
     pattern_distribution: Optional[List[float]] = None
     outline_distribution: Optional[List[float]] = None
     shape_distribution: Optional[List[float]] = None
-    child_configs:Iterator[Union["BaseConfig", "PanelConfig", "ElementConfig"]] = Field(default=None, exclude=True)
+    child_configs:Iterator["NestedConfigModel"] = Field(default=None, exclude=True)
     
     model_config = {
         "extra":"allow",
@@ -52,7 +53,7 @@ class NestedConfigModel(ConfigBaseModel): # a common superclass of both PanelCon
     radial_image_config:Optional["RadialImageConfig"] = None
     random_image_config:Optional["RandomImageConfig"] = None
     border_image_config:Optional["BorderImageConfig"] = None
-    selected_generator_config:Optional["GeneratorConfigModel"] = Field(default=None, exclude=True)
+    selected_generator_config:Optional["GeneratorConfigModelWithSubElements"] = Field(default=None, exclude=True)
     def model_post_init(self, __context: Any) -> None:
         for img_config_name in ["chaining_image_config", "enclosing_image_config", "parallel_image_config", "radial_image_config", "random_image_config", "border_image_config"]: # without simple_image_config
             if getattr(self, img_config_name) is not None:
@@ -62,8 +63,9 @@ class NestedConfigModel(ConfigBaseModel): # a common superclass of both PanelCon
                     
     
     def set_selected_generator_config(self, generator_config_name:str):
+        if generator_config_name == "simple_image_config":
+            raise ValueError("trying to set sub elements for simple image config, which is not allowed")
         self.selected_generator_config = {
-            "simple_image_config":self.simple_image_config,
             "chaining_image_config":self.chaining_image_config,
             "enclosing_image_config":self.enclosing_image_config,
             "parallel_image_config":self.parallel_image_config,
@@ -80,7 +82,8 @@ class NestedConfigModel(ConfigBaseModel): # a common superclass of both PanelCon
             raise AttributeError("selected generator config is not set")
     
 
-PanelConfig = ElementConfig = NestedConfigModel
+PanelConfig:TypeAlias =  NestedConfigModel
+ElementConfig:TypeAlias = NestedConfigModel
 
 class GeneratorConfigModel(BaseModel):
     pass

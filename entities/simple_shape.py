@@ -1,24 +1,16 @@
-import copy
-from token import OP
-from typing import Optional
-import common_types
-from entities.closed_shape import ClosedShape
-from entities.line_segment import LineSegment
-from entities.visible_shape import VisibleShape
-import generation_config
-from img_params import *
 import math
 import random
-import numpy as np
+from typing import Optional
 
+import numpy as np
+from shapely.geometry import Point, Polygon
+
+import common_types
 import img_params
-from shapely.geometry import Point, LineString, Polygon
-from shapely.geometry.base import BaseGeometry
-import json
+from entities.closed_shape import ClosedShape
+from entities.visible_shape import VisibleShape
+from img_params import *
 from tikz_converters import SimpleShapeConverter
-import uid_service
-from util import almost_equal, choose_param_with_beta
-from generation_config import GenerationConfig
 
 
 class SimpleShape(ClosedShape):

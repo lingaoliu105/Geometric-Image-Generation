@@ -3,29 +3,30 @@
 包含所有图像生成器类和相关函数
 """
 
-# === 通用导入 ===
-from abc import ABC, abstractmethod
 import random
 import re
+# === 通用导入 ===
+from abc import ABC, abstractmethod
 from typing import Dict, List
-import numpy as np
-from shapely import LineString, Point
-import shapely
 
+import numpy as np
+import shapely
+from shapely import LineString, Point
+
+import generation_config
+import img_params
 # === 项目相关导入 ===
 from common_types import *
 from entities.closed_shape import ClosedShape
 from entities.complex_shape import ComplexShape
 from entities.line_segment import LineSegment
-
 from entities.simple_shape import SimpleShape
-from generation_config import GenerationConfig, step_into_config_scope_decorator, step_out_config_scope
-import generation_config
+from generation_config import (GenerationConfig,
+                               step_into_config_scope_decorator,
+                               step_out_config_scope)
 from input_configs import SimpleImageConfig
 from shape_group import ShapeGroup
 from util import *
-import img_params
-
 
 # === 基类 ImageGenerator ===
 

@@ -1,14 +1,14 @@
-from typing import List
 import re
+from abc import ABC, abstractmethod
+from typing import List
 
 from shapely import LineString
+
 import entities.entity as entity
+import img_params
 from entities.visible_shape import VisibleShape
 from generation_config import GenerationConfig
 from img_params import *
-from abc import ABC, abstractmethod
-
-import img_params
 
 
 class BaseConverter:  # enclose in classes to store temporary strings that makes the tikz strings, held by each individual VisibleShape instance to avoid data miswrite

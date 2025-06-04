@@ -1,18 +1,12 @@
-from enum import Enum
-import json
-import math
+from typing import Tuple
 
-import numpy as np
 
+import img_params
 from entities.entity import Relationship
 from entities.line_segment import LineSegment
 from entities.simple_shape import SimpleShape
-
 from entities.visible_shape import VisibleShape
 from shapely_helpers import *
-
-import img_params
-from typing import Tuple
 
 
 class TouchingPoint(Relationship):

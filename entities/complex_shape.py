@@ -1,15 +1,15 @@
-from collections import defaultdict
 import random
 from typing import List, Optional
 
 import shapely
+from shapely.affinity import scale
+from shapely.geometry.base import BaseMultipartGeometry
+
+import img_params
 from entities.closed_shape import ClosedShape
 from entities.entity import Relationship
 from generation_config import GenerationConfig
-import img_params
 from tikz_converters import ComplexShapeConverter
-from shapely.affinity import scale
-from shapely.geometry.base import BaseMultipartGeometry
 
 
 class ComplexShape(ClosedShape, Relationship):

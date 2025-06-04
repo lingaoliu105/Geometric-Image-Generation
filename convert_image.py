@@ -1,5 +1,7 @@
-from pdf2image import convert_from_path
 import sys
+
+from pdf2image import convert_from_path
+
 # PDF 文件路径
 pdf_path = sys.argv[1]
 

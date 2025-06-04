@@ -2,18 +2,17 @@
 This module includes pure computation functions used in the code base
 """
 
-from enum import Enum
 import random
+from enum import Enum
 from typing import List, Type, Union
+
 import numpy as np
 import shapely
+from scipy.stats import beta
 
 import common_types
 import generation_config
 import img_params
-
-
-from scipy.stats import beta
 
 
 def compute_angle_between_vectors(
@@ -227,6 +226,7 @@ def get_points_on_line(start, end, n=100):
 def get_line_rotation(
     pt1: common_types.Coordinate, pt2: common_types.Coordinate
 ) -> float:
+    pt1, pt2 = np.array(pt1), np.array(pt2)
     delta = pt1 - pt2
     # 使用 arctan2 计算角度，并转换为度数
     angle = np.degrees(np.arctan2(delta[1], delta[0]))
@@ -244,7 +244,7 @@ def get_point_distance(point1: np.ndarray, point2: np.ndarray) -> float:
     # Compute the Euclidean distance
     distance = np.linalg.norm(diff)
 
-    return distance
+    return float(distance)
 
 
 def almost_equal(a, b, tol=1e-6):

@@ -1,22 +1,15 @@
-from enum import Enum
-import json
-import random
+from abc import ABC, abstractmethod
 from typing import Optional, Union
 
-import numpy as np
-import shapely
+from shapely.affinity import rotate, scale, translate
 from shapely.geometry.base import BaseGeometry
 
+import img_params
+import util
 from entities.entity import Entity
 from generation_config import GenerationConfig
-import img_params
-import uid_service
-
-from abc import ABC, abstractmethod
-from shapely.affinity import translate, rotate, scale
-
 from util import *
-import util
+
 
 class VisibleShape(Entity, ABC):
 

@@ -1,12 +1,13 @@
-import urllib.request
 import json
+import urllib.request
 
 with open("./coco_dataset/example/labels.json","r") as l:
     labels = json.load(l)
 
-import aiohttp
 import asyncio
 import os
+
+import aiohttp
 
 
 async def download_image(session, url, file_name):

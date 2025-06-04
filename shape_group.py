@@ -1,23 +1,19 @@
 import copy
 import inspect
 from typing import List, Optional, Tuple, Union
-import numpy as np
-from shapely import LineString, unary_union
 
+import numpy as np
+from shapely import LineString, MultiPolygon, Polygon, unary_union
+from shapely.geometry import (GeometryCollection, LinearRing, MultiLineString,
+                              Point)
+from shapely.geometry.base import BaseGeometry
+
+import img_params
 from entities.closed_shape import ClosedShape
 from entities.complex_shape import ComplexShape
 from entities.visible_shape import VisibleShape
 from generation_config import GenerationConfig
-import img_params
 from panel import Panel
-from shapely.geometry.base import BaseGeometry
-from shapely import Polygon, MultiPolygon
-from shapely.geometry import ( 
-    Point,
-    LinearRing,
-    MultiLineString,
-    GeometryCollection, 
-)
 
 
 class ShapeGroup:

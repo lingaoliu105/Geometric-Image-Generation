@@ -1,12 +1,13 @@
-from enum import Enum
 import json
 import sys
-from PIL import Image
-from matplotlib.pyplot import xkcd
+from enum import Enum
 
-from entities.simple_shape import SimpleShape
+from matplotlib.pyplot import xkcd
+from PIL import Image
+
 import img_params
 from common_types import *
+from entities.simple_shape import SimpleShape
 
 get_image_id = (x for x in range(1000000)).__next__
 get_annotation_id = (x for x in range(100000)).__next__

@@ -1,8 +1,7 @@
 import fiftyone as fo
-import fiftyone.utils.data as foud
 import fiftyone.types as fot
+import fiftyone.utils.data as foud
 import fiftyone.zoo as foz
-
 
 # Path to your dataset (images or videos)
 # dataset_dir = "./coco_dataset/example"

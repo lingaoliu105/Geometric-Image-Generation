@@ -1,6 +1,5 @@
 import json
 
-
 sup_to_cat = {
     "Type": [
         "dot",

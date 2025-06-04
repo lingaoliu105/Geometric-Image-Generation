@@ -1,23 +1,12 @@
-import copy
-from enum import Enum
-import json
 import random
 from typing import Optional
 
-import numpy as np
-import shapely
-from shapely.geometry.base import BaseGeometry
 
+import img_params
+import util
 from entities.visible_shape import VisibleShape
 from generation_config import GenerationConfig
-import img_params
-import uid_service
-
-from abc import ABC, abstractmethod
-from shapely.affinity import translate, rotate
-
 from util import *
-import util
 
 
 class ClosedShape(VisibleShape):

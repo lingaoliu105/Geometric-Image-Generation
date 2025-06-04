@@ -1,24 +1,25 @@
 import json
+from dataclasses import dataclass, fields
 from typing import Literal, Union
 
 import img_params
-from input_configs import (
-    BaseConfig,
-    ElementConfig,
-    PanelConfig,
-    ChainingImageConfig,
-    EnclosingImageConfig,
-    RadialImageConfig,
-    RandomImageConfig,
-    SimpleImageConfig
-)
-from dataclasses import fields, dataclass
+from input_configs import (BaseConfig, ChainingImageConfig, ElementConfig,
+                           EnclosingImageConfig, PanelConfig,
+                           RadialImageConfig, RandomImageConfig,
+                           SimpleImageConfig)
+
+
+class classproperty:
+    def __init__(self, func):
+        self.func = func
+
+    def __get__(self, obj, owner):
+        return self.func(owner)
 
 
 class DynamicClassAttributesMeta(type):
     def __getattr__(cls, name):
         searched_config = cls.current_config
-        print(f"searching {name} in {searched_config.__class__.__name__}")
         while searched_config is not None:
             try:
                 attr = getattr(searched_config, name)
@@ -27,7 +28,6 @@ class DynamicClassAttributesMeta(type):
                 else:
                     raise AttributeError(f"{name} is None in {searched_config.__class__.__name__}")
             except AttributeError:
-                print(f"did not find {name} in {searched_config.__class__.__name__}")
                 try:
                     searched_config = searched_config.parent
                 except AttributeError:
@@ -68,26 +68,21 @@ class GenerationConfig(metaclass=DynamicClassAttributesMeta):
     #     list(img_params.Outline)
     # )
     # border_image_config = None
-    @classmethod
-    @property
-    def left_canvas_bound(self):
-        return -self.canvas_width/2    
-    @classmethod
-    @property
-    def right_canvas_bound(self):
-        return self.canvas_width/2    
-    @classmethod
-    @property
-    def upper_canvas_bound(self):
-        return self.canvas_height/2    
-    @classmethod
-    @property
-    def lower_canvas_bound(self):
-        return -self.canvas_height/2   
-    @classmethod
-    @property
-    def canvas_limit(self):
-        return min(self.canvas_height,self.canvas_width)
+    @classproperty
+    def left_canvas_bound(cls):
+        return -cls.canvas_width/2    
+    @classproperty
+    def right_canvas_bound(cls):
+        return cls.canvas_width/2    
+    @classproperty
+    def upper_canvas_bound(cls):
+        return cls.canvas_height/2    
+    @classproperty
+    def lower_canvas_bound(cls):
+        return -cls.canvas_height/2   
+    @classproperty
+    def canvas_limit(cls):
+        return min(cls.canvas_height,cls.canvas_width)
 
 
 def step_into_config_scope_decorator(func):

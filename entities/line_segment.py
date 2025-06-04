@@ -1,30 +1,19 @@
 import copy
 import random
-import sys
-from networkx import center
+from typing import Optional, Union
+
 import numpy as np
 from shapely import LineString, Point, Polygon
-from common_types import *
-from typing import Literal, Optional, Union
+from shapely.geometry.base import BaseGeometry
 
-from entities.closed_shape import ClosedShape
-from entities.visible_shape import OpenShape, VisibleShape
 import generation_config
 import img_params
-from tikz_converters import LineSegmentConverter
-from util import (
-    almost_equal,
-    generate_random_points_around_point,
-    get_line_rotation,
-    get_point_distance,
-    get_rand_point,
-    rotate_point,
-)
-from shapely.affinity import translate
-from shapely.geometry.base import BaseGeometry
-from shapely.ops import nearest_points
-
 import util
+from common_types import *
+from entities.visible_shape import OpenShape, VisibleShape
+from tikz_converters import LineSegmentConverter
+from util import (almost_equal, generate_random_points_around_point,
+                  get_line_rotation, get_point_distance, get_rand_point)
 
 
 class LineSegment(OpenShape):

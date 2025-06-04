@@ -2,24 +2,16 @@
 This file defines the abstract class for the entities' hierachy
 '''
 import copy
-from enum import Enum
 import json
-import random
-from typing import Optional
+from abc import ABC
+from enum import Enum
 
 import numpy as np
 import shapely
 from shapely.geometry.base import BaseGeometry
 
-from generation_config import GenerationConfig
 import img_params
 import uid_service
-
-from abc import ABC, abstractmethod
-from shapely.affinity import translate,rotate
-
-from util import *
-import util
 
 
 class Entity(ABC):

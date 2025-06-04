@@ -1,34 +1,33 @@
 import json
 import math
-from pathlib import Path
 import random
-from typing import List, Literal
-from jinja2 import Environment, FileSystemLoader
-import jsonref
-
-from generation_config import GenerationConfig
-from entities.line_segment import LineSegment
-from image_generators_merged import (
-    ChainingImageGenerator,
-    BorderImageGenerator,
-    EnclosingImageGenerator,
-    ParallelImageGenerator,
-    RandomImageGenerator,
-    SimpleImageGenerator,
-    get_image_generator,
-    generate_shape_group
-)
-from input_configs import BaseConfig
-from panel import Panel
-from entities.touching_point import TouchingPoint
-from shape_group import ShapeGroup
-from tikz_converters import *
-import img_params
 import sys
-from entities.simple_shape import SimpleShape
+from pathlib import Path
+from typing import List, Literal
+
+import jsonref
 import numpy as np
 import shapely
+from jinja2 import Environment, FileSystemLoader
+
+import img_params
+from entities.line_segment import LineSegment
+from entities.simple_shape import SimpleShape
+from entities.touching_point import TouchingPoint
+from generation_config import GenerationConfig
+from image_generators import (BorderImageGenerator,
+                                     ChainingImageGenerator,
+                                     EnclosingImageGenerator,
+                                     ParallelImageGenerator,
+                                     RandomImageGenerator,
+                                     SimpleImageGenerator,
+                                     generate_shape_group, get_image_generator)
+from input_configs import BaseConfig
+from panel import Panel
+from shape_group import ShapeGroup
+from tikz_converters import *
 from util import *
+
 
 def generate_panels(base_config:BaseConfig) -> list[Panel]:
     """combine images of each sub-panel"""
@@ -99,8 +98,7 @@ def generate_consecutive_line_segments(position, num_lines:int = 8, mode:Literal
         if end[1]>upper_bound:
             upper_bound = end[1]
         comp_key = lambda p: (p[0], -p[1])
-        print(init)
-        print(end)
+
         line_seg = LineSegment(pt1 = min(init,end,key=comp_key),pt2 = max(init,end,key=comp_key))
         output_line_segments.append(line_seg)
         init = end

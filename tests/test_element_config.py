@@ -1,8 +1,8 @@
-import unittest
 import json
-from pathlib import Path
-import tempfile
 import sys
+import tempfile
+import unittest
+from pathlib import Path
 
 # This assumes 'input_configs' is a package located in the parent directory of 'tests'
 # or accessible via PYTHONPATH.
@@ -12,8 +12,9 @@ import sys
 # using a command like 'python -m unittest discover tests'
 # For simplicity, if 'input_configs' is not found, we add its parent to sys.path.
 try:
+    from input_configs.basic_attributes_distribution import \
+        BasicAttributesDistribution
     from input_configs.element_config import ElementConfig
-    from input_configs.basic_attributes_distribution import BasicAttributesDistribution
 except ImportError:
     # Assuming the script is in /d:/MyProjects/Research/tests
     # and input_configs is in /d:/MyProjects/Research/input_configs
@@ -21,8 +22,9 @@ except ImportError:
     current_dir = Path(__file__).resolve().parent
     project_root = current_dir.parent
     sys.path.insert(0, str(project_root))
+    from input_configs.basic_attributes_distribution import \
+        BasicAttributesDistribution
     from input_configs.element_config import ElementConfig
-    from input_configs.basic_attributes_distribution import BasicAttributesDistribution
 
 
 class TestElementConfig(unittest.TestCase):

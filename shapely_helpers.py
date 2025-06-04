@@ -1,7 +1,9 @@
-from shapely.geometry import LineString,Polygon,Point
+from shapely.geometry import LineString, Point, Polygon
 from shapely.ops import nearest_points
 
 from entities.simple_shape import SimpleShape
+
+
 def find_touching_point(shape1:SimpleShape, shape2:SimpleShape, buffer_distance=0.001)-> Point:
     # Create buffers around the shapes
     buffer1 = shape1.base_geometry.buffer(buffer_distance)

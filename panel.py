@@ -2,13 +2,14 @@ import random
 from typing import List
 
 import numpy as np
+
+import img_params
+import util
 from entities.entity import Relationship
 from entities.simple_shape import SimpleShape
 from entities.touching_point import TouchingPoint
 from entities.visible_shape import VisibleShape
 from generation_config import GenerationConfig
-import img_params
-import util
 
 
 class Panel:
