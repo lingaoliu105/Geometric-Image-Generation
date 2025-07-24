@@ -193,7 +193,7 @@ class LineSegment(OpenShape):
             ):  # don't know why no point passed the filter. if so, simply choose the point directly facing the next endpoint
                 return (
                     LineString([ref_point, shape.centroid.coords[0]])
-                    .intersection(shape.base_geometry.buffer(0.01))
+                    .intersection(shape.buffer(0.01))
                     .coords[0]
                 )
             return random.choice(filtered_bound_points)

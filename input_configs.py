@@ -101,6 +101,7 @@ class ChainingImageConfig(GeneratorConfigModelWithSubElements):
     chain_level: str
     interval: float
     rotation: float
+    
 class EnclosingImageConfig(GeneratorConfigModelWithSubElements):
     enclose_level: int
 

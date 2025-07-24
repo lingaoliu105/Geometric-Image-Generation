@@ -51,7 +51,8 @@ def generate_panels(base_config:BaseConfig) -> list[Panel]:
     return panels
  
 def reconfigure_for_panel(panel_index):
-    assert isinstance(GenerationConfig.current_config, BaseConfig)
+    while not isinstance(GenerationConfig.current_config, BaseConfig):
+        GenerationConfig.current_config = GenerationConfig.current_config.parent
     GenerationConfig.current_config = GenerationConfig.current_config.panel_configs[panel_index]
 
 def compute_panel_position(layout: tuple[int, int], index: int):
@@ -150,6 +151,8 @@ def initialize_config()->BaseConfig:
         data = json.load(f)
 
     resolved = jsonref.JsonRef.replace_refs(data,base_uri=base_path.as_uri())
+    global_basic_attributes_distribution = json.load(open("input/basic_attributes_distribution.json","r",encoding="utf-8"))
+    resolved = resolved | global_basic_attributes_distribution
 
     resolved_json_str = json.dumps(resolved,indent=4)
     config = BaseConfig.model_validate_json(resolved_json_str)

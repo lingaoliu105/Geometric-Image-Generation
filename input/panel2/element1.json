@@ -1,9 +1,8 @@
-{
-    "id": 1,
+ {
+    "id": 2,
     "composition_type": {
         "enclosing": 1.0
     },
-
     "enclosing_image_config": {
         "enclose_level": 2,
         "sub_elements": [

@@ -1,9 +1,9 @@
 {
     "layout": [
         1,
-        1
+        2
     ],
-    "canvas_width": 20.0,
+    "canvas_width": 40.0,
     "canvas_height": 20.0,
     "opacity": 0.5,
     "panel_configs": [
@@ -31,85 +31,22 @@
                     }
                 ]
             }
+        },
+        {
+            "panel_id": 2,
+            "composition_type": {
+                "enclosing": 1.0
+            },
+            "enclosing_image_config": {
+                "enclose_level": 3,
+                "sub_elements": [
+                    {
+                        "$ref": "./panel2/element1.json"
+                    }
+                ]
+            }
         }
-    ],
-    "color_distribution": [
-        0.0,
-        0.25,
-        0.1,
-        0.1,
-        0.1,
-        0.1,
-        0.1,
-        0.1,
-        0.05,
-        0.05,
-        0.05
-    ],
-    "lightness_distribution": [
-        0.0,
-        0.2,
-        0.2,
-        0.1,
-        0.1,
-        0.1,
-        0.02,
-        0.02,
-        0.02,
-        0.02,
-        0.22
-    ],
-    "background_lightness_distribution": [
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
-    ],
-    "pattern_distribution": [
-        0.4,
-        0.3,
-        0.3,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
-    ],
-    "outline_distribution": [
-        1.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
-    ],
-    "shape_distribution": [
-        0.0,
-        0.5,
-        0.5,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0,
-        0.0
     ]
+    
+    
 }

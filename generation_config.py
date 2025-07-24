@@ -120,7 +120,12 @@ def step_into_config_scope(img_config_name):
         raise ValueError("No config object to access")
 
 def step_out_config_scope(func):
-    def wrapper(self, *args, **kwargs):
+    def wrapper(self=None, *args, **kwargs):
+        result = None
+        if self is not None:
+            result = func(self, *args, **kwargs)
+        else:
+            result = func(*args, **kwargs)
         GenerationConfig.current_config = GenerationConfig.current_config.parent
-        return func(self, *args, **kwargs)
+        return result
     return wrapper

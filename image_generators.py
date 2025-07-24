@@ -222,6 +222,7 @@ class ChainingImageGenerator(ImageGenerator):
                 self.skipped[i] = {"prev": prev_elements, "next": None}
                 continue
 
+
             element_grp = generate_shape_group()
             element_grp.shift(self.chain[i] - element_grp.center)
             element_grp.scale(1 / self.element_num)
@@ -868,6 +869,7 @@ def get_config_name(generator: ImageGenerator) -> str:
     return d[generator.__class__.__name__]
 
 
+# @step_out_config_scope
 def generate_shape_group() -> ShapeGroup:
     """生成一个形状组"""
     composition_type = random.choices(
@@ -881,7 +883,6 @@ def generate_shape_group() -> ShapeGroup:
     return elements
 
 
-# === 导出的类和函数 ===
 __all__ = [
     "ImageGenerator",
     "SimpleImageGenerator",
