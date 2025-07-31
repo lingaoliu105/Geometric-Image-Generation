@@ -101,6 +101,7 @@ class ChainingImageConfig(GeneratorConfigModelWithSubElements):
     chain_level: str
     interval: float
     rotation: float
+    control_point_distribution: Optional[Dict[str, List[float]]] = None
     
 class EnclosingImageConfig(GeneratorConfigModelWithSubElements):
     enclose_level: int
@@ -116,4 +117,7 @@ class RandomImageConfig(GeneratorConfigModelWithSubElements):
     element_num: int
 
 class BorderImageConfig(GeneratorConfigModelWithSubElements):
-    pass
+    position_probabilities: List[float]
+    element_scaling: float
+    approach_factor: float
+    shade_probability: float    

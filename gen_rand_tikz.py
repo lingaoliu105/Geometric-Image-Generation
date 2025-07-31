@@ -52,7 +52,7 @@ def generate_panels(base_config:BaseConfig) -> list[Panel]:
  
 def reconfigure_for_panel(panel_index):
     while not isinstance(GenerationConfig.current_config, BaseConfig):
-        GenerationConfig.current_config = GenerationConfig.current_config.parent
+        GenerationConfig.current_config = GenerationConfig.current_config.parent  
     GenerationConfig.current_config = GenerationConfig.current_config.panel_configs[panel_index]
 
 def compute_panel_position(layout: tuple[int, int], index: int):
@@ -155,6 +155,13 @@ def initialize_config()->BaseConfig:
     resolved = resolved | global_basic_attributes_distribution
 
     resolved_json_str = json.dumps(resolved,indent=4)
+    
+    # 输出resolved_config到新文件
+    resolved_config_filename = "resolved_config.json"
+    with open(f"./output_json/{resolved_config_filename}", "w", encoding="utf-8") as f:
+        f.write(resolved_json_str)
+    print(f"Resolved config saved to output_json/{resolved_config_filename}")
+    
     config = BaseConfig.model_validate_json(resolved_json_str)
     GenerationConfig.current_config = config
     return config

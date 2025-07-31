@@ -146,7 +146,7 @@ def generate_equidistant_bezier_curve(
 
 def generate_random_bezier_curve():
     config = generation_config.GenerationConfig.chaining_image_config
-    control_dist = config.get('control_point_distribution', {
+    control_dist = getattr(config, 'control_point_distribution', {
         'x_range': [-0.125, 0.125],
         'y_range': [-0.5, 0.5],
         'pivot_points': [-0.75, -0.25, 0.25, 0.75]

@@ -277,10 +277,28 @@ For chain-based arrangements:
         "chain_level": "bottom",    // "bottom", "top"
         "interval": 0.4,
         "rotation": 0,
+        "control_point_distribution": {  // Only used when chain_shape is "bezier"
+            "x_range": [-0.125, 0.125],
+            "y_range": [-0.5, 0.5],
+            "pivot_points": [-0.75, -0.25, 0.25, 0.75]
+        },
         "sub_elements": [...]
     }
 }
 ```
+
+**Fields:**
+- `element_num`: Number of elements to arrange in the chain
+- `chain_shape`: Shape of the chain path - "line", "bezier", or "circle"
+- `draw_chain`: Whether to draw the chain path itself
+- `chain_level`: Z-order of the chain relative to elements - "bottom" or "top"
+- `interval`: Spacing between elements along the chain
+- `rotation`: Rotation angle of the entire chain arrangement
+- `control_point_distribution`: (Optional) Used only when `chain_shape` is "bezier" to control the Bézier curve shape
+  - `x_range`: Array of two floats defining the horizontal range for control point offsets
+  - `y_range`: Array of two floats defining the vertical range for control point offsets  
+  - `pivot_points`: Array of floats defining normalized positions along the curve where control points are placed
+- `sub_elements`: Array of child element configurations
 
 ##### Enclosing Image Config (`enclosing_image_config`)
 For nested arrangements:
@@ -301,7 +319,8 @@ For border placement:
         "position_probabilities": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1.0],
         "element_scaling": 0.2,
         "approach_factor": 1.0,
-        "shade_probability": 0.7
+        "shade_probability": 0.7,
+        "sub_elements":[...]
     }
 }
 ```
@@ -390,3 +409,1014 @@ This creates a single panel with one simple shape using global attribute distrib
 3. **Balanced Distributions**: Ensure probability distributions reflect desired output characteristics
 4. **Documentation**: Include comments or maintain separate documentation for complex configurations
 5. **Validation**: Test configurations with small generation runs before large-scale generation
+
+
+
+## Examples
+
+1. Input:  [input1.zip](input1.zip) 
+
+   Output: ![new-0](./input_format.assets/new-0.png)
+
+2. Input:
+
+   ```JSON
+   {
+       "layout": [
+           2,
+           2
+       ],
+       "canvas_width": 40.0,
+       "canvas_height": 40.0,
+       "opacity": 0.5,
+       "panel_configs": [
+           {
+               "panel_id": 1,
+               "composition_type": {
+                   "chaining": 1.0
+               },
+               "chaining_image_config": {
+                   "element_num": 3,
+                   "chain_shape": "line",
+                   "draw_chain": true,
+                   "chain_level": "bottom",
+                   "interval": 0.4,
+                   "rotation": 0,
+                   "sub_elements": [
+                       {
+                           "id": 1,
+                           "composition_type": {
+                               "enclosing": 1.0
+                           },
+                           "enclosing_image_config": {
+                               "enclose_level": 2,
+                               "sub_elements": [
+                                   {
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {},
+                                       "shape_distribution": [
+                                           0.0,
+                                           0.5,
+                                           0.5,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0
+                                       ]
+                                   }
+                               ]
+                           }
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       }
+                   ]
+               }
+           },
+           {
+               "panel_id": 2,
+               "composition_type": {
+                   "enclosing": 1.0
+               },
+               "enclosing_image_config": {
+                   "enclose_level": 3,
+                   "sub_elements": [
+                       {
+                           "id": 2,
+                           "composition_type": {
+                               "enclosing": 1.0
+                           },
+                           "enclosing_image_config": {
+                               "enclose_level": 2,
+                               "sub_elements": [
+                                   {
+                                       "id": 3,
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {}
+                                   }
+                               ]
+                           }
+                       }
+                   ]
+               }
+           },
+           {
+               "panel_id": 3,
+               "composition_type": {
+                   "enclosing": 1.0
+               },
+               "enclosing_image_config": {
+                   "enclose_level": 3,
+                   "sub_elements": [
+                       {
+                           "id": 2,
+                           "composition_type": {
+                               "enclosing": 1.0
+                           },
+                           "enclosing_image_config": {
+                               "enclose_level": 2,
+                               "sub_elements": [
+                                   {
+                                       "id": 3,
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {}
+                                   }
+                               ]
+                           }
+                       }
+                   ]
+               }
+           },
+           {
+               "panel_id": 4,
+               "composition_type": {
+                   "enclosing": 1.0
+               },
+               "enclosing_image_config": {
+                   "enclose_level": 3,
+                   "sub_elements": [
+                       {
+                           "id": 2,
+                           "composition_type": {
+                               "enclosing": 1.0
+                           },
+                           "enclosing_image_config": {
+                               "enclose_level": 2,
+                               "sub_elements": [
+                                   {
+                                       "id": 3,
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {}
+                                   }
+                               ]
+                           }
+                       }
+                   ]
+               }
+           }
+       ],
+       "color_distribution": [
+           0.0,
+           0.25,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "lightness_distribution": [
+           0.0,
+           0.2,
+           0.2,
+           0.1,
+           0.1,
+           0.1,
+           0.02,
+           0.02,
+           0.02,
+           0.02,
+           0.22
+       ],
+       "background_lightness_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_distribution": [
+           0.4,
+           0.3,
+           0.3,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_color_distribution": [
+           0.1,
+           0.3,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "pattern_lightness_distribution": [
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.1,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "outline_color_distribution": [
+           0.05,
+           0.4,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_lightness_distribution": [
+           0.2,
+           0.2,
+           0.15,
+           0.15,
+           0.1,
+           0.08,
+           0.05,
+           0.04,
+           0.02,
+           0.01
+       ],
+       "outline_thickness_distribution": [
+           0.2,
+           0.05,
+           0.1,
+           0.3,
+           0.2,
+           0.1,
+           0.04,
+           0.01
+       ],
+       "shape_distribution": [
+           0.0,
+           0.5,
+           0.5,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ]
+   }
+   ```
+
+   
+
+​	Output:
+
+​	![new-0](./input_format.assets/new-0-1753943049055-1.png)
+
+
+
+3. Input:
+
+   ```
+   {
+       "layout": [
+           1,
+           1
+       ],
+       "canvas_width": 20.0,
+       "canvas_height": 20.0,
+       "opacity": 0.5,
+       "panel_configs": [
+           {
+               "panel_id": 1,
+               "composition_type": {
+                   "chaining": 1.0
+               },
+               "chaining_image_config": {
+                   "element_num": 5,
+                   "chain_shape": "bezier",
+                   "draw_chain": true,
+                   "chain_level": "bottom",
+                   "interval": 0.4,
+                   "rotation": 0,
+                   "control_point_distribution": {
+                       "x_range": [
+                           -0.125,
+                           0.125
+                       ],
+                       "y_range": [
+                           -0.5,
+                           0.5
+                       ],
+                       "pivot_points": [
+                           -0.75,
+                           -0.25,
+                           0.25,
+                           0.75
+                       ]
+                   },
+                   "sub_elements": [
+                       {
+                           "id": 1,
+                           "composition_type": {
+                               "enclosing": 1.0
+                           },
+                           "enclosing_image_config": {
+                               "enclose_level": 2,
+                               "sub_elements": [
+                                   {
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {},
+                                       "shape_distribution": [
+                                           0.0,
+                                           0.5,
+                                           0.5,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0
+                                       ]
+                                   }
+                               ]
+                           }
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       }
+                   ]
+               }
+           }
+       ],
+       "color_distribution": [
+           0.0,
+           0.25,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "lightness_distribution": [
+           0.0,
+           0.2,
+           0.2,
+           0.1,
+           0.1,
+           0.1,
+           0.02,
+           0.02,
+           0.02,
+           0.02,
+           0.22
+       ],
+       "background_lightness_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_distribution": [
+           0.4,
+           0.3,
+           0.3,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_color_distribution": [
+           0.1,
+           0.3,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "pattern_lightness_distribution": [
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.1,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "outline_color_distribution": [
+           0.05,
+           0.4,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_lightness_distribution": [
+           0.2,
+           0.2,
+           0.15,
+           0.15,
+           0.1,
+           0.08,
+           0.05,
+           0.04,
+           0.02,
+           0.01
+       ],
+       "outline_thickness_distribution": [
+           0.2,
+           0.05,
+           0.1,
+           0.3,
+           0.2,
+           0.1,
+           0.04,
+           0.01
+       ],
+       "shape_distribution": [
+           0.0,
+           0.5,
+           0.5,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ]
+   }
+   ```
+
+   Output:
+
+   ![new-0](./input_format.assets/new-0-1753943996219-3.png)
+
+4. Input:
+
+   ```
+   {
+       "layout": [
+           1,
+           1
+       ],
+       "canvas_width": 20.0,
+       "canvas_height": 20.0,
+       "opacity": 0.5,
+       "panel_configs": [
+           {
+               "panel_id": 1,
+               "composition_type": {
+                   "random": 1.0
+               },
+               "random_image_config": {
+                   "element_num": 5,
+                   "centralization": 0.5,
+                   "sub_elements": [
+                       {
+                           "id": 1,
+                           "composition_type": {
+                               "enclosing": 1.0
+                           },
+                           "enclosing_image_config": {
+                               "enclose_level": 2,
+                               "sub_elements": [
+                                   {
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {},
+                                       "shape_distribution": [
+                                           0.0,
+                                           0.5,
+                                           0.5,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0
+                                       ]
+                                   }
+                               ]
+                           }
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       },
+                       {
+                           "composition_type": {
+                               "simple": 1.0
+                           },
+                           "simple_image_config": {}
+                       }
+                   ]
+               }
+           }
+       ],
+       "color_distribution": [
+           0.0,
+           0.25,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "lightness_distribution": [
+           0.0,
+           0.2,
+           0.2,
+           0.1,
+           0.1,
+           0.1,
+           0.02,
+           0.02,
+           0.02,
+           0.02,
+           0.22
+       ],
+       "background_lightness_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_distribution": [
+           0.4,
+           0.3,
+           0.3,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_color_distribution": [
+           0.1,
+           0.3,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "pattern_lightness_distribution": [
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.1,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "outline_color_distribution": [
+           0.05,
+           0.4,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_lightness_distribution": [
+           0.2,
+           0.2,
+           0.15,
+           0.15,
+           0.1,
+           0.08,
+           0.05,
+           0.04,
+           0.02,
+           0.01
+       ],
+       "outline_thickness_distribution": [
+           0.2,
+           0.05,
+           0.1,
+           0.3,
+           0.2,
+           0.1,
+           0.04,
+           0.01
+       ],
+       "shape_distribution": [
+           0.0,
+           0.5,
+           0.5,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ]
+   }
+   ```
+
+Output:
+
+​	![new-1](./input_format.assets/new-1.png)
+
+5. Input:
+
+   ```json
+   {
+       "layout": [
+           1,
+           1
+       ],
+       "canvas_width": 20.0,
+       "canvas_height": 20.0,
+       "opacity": 0.5,
+       "panel_configs": [
+           {
+               "panel_id": 1,
+               "composition_type": {
+                   "enclosing": 1.0
+               },
+               "enclosing_image_config": {
+                   "enclose_level": 2,
+                   "sub_elements": [
+                       {
+                           "id": 1,
+                           "composition_type": {
+                               "chaining": 1.0
+                           },
+                           "chaining_image_config": {
+                               "element_num": 3,
+                               "chain_shape": "bezier",
+                               "draw_chain": true,
+                               "chain_level": "bottom",
+                               "interval": 0.4,
+                               "rotation": 0,
+                               "control_point_distribution": {
+                                   "x_range": [
+                                       -0.125,
+                                       0.125
+                                   ],
+                                   "y_range": [
+                                       -0.5,
+                                       0.5
+                                   ],
+                                   "pivot_points": [
+                                       -0.75,
+                                       -0.25,
+                                       0.25,
+                                       0.75
+                                   ]
+                               },
+                               "sub_elements": [
+                                   {
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {},
+                                       "shape_distribution": [
+                                           0.0,
+                                           0.5,
+                                           0.5,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0,
+                                           0.0
+                                       ]
+                                   },
+                                   {
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {}
+                                   },
+                                   {
+                                       "composition_type": {
+                                           "simple": 1.0
+                                       },
+                                       "simple_image_config": {}
+                                   }
+                               ]
+                           }
+                       }
+                   ]
+               }
+           }
+       ],
+       "color_distribution": [
+           0.0,
+           0.25,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "lightness_distribution": [
+           0.0,
+           0.2,
+           0.2,
+           0.1,
+           0.1,
+           0.1,
+           0.02,
+           0.02,
+           0.02,
+           0.02,
+           0.22
+       ],
+       "background_lightness_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_distribution": [
+           0.4,
+           0.3,
+           0.3,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "pattern_color_distribution": [
+           0.1,
+           0.3,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.05
+       ],
+       "pattern_lightness_distribution": [
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.15,
+           0.1,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_distribution": [
+           1.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ],
+       "outline_color_distribution": [
+           0.05,
+           0.4,
+           0.1,
+           0.1,
+           0.1,
+           0.05,
+           0.05,
+           0.05,
+           0.05,
+           0.025,
+           0.025
+       ],
+       "outline_lightness_distribution": [
+           0.2,
+           0.2,
+           0.15,
+           0.15,
+           0.1,
+           0.08,
+           0.05,
+           0.04,
+           0.02,
+           0.01
+       ],
+       "outline_thickness_distribution": [
+           0.2,
+           0.05,
+           0.1,
+           0.3,
+           0.2,
+           0.1,
+           0.04,
+           0.01
+       ],
+       "shape_distribution": [
+           0.0,
+           0.5,
+           0.5,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0,
+           0.0
+       ]
+   }
+   ```
+
+Output:
+
+​	![new-1](./input_format.assets/new-1-1753947274108-6.png)

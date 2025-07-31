@@ -180,3 +180,4 @@ test.py
 untracked/
 
 input.json
+*.zip

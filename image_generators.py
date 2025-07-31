@@ -3,6 +3,8 @@
 包含所有图像生成器类和相关函数
 """
 
+import copy
+import math
 import random
 import re
 # === 通用导入 ===
@@ -12,6 +14,8 @@ from typing import Dict, List
 import numpy as np
 import shapely
 from shapely import LineString, Point
+from shapely.geometry.multipolygon import MultiPolygon
+from shapely.geometry.polygon import Polygon
 
 import generation_config
 import img_params
@@ -401,17 +405,11 @@ class EnclosingImageGenerator(ImageGenerator):
 class RandomImageGenerator(ImageGenerator):
     def __init__(self):
         super().__init__()
-        self.rotation=GenerationConfig.random_image_config.rotation
         self.element_num=GenerationConfig.random_image_config.element_num
     def generate(self) -> ShapeGroup:
         """generate a composite geometry entity by randomly placing simple shapes
-
-        Args:
-            position (numpy 2-d array): coordinate of the center of the radnom shape
-            rotation (float): rotation angle in degree
         """
-        for i in range(self.element_num):
-            generation_config.step_into_config_scope("random_image_config")
+        for _ in range(self.element_num):
             element = generate_shape_group()
             element.rotate(angle=random.choice(list(img_params.Angle)))
             element.scale(random.choice([1, 2, 4]) / self.element_num)
@@ -475,7 +473,7 @@ class ParallelImageGenerator(ImageGenerator):
                 ])
                 lines.append(line)
             return lines
-            
+
         elif self.parallel_shape == "vertical":
             # Generate vertical lines
             x_positions = np.linspace(
@@ -491,19 +489,19 @@ class ParallelImageGenerator(ImageGenerator):
                 ])
                 lines.append(line)
             return lines
-            
+
         elif self.parallel_shape == "diagonal":
             # Generate diagonal lines (45 degree angle)
             # Calculate the diagonal span needed
             canvas_diagonal = GenerationConfig.canvas_limit * np.sqrt(2)
-            
+
             # Generate evenly spaced offsets
             offsets = np.linspace(
                 -canvas_diagonal / 2,
                 canvas_diagonal / 2,
                 self.element_num
             )
-            
+
             lines = []
             for offset in offsets:
                 # For each offset, create a diagonal line
@@ -513,7 +511,7 @@ class ParallelImageGenerator(ImageGenerator):
                 y1 = x1 + offset
                 x2 = GenerationConfig.canvas_limit / 2
                 y2 = x2 + offset
-                
+
                 # Clip to canvas boundaries
                 if y1 < -GenerationConfig.canvas_limit / 2:
                     y1 = -GenerationConfig.canvas_limit / 2
@@ -521,18 +519,18 @@ class ParallelImageGenerator(ImageGenerator):
                 elif y1 > GenerationConfig.canvas_limit / 2:
                     y1 = GenerationConfig.canvas_limit / 2
                     x1 = y1 - offset
-                    
+
                 if y2 < -GenerationConfig.canvas_limit / 2:
                     y2 = -GenerationConfig.canvas_limit / 2
                     x2 = y2 - offset
                 elif y2 > GenerationConfig.canvas_limit / 2:
                     y2 = GenerationConfig.canvas_limit / 2
                     x2 = y2 - offset
-                
+
                 line = LineString([(x1, y1), (x2, y2)])
                 lines.append(line)
             return lines
-            
+
         else:
             raise ValueError(f"Unknown parallel shape: {self.parallel_shape}")
 
@@ -542,36 +540,36 @@ class ParallelImageGenerator(ImageGenerator):
             # Skip some lines randomly for visual variety
             if random.random() < 0.2:  # 20% chance to skip
                 continue
-                
+
             # Determine number of shapes on this line
             line_length = line.length
             num_shapes_on_line = max(1, int(line_length / (GenerationConfig.canvas_limit / 4)))
-            
+
             # Generate positions along the line
             positions = []
             if num_shapes_on_line == 1:
                 positions = [0.5]  # Middle of the line
             else:
                 positions = np.linspace(0.1, 0.9, num_shapes_on_line)
-            
+
             for pos in positions:
                 # Get point at this position along the line
                 point = line.interpolate(pos, normalized=True)
-                
+
                 # Generate a shape group at this position
                 generation_config.step_into_config_scope("parallel_image_config")
                 element_grp = generate_shape_group()
-                
+
                 # Scale based on interval
                 scale_factor = (1 - self.interval) / (self.element_num * 0.5)
                 element_grp.scale(scale_factor)
-                
+
                 # Move to position
                 element_grp.shift(np.array([point.x, point.y]) - element_grp.center)
-                
+
                 # Add some random rotation for variety
                 element_grp.rotate(angle=random.choice(list(img_params.Angle)))
-                
+
                 self.shapes.add_group(element_grp)
                 self.groups.append(element_grp)
 
@@ -579,13 +577,13 @@ class ParallelImageGenerator(ImageGenerator):
         """Add connecting elements between shapes if needed."""
         if len(self.groups) < 2:
             return
-            
+
         # Randomly connect some adjacent shapes
         for i in range(len(self.groups) - 1):
             if random.random() < 0.3:  # 30% chance to connect
                 shape1 = self.groups[i]
                 shape2 = self.groups[i + 1]
-                
+
                 # Check if shapes are close enough
                 dist = np.linalg.norm(shape1.center - shape2.center)
                 if dist < GenerationConfig.canvas_limit / 3:
@@ -604,234 +602,162 @@ class ParallelImageGenerator(ImageGenerator):
         """
         # Generate the parallel lines
         lines = self.generate_parallel_lines()
-        
+
         # Rotate all lines if needed
         if self.rotation != 0:
             from shapely.affinity import rotate
             lines = [rotate(line, self.rotation, origin=(0, 0)) for line in lines]
-        
+
         # Place shapes on the lines
         self.place_shapes_on_lines(lines)
-        
+
         # Add connecting elements
         self.add_connecting_elements()
-        
+
         # Fit to canvas
         self.shapes.fit_canvas()
-        
+
         return self.shapes
 
 
 # === BorderImageGenerator ===
 
+
 class BorderImageGenerator(ImageGenerator):
-    def __init__(self) -> None:
+    def __init__(self):
         super().__init__()
-        self.position: Coordinate = (0, 0)
-        self.interval = GenerationConfig.border_image_config.interval
-        self.rotation = GenerationConfig.border_image_config.rotation
-        self.border_shape = GenerationConfig.border_image_config.border_shape
-        self.element_num = GenerationConfig.border_image_config.element_num
-        self.border_points = []  # Positions for border elements
+        self.position_probabilities = GenerationConfig.border_image_config.position_probabilities
+        self.element_scaling = GenerationConfig.border_image_config.element_scaling
+        self.approach_factor = GenerationConfig.border_image_config.approach_factor
+        self.shade_probability = GenerationConfig.border_image_config.shade_probability
+        self.spokes: List[LineSegment] = []
+        self.shaded_areas: List[ComplexShape] = []
 
-    def generate_border_points(self):
-        """Generate points along the border shape."""
-        if self.border_shape == "rectangle":
-            # Generate points along a rectangle
-            width = GenerationConfig.canvas_limit * 0.8
-            height = GenerationConfig.canvas_limit * 0.6
-            
-            # Calculate perimeter and spacing
-            perimeter = 2 * (width + height)
-            spacing = perimeter / self.element_num
-            
-            points = []
-            current_distance = 0
-            
-            # Top edge (left to right)
-            for i in range(self.element_num):
-                distance = i * spacing
-                
-                if distance < width:
-                    # Top edge
-                    x = -width/2 + distance
-                    y = height/2
-                elif distance < width + height:
-                    # Right edge
-                    x = width/2
-                    y = height/2 - (distance - width)
-                elif distance < 2*width + height:
-                    # Bottom edge
-                    x = width/2 - (distance - width - height)
-                    y = -height/2
-                else:
-                    # Left edge
-                    x = -width/2
-                    y = -height/2 + (distance - 2*width - height)
-                
-                points.append((x, y))
-            
-            self.border_points = points
-            
-        elif self.border_shape == "circle":
-            # Generate points along a circle
-            radius = GenerationConfig.canvas_limit * 0.4
-            angles = np.linspace(0, 2*np.pi, self.element_num, endpoint=False)
-            
-            self.border_points = [
-                (radius * np.cos(angle), radius * np.sin(angle))
-                for angle in angles
+    def generate(self):
+        self.canvas_corner_points = np.array(
+            [
+                (
+                    GenerationConfig.right_canvas_bound,
+                    GenerationConfig.upper_canvas_bound,
+                ),
+                (
+                    GenerationConfig.left_canvas_bound,
+                    GenerationConfig.upper_canvas_bound,
+                ),
+                (
+                    GenerationConfig.left_canvas_bound,
+                    GenerationConfig.lower_canvas_bound,
+                ),
+                (
+                    GenerationConfig.right_canvas_bound,
+                    GenerationConfig.lower_canvas_bound,
+                ),
+                (
+                    GenerationConfig.right_canvas_bound,
+                    GenerationConfig.upper_canvas_bound,
+                ),
             ]
-            
-        elif self.border_shape == "triangle":
-            # Generate points along a triangle
-            # Define triangle vertices
-            height = GenerationConfig.canvas_limit * 0.7
-            base = GenerationConfig.canvas_limit * 0.8
-            
-            vertices = [
-                (-base/2, -height/3),  # Bottom left
-                (base/2, -height/3),   # Bottom right
-                (0, 2*height/3)        # Top
-            ]
-            
-            # Calculate perimeter
-            sides = [
-                np.linalg.norm(np.array(vertices[1]) - np.array(vertices[0])),
-                np.linalg.norm(np.array(vertices[2]) - np.array(vertices[1])),
-                np.linalg.norm(np.array(vertices[0]) - np.array(vertices[2]))
-            ]
-            perimeter = sum(sides)
-            spacing = perimeter / self.element_num
-            
-            points = []
-            for i in range(self.element_num):
-                distance = i * spacing
-                
-                # Determine which side the point is on
-                if distance < sides[0]:
-                    # First side (bottom)
-                    t = distance / sides[0]
-                    point = (1-t) * np.array(vertices[0]) + t * np.array(vertices[1])
-                elif distance < sides[0] + sides[1]:
-                    # Second side (right)
-                    t = (distance - sides[0]) / sides[1]
-                    point = (1-t) * np.array(vertices[1]) + t * np.array(vertices[2])
-                else:
-                    # Third side (left)
-                    t = (distance - sides[0] - sides[1]) / sides[2]
-                    point = (1-t) * np.array(vertices[2]) + t * np.array(vertices[0])
-                
-                points.append(tuple(point))
-            
-            self.border_points = points
-        
-        else:
-            raise ValueError(f"Unknown border shape: {self.border_shape}")
+        )
+        canvas_boundary_geometry = LineString(self.canvas_corner_points)
+        shrinked_boundary = LineString(self.canvas_corner_points * self.approach_factor)
+        for entry, probability in enumerate(self.position_probabilities[:-1]):
+            move_direction_angle = 45 * entry  # starting from 0 degree counterclockwise
+            move_direction_vector = np.array(
+                (
+                    math.cos(math.radians(move_direction_angle)),
+                    math.sin(math.radians(move_direction_angle)),
+                )
+            )
+            if random.random() <= probability:
+                sub_image = generate_shape_group()
+                if sub_image.size() == 1 and isinstance(sub_image[0][0], LineSegment):
 
-    def generate_shapes_on_border(self):
-        """Place shapes at border points."""
-        prev_element = None
-        
-        for i, point in enumerate(self.border_points):
-            # Generate shape group
-            generation_config.step_into_config_scope("border_image_config")
-            element_grp = generate_shape_group()
-            
-            # Scale based on element number and interval
-            scale_factor = 1 / (self.element_num * 0.3)
-            scale_factor *= (1 - self.interval)
-            element_grp.scale(scale_factor)
-            
-            # Move to border position
-            element_grp.shift(np.array(point) - element_grp.center)
-            
-            # Rotate shape
-            # For circular borders, orient shapes outward
-            if self.border_shape == "circle":
-                angle = np.arctan2(point[1], point[0]) * 180 / np.pi
-                element_grp.rotate(angle=angle)
-            else:
-                element_grp.rotate(angle=random.choice(list(img_params.Angle)))
-            
-            # Adjust size to maintain interval with previous element
-            if prev_element is not None and i > 0:
-                # Check if current element overlaps too much with previous
-                curr_geom = element_grp.geometry(0)
-                prev_geom = prev_element.geometry(0)
-                
-                if isinstance(curr_geom, shapely.geometry.base.BaseGeometry) and \
-                   isinstance(prev_geom, shapely.geometry.base.BaseGeometry):
-                    # Calculate distance between geometries
-                    distance = curr_geom.distance(prev_geom)
-                    
-                    # If too close, scale down
-                    if distance < self.interval * GenerationConfig.canvas_limit * 0.05:
-                        scale_adjust = 0.8
-                        element_grp.scale(scale_adjust)
-            
-            prev_element = element_grp
-            self.shapes.add_group(element_grp)
-
-    def add_connecting_lines(self):
-        """Add lines connecting border elements."""
-        if self.element_num < 2:
-            return
-            
-        # Connect consecutive border elements
-        for i in range(self.element_num):
-            next_i = (i + 1) % self.element_num
-            
-            # Get the shapes at these positions
-            if i < len(self.shapes.shape_groups) and next_i < len(self.shapes.shape_groups):
-                shape1 = self.shapes.shape_groups[i]
-                shape2 = self.shapes.shape_groups[next_i]
-                
-                # Add connecting line
-                try:
-                    line = LineSegment.connect(
-                        shape1.geometry(0),
-                        shape2.geometry(0)
+                    large_distance = 1000
+                    end_point = (
+                        np.array((0, 0)) + move_direction_vector * large_distance
                     )
-                    self.shapes.add_shape(line)
-                except:
-                    # If connection fails, skip
-                    pass
+                    ray = LineString([np.array((0, 0)), end_point])
 
-    def generate(self) -> ShapeGroup:
-        """Generate a composite geometry entity with border arrangement.
-        
-        Returns:
-            ShapeGroup: The generated shape group
-        """
-        # Generate border points
-        self.generate_border_points()
-        
-        # Apply rotation to all points if needed
-        if self.rotation != 0:
-            angle_rad = self.rotation * np.pi / 180
-            rotation_matrix = np.array([
-                [np.cos(angle_rad), -np.sin(angle_rad)],
-                [np.sin(angle_rad), np.cos(angle_rad)]
-            ])
-            
-            self.border_points = [
-                tuple(rotation_matrix @ np.array(point))
-                for point in self.border_points
-            ]
-        
-        # Place shapes on border
-        self.generate_shapes_on_border()
-        
-        # Add connecting lines if configured
-        if hasattr(GenerationConfig.border_image_config, 'add_connections') and \
-           GenerationConfig.border_image_config.add_connections:
-            self.add_connecting_lines()
-        
-        # Fit to canvas
-        self.shapes.fit_canvas()
-        
+                    # Find the intersection between the ray and the boundary geometry
+                    intersection = ray.intersection(canvas_boundary_geometry)
+
+                    pt2 = np.array(intersection.coords[0])
+                    spoke = LineSegment(pt1=np.array((0, 0)), pt2=pt2)
+                    spoke.angle = move_direction_angle
+                    sub_image = ShapeGroup([[spoke]])
+                    self.spokes.append(spoke)
+                else:
+                    step_length = 0.05
+                    sub_image.scale(self.element_scaling)
+                    sub_image.rotate(random.choice(list(range(0, 361, 90))))
+                    xoff = 0
+                    yoff = 0
+                    if move_direction_vector[0]:
+                        cpy = copy.deepcopy(sub_image)
+                        while not cpy.geometry(0).intersects(shrinked_boundary):
+                            cpy.shift(
+                                np.array([move_direction_vector[0], 0]) * step_length
+                            )
+                            xoff += step_length
+                    if move_direction_vector[1]:
+                        cpy = copy.deepcopy(sub_image)
+                        while not cpy.geometry(0).intersects(shrinked_boundary):
+                            cpy.shift(
+                                np.array([0, move_direction_vector[1]]) * step_length
+                            )
+                            yoff += step_length
+                    sub_image.shift(
+                        [
+                            xoff * move_direction_vector[0],
+                            yoff * move_direction_vector[1],
+                        ]
+                    )
+                self.shapes.add_group(sub_image)
+
+        if random.random() < self.position_probabilities[-1]:
+            sub_image = generate_shape_group()
+            if isinstance(sub_image.geometry(0), Polygon) or isinstance(
+                sub_image.geometry(0), MultiPolygon
+            ):
+                sub_image.scale(self.element_scaling)
+                self.shapes.add_group(sub_image)
+
+        self.shade_regions()
+        self.shapes.show()
         return self.shapes
+
+    def shade_regions(self):
+        if len(self.spokes) <= 1:
+            return
+
+        corner_angles = [45 + i * 90 for i in range(4)]
+        for i in range(-1, len(self.spokes) - 1):
+            if random.random() < self.shade_probability:
+                start_edge = self.spokes[i]
+                start_angle = start_edge.angle
+                end_edge = self.spokes[i + 1]
+                end_angle = end_edge.angle
+                vertices = []
+                start_endpts = [start_edge.endpt_left, start_edge.endpt_right]
+                start_endpts.sort(key=lambda coord: coord[0] ** 2 + coord[1] ** 2)
+                start_pt = start_endpts[1]
+                end_endpts = [end_edge.endpt_left, end_edge.endpt_right]
+                end_endpts.sort(key=lambda coord: coord[0] ** 2 + coord[1] ** 2)
+                end_pt = end_endpts[1]
+
+                for corner_index in range(4):
+                    if (
+                        corner_angles[corner_index] > start_angle
+                        and corner_angles[corner_index] < end_angle
+                    ):
+                        vertices.append(self.canvas_corner_points[corner_index])
+
+                final_vertices = [(0, 0)] + [start_pt] + vertices + [end_pt] + [(0, 0)]
+                self.shaded_areas.append(ComplexShape(geometry=Polygon(final_vertices)))
+
+        self.shapes.lift_up_layer()
+        for area in self.shaded_areas:
+            self.shapes.add_shape(area)
 
 
 # === 辅助函数 ===
@@ -854,7 +780,7 @@ def get_image_generator(composition_type: str) -> ImageGenerator:
         return RadialImageGenerator()
     else:
         raise ValueError(f"Invalid composition type: {composition_type}")
-    
+
 def get_config_name(generator: ImageGenerator) -> str:
     """根据生成器实例返回相应的配置名称"""
     d = {
